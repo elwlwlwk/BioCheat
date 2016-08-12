@@ -1,0 +1,3 @@
+*.swp
+.babelrc
+node_modules
