@@ -2,9 +2,9 @@
 
 requirejs(["static/script/electrophoresis"], function () {
 	var styles = {
-		padding: 30,
+		padding: 40,
 		marker_width: 40,
-		column_padding: 20
+		column_padding: 40
 	};
 	var mountingPoint = document.createElement('div');
 	mountingPoint.className = 'react-app';

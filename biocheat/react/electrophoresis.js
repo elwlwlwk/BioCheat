@@ -2,7 +2,7 @@ class XYAxis extends React.Component{
 	renderAxis(props){
 		return (coords, index) => {
 			var col_num= d3.max(props.markers, (d) => d[0])+1;
-			return <text x={props.xScale(coords[0])} y="15" dy="0.35em" key={index}>{ coords[1] }</text>;
+			return <text x={props.xScale(coords[0])} y="15" dy="0.35em" fontSize="10px" key={index}>{ coords[1] }</text>;
 		}
 	}
 	render(){
@@ -28,38 +28,45 @@ class Markers extends React.Component{
 class Electrophoresis extends React.Component{
 	constructor(props){
 		super(props);
+		var default_marker_input= "ladder: 1.1 2.4 5.5 6.7\nA: 1.3 2.5 5.5 8.8";
+		var default_parsed_result= this.parse_marker_input(default_marker_input);
 		this.state= {
-			markers:[[0,0]],
-			marker_label:[[0,"test"]],
-			width: props.padding*2+ props.marker_width,
+			markers: default_parsed_result.markers,
+			marker_label: default_parsed_result.marker_label,
+			marker_input: default_marker_input,
+			width: this.props.padding*2+ (this.props.marker_width+ this.props.column_padding)* (d3.max(default_parsed_result.markers, (d) => d[0])+1) - this.props.column_padding,
 			height: 300,
 		};
 	}
 
-	add_column(){
-		if(this.state.markers.length== 1){
-			this.setState({
-				markers: [[d3.max(this.state.markers, (d) => d[0]), 0]]
-.concat(this.state.marker_input.split(/[\s,]+/).map( (pos) => [d3.max(this.state.markers, (d) => d[0]), parseFloat(pos)] )),
-				width: this.props.padding*2+ (this.props.marker_width + this.props.column_padding)* (d3.max(this.state.markers, (d) => d[0])+2)-this.props.column_padding,
-			});
-		}
-		else{
-			this.setState({
-				markers: this.state.markers.concat([[d3.max(this.state.markers, (d) => d[0])+1, 0]])
-.concat(this.state.marker_input.split(/[\s,]+/).map( (pos) => [d3.max(this.state.markers, (d) => d[0])+1, parseFloat(pos)] )),
-				width: this.props.padding*2+ (this.props.marker_width + this.props.column_padding)* (d3.max(this.state.markers, (d) => d[0])+2)-this.props.column_padding,
-			});
-		}
+	parse_marker_input(input){
+		var columns= input.trim().split("\n").map( (i) => i.trim() );
+		var markers=[];
+		var marker_label=[]
+		columns.forEach( (column, idx) => {
+			var label= column.split(":")[0];
+			var elements= column.split(":")[1].split(/[\s,]+/);
+			marker_label.push([idx, label]);
+			elements.forEach( (marker) => {
+				markers.push([idx, isNaN(parseFloat(marker))? 0: parseFloat(marker)]);
+			})
+			markers.push([idx, 0]);
+		});
+		return {markers: markers, marker_label: marker_label};
 	}
 
-	marker_input_change(e){
+	marker_input_changed(e){
+		var input= e.target.value;
+		var result= this.parse_marker_input(input);
 		this.setState({
-			marker_input: e.target.value,
-		})
+			markers: result.markers,
+			marker_label: result.marker_label,
+			width: this.props.padding*2+ (this.props.marker_width+ this.props.column_padding)* (d3.max(result.markers, (d) => d[0])+1) - this.props.column_padding,
+			marker_input: input,
+		});
 	}
 
-	render_position_change(e){
+	render_position_changed(e){
 		console.log(e.target.checked);
 	}
 
@@ -73,11 +80,9 @@ class Electrophoresis extends React.Component{
 				<Markers {...this.state} {...scales} {...this.props}/>
 			</svg>
 			<div>
-				<input onChange={ (e) => this.marker_input_change(e) } type="text" placeholder="1.1 4.2 6.4"/>
-				<button onClick={() => this.add_column()}>
-					Add Column
-				</button>
-				<input type="checkbox" onChange= { (e) => this.show_position_change(e) } />render position
+				<textarea onChange={ (e) => this.marker_input_changed(e) } defaultValue={this.state.marker_input} cols="50" rows="5">
+				</textarea>
+				<input type="checkbox" onChange= { (e) => this.render_position_changed(e) } />render position
 			</div>
 		</div>;
 	}
