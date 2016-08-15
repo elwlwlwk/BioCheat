@@ -19,10 +19,24 @@ class Markers extends React.Component{
 		}
 	}
 
+	renderPosition(props){
+		return (coords, index) => {
+			return <text x={props.xScale(coords[0])+props.marker_width+3} y={props.yScale(coords[1])} dy="0.35em" fontSize="10px" key={index}>{ coords[1] }</text>
+		}
+	}
+
 	render(){
-		return <g>
-			{ this.props.markers.map(this.renderMarker(this.props)) }
-		</g>;
+		if(this.props.render_pos){
+			return <g>
+				{ this.props.markers.map(this.renderMarker(this.props)) }
+				{ this.props.markers.map(this.renderPosition(this.props)) }
+			</g>;
+		}
+		else{
+			return <g>
+				{ this.props.markers.map(this.renderMarker(this.props)) }
+			</g>;
+		}
 	}
 }
 class Electrophoresis extends React.Component{
@@ -36,6 +50,7 @@ class Electrophoresis extends React.Component{
 			marker_input: default_marker_input,
 			width: this.props.padding*2+ (this.props.marker_width+ this.props.column_padding)* (d3.max(default_parsed_result.markers, (d) => d[0])+1) - this.props.column_padding,
 			height: 300,
+			render_pos: false,
 		};
 	}
 
@@ -67,7 +82,9 @@ class Electrophoresis extends React.Component{
 	}
 
 	render_position_changed(e){
-		console.log(e.target.checked);
+		this.setState({
+			render_pos: e.target.checked,
+		})
 	}
 
 	render(){

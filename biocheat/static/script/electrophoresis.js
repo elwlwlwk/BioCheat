@@ -67,13 +67,33 @@ var Markers = function (_React$Component2) {
 			};
 		}
 	}, {
+		key: "renderPosition",
+		value: function renderPosition(props) {
+			return function (coords, index) {
+				return React.createElement(
+					"text",
+					{ x: props.xScale(coords[0]) + props.marker_width + 3, y: props.yScale(coords[1]), dy: "0.35em", fontSize: "10px", key: index },
+					coords[1]
+				);
+			};
+		}
+	}, {
 		key: "render",
 		value: function render() {
-			return React.createElement(
-				"g",
-				null,
-				this.props.markers.map(this.renderMarker(this.props))
-			);
+			if (this.props.render_pos) {
+				return React.createElement(
+					"g",
+					null,
+					this.props.markers.map(this.renderMarker(this.props)),
+					this.props.markers.map(this.renderPosition(this.props))
+				);
+			} else {
+				return React.createElement(
+					"g",
+					null,
+					this.props.markers.map(this.renderMarker(this.props))
+				);
+			}
 		}
 	}]);
 
@@ -97,7 +117,8 @@ var Electrophoresis = function (_React$Component3) {
 			width: _this3.props.padding * 2 + (_this3.props.marker_width + _this3.props.column_padding) * (d3.max(default_parsed_result.markers, function (d) {
 				return d[0];
 			}) + 1) - _this3.props.column_padding,
-			height: 300
+			height: 300,
+			render_pos: false
 		};
 		return _this3;
 	}
@@ -138,7 +159,9 @@ var Electrophoresis = function (_React$Component3) {
 	}, {
 		key: "render_position_changed",
 		value: function render_position_changed(e) {
-			console.log(e.target.checked);
+			this.setState({
+				render_pos: e.target.checked
+			});
 		}
 	}, {
 		key: "render",
