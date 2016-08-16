@@ -67,33 +67,49 @@ var Markers = function (_React$Component2) {
 			};
 		}
 	}, {
-		key: "renderPosition",
-		value: function renderPosition(props) {
-			return function (coords, index) {
-				return React.createElement(
-					"text",
-					{ x: props.xScale(coords[0]) + props.marker_width + 3, y: props.yScale(coords[1]), dy: "0.35em", fontSize: "10px", key: index },
-					coords[1]
-				);
-			};
+		key: "renderDistance",
+		value: function renderDistance(props) {
+			if (props.render_dis) {
+				return function (coords, index) {
+					return React.createElement(
+						"text",
+						{ x: props.xScale(coords[0]) + props.marker_width + 3, y: props.yScale(coords[1]), dy: "0.35em", fontSize: "10px", key: index },
+						coords[1]
+					);
+				};
+			} else {
+				return function (coords, index) {
+					return null;
+				};
+			}
+		}
+	}, {
+		key: "renderLength",
+		value: function renderLength(props) {
+			if (props.render_length) {
+				return function (coords, index) {
+					return React.createElement(
+						"text",
+						{ x: props.xScale(coords[0]) + props.marker_width + 3, y: props.yScale(coords[1]), dy: "0.35em", fontSize: "10px", key: index },
+						Math.round(coords[2])
+					);
+				};
+			} else {
+				return function (coords, index) {
+					return null;
+				};
+			}
 		}
 	}, {
 		key: "render",
 		value: function render() {
-			if (this.props.render_pos) {
-				return React.createElement(
-					"g",
-					null,
-					this.props.markers.map(this.renderMarker(this.props)),
-					this.props.markers.map(this.renderPosition(this.props))
-				);
-			} else {
-				return React.createElement(
-					"g",
-					null,
-					this.props.markers.map(this.renderMarker(this.props))
-				);
-			}
+			return React.createElement(
+				"g",
+				null,
+				this.props.markers.map(this.renderMarker(this.props)),
+				this.props.markers.map(this.renderDistance(this.props)),
+				this.props.markers.map(this.renderLength(this.props))
+			);
 		}
 	}]);
 
@@ -103,97 +119,30 @@ var Markers = function (_React$Component2) {
 var Electrophoresis = function (_React$Component3) {
 	_inherits(Electrophoresis, _React$Component3);
 
-	function Electrophoresis(props) {
+	function Electrophoresis() {
 		_classCallCheck(this, Electrophoresis);
 
-		var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(Electrophoresis).call(this, props));
-
-		var default_marker_input = "ladder: 1.1 2.4 5.5 6.7\nA: 1.3 2.5 5.5 8.8";
-		var default_parsed_result = _this3.parse_marker_input(default_marker_input);
-		_this3.state = {
-			markers: default_parsed_result.markers,
-			marker_label: default_parsed_result.marker_label,
-			marker_input: default_marker_input,
-			width: _this3.props.padding * 2 + (_this3.props.marker_width + _this3.props.column_padding) * (d3.max(default_parsed_result.markers, function (d) {
-				return d[0];
-			}) + 1) - _this3.props.column_padding,
-			height: 300,
-			render_pos: false
-		};
-		return _this3;
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(Electrophoresis).apply(this, arguments));
 	}
 
 	_createClass(Electrophoresis, [{
-		key: "parse_marker_input",
-		value: function parse_marker_input(input) {
-			var columns = input.trim().split("\n").map(function (i) {
-				return i.trim();
-			});
-			var markers = [];
-			var marker_label = [];
-			columns.forEach(function (column, idx) {
-				var label = column.split(":")[0];
-				var elements = column.split(":")[1].split(/[\s,]+/);
-				marker_label.push([idx, label]);
-				elements.forEach(function (marker) {
-					markers.push([idx, isNaN(parseFloat(marker)) ? 0 : parseFloat(marker)]);
-				});
-				markers.push([idx, 0]);
-			});
-			return { markers: markers, marker_label: marker_label };
-		}
-	}, {
-		key: "marker_input_changed",
-		value: function marker_input_changed(e) {
-			var input = e.target.value;
-			var result = this.parse_marker_input(input);
-			this.setState({
-				markers: result.markers,
-				marker_label: result.marker_label,
-				width: this.props.padding * 2 + (this.props.marker_width + this.props.column_padding) * (d3.max(result.markers, function (d) {
-					return d[0];
-				}) + 1) - this.props.column_padding,
-				marker_input: input
-			});
-		}
-	}, {
-		key: "render_position_changed",
-		value: function render_position_changed(e) {
-			this.setState({
-				render_pos: e.target.checked
-			});
-		}
-	}, {
 		key: "render",
 		value: function render() {
-			var _this4 = this;
-
-			var xScale = d3.scaleLinear().domain([0, d3.max(this.state.markers, function (d) {
+			var xScale = d3.scaleLinear().domain([0, d3.max(this.props.markers, function (d) {
 				return d[0];
-			})]).range([this.props.padding, this.state.width - this.props.padding - this.props.marker_width]);
-			var yScale = d3.scaleLinear().domain([0, d3.max(this.state.markers, function (d) {
+			})]).range([this.props.padding, this.props.electro_width - this.props.padding - this.props.marker_width]);
+			var yScale = d3.scaleLinear().domain([0, d3.max(this.props.markers, function (d) {
 				return d[1];
-			})]).range([this.props.padding, this.state.height - this.props.padding]);
+			})]).range([this.props.padding, this.props.electro_height - this.props.padding]);
 			var scales = { xScale: xScale, yScale: yScale };
 			return React.createElement(
 				"div",
 				null,
 				React.createElement(
 					"svg",
-					{ width: this.state.width, height: this.state.height },
+					{ width: this.props.electro_width, height: this.props.electro_height },
 					React.createElement(XYAxis, _extends({}, this.state, scales, this.props)),
 					React.createElement(Markers, _extends({}, this.state, scales, this.props))
-				),
-				React.createElement(
-					"div",
-					null,
-					React.createElement("textarea", { onChange: function onChange(e) {
-							return _this4.marker_input_changed(e);
-						}, defaultValue: this.state.marker_input, cols: "50", rows: "5" }),
-					React.createElement("input", { type: "checkbox", onChange: function onChange(e) {
-							return _this4.render_position_changed(e);
-						} }),
-					"render position"
 				)
 			);
 		}

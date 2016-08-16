@@ -1,13 +1,173 @@
-'use strict';
+"use strict";
 
-requirejs(["static/script/electrophoresis"], function () {
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+requirejs(["static/script/electrophoresis", "static/regression/regression"], function () {
+
 	var styles = {
 		padding: 40,
 		marker_width: 40,
 		column_padding: 40
 	};
+
+	var BaseLen = function (_React$Component) {
+		_inherits(BaseLen, _React$Component);
+
+		function BaseLen(props) {
+			_classCallCheck(this, BaseLen);
+
+			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(BaseLen).call(this, props));
+
+			var default_marker_input = "ladder: 2-23130 2.6-10000 2.8-8000 3.1-6000 3.3-5000 3.6-4000 4-3000 4.6-2000 5.1-1500 5.8-1000\nA: 1.3 2.5 5.5";
+			var default_parsed_result = _this.parse_marker_input(default_marker_input);
+			_this.state = {
+				markers: _this.estimate_length(default_parsed_result.markers),
+				marker_label: default_parsed_result.marker_label,
+				marker_input: default_marker_input,
+				electro_width: _this.props.padding * 2 + (_this.props.marker_width + _this.props.column_padding) * (d3.max(default_parsed_result.markers, function (d) {
+					return d[0];
+				}) + 1) - _this.props.column_padding,
+				electro_height: 300,
+				render_dis: false,
+				render_length: true
+			};
+			return _this;
+		}
+
+		_createClass(BaseLen, [{
+			key: "render_distance_changed",
+			value: function render_distance_changed(e) {
+				this.setState({
+					render_dis: e.target.checked
+				});
+			}
+		}, {
+			key: "render_length_changed",
+			value: function render_length_changed(e) {
+				this.setState({
+					render_length: e.target.checked
+				});
+			}
+		}, {
+			key: "power_regression",
+			value: function power_regression(points) {
+				var data = points.filter(function (p) {
+					return p[1];
+				}).map(function (p) {
+					return [p[0], p[1]];
+				});
+				var result = regression("power", data);
+				return points.map(function (p) {
+					return [p[0], p[1] ? p[1] : result.equation[0] * Math.pow(p[0], result.equation[1]), p[2]];
+				});
+			}
+		}, {
+			key: "logarithmic_regression",
+			value: function logarithmic_regression(points) {
+				var data = points.filter(function (p) {
+					return p[1];
+				}).map(function (p) {
+					return [p[0], Math.log10(p[1])];
+				});
+				var result = regression("linear", data);
+				return points.map(function (p) {
+					return [p[0], p[1] ? p[1] : Math.pow(10, result.equation[1] + result.equation[0] * p[0]), p[2]];
+				});
+			}
+		}, {
+			key: "linear_regression",
+			value: function linear_regression(points) {
+				var data = points.filter(function (p) {
+					return p[1];
+				}).map(function (p) {
+					return [p[0], p[1]];
+				});
+				var result = regression("linear", data);
+				return points.map(function (p) {
+					return [p[0], p[1] ? p[1] : result.equation[1] + result.equation[0] * p[0], p[2]];
+				});
+			}
+		}, {
+			key: "estimate_length",
+			value: function estimate_length(markers) {
+				var points = markers.map(function (marker) {
+					return [marker[1], marker[2], marker[0]];
+				});
+				var result = this.linear_regression(points);
+				return result.map(function (marker) {
+					return [marker[2], marker[0], marker[1]];
+				});
+			}
+		}, {
+			key: "parse_marker_input",
+			value: function parse_marker_input(input) {
+				var columns = input.trim().split("\n").map(function (i) {
+					return i.trim();
+				});
+				var markers = [];
+				var marker_label = [];
+				columns.forEach(function (column, idx) {
+					var label = column.split(":")[0].trim();
+					var elements = column.split(":")[1].trim().split(/[\s,]+/);
+					marker_label.push([idx, label]);
+					elements.forEach(function (marker) {
+						markers.push([idx, isNaN(parseFloat(marker.split("-")[0])) ? 0 : parseFloat(marker.split("-")[0]), isNaN(parseFloat(marker.split("-")[1])) ? null : parseFloat(marker.split("-")[1])]);
+					});
+				});
+				return { markers: markers, marker_label: marker_label };
+			}
+		}, {
+			key: "marker_input_changed",
+			value: function marker_input_changed(e) {
+				var input = e.target.value;
+				var result = this.parse_marker_input(input);
+				result.markers = this.estimate_length(result.markers);
+				this.setState({
+					markers: result.markers,
+					marker_label: result.marker_label,
+					electro_width: this.props.padding * 2 + (this.props.marker_width + this.props.column_padding) * (d3.max(result.markers, function (d) {
+						return d[0];
+					}) + 1) - this.props.column_padding,
+					marker_input: input
+				});
+			}
+		}, {
+			key: "render",
+			value: function render() {
+				var _this2 = this;
+
+				return React.createElement(
+					"div",
+					null,
+					React.createElement(Electrophoresis, _extends({}, this.props, this.state)),
+					React.createElement("textarea", { onChange: function onChange(e) {
+							return _this2.marker_input_changed(e);
+						}, defaultValue: this.state.marker_input, cols: "50", rows: "5" }),
+					React.createElement("input", { type: "checkbox", onChange: function onChange(e) {
+							return _this2.render_distance_changed(e);
+						}, checked: this.state.render_dis }),
+					"render distance",
+					React.createElement("input", { type: "checkbox", onChange: function onChange(e) {
+							return _this2.render_length_changed(e);
+						}, checked: this.state.render_length }),
+					"render base length"
+				);
+			}
+		}]);
+
+		return BaseLen;
+	}(React.Component);
+
 	var mountingPoint = document.createElement('div');
 	mountingPoint.className = 'react-app';
 	document.body.appendChild(mountingPoint);
-	ReactDOM.render(React.createElement(Electrophoresis, styles), mountingPoint);
+	ReactDOM.render(React.createElement(BaseLen, styles), mountingPoint);
 });
