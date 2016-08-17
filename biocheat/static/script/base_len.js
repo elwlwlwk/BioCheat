@@ -10,7 +10,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-requirejs(["static/script/electrophoresis", "static/regression/regression"], function () {
+requirejs(["static/script/electrophoresis", "static/regression/regression_r"], function () {
 
 	var styles = {
 		padding: 40,
@@ -28,8 +28,9 @@ requirejs(["static/script/electrophoresis", "static/regression/regression"], fun
 
 			var default_marker_input = "ladder: 2-23130 2.6-10000 2.8-8000 3.1-6000 3.3-5000 3.6-4000 4-3000 4.6-2000 5.1-1500 5.8-1000\nA: 1.3 2.5 5.5";
 			var default_parsed_result = _this.parse_marker_input(default_marker_input);
+			var default_regression_method = "power";
 			_this.state = {
-				markers: _this.estimate_length(default_parsed_result.markers),
+				markers: _this.estimate_length(default_regression_method, default_parsed_result.markers).points,
 				marker_label: default_parsed_result.marker_label,
 				marker_input: default_marker_input,
 				electro_width: _this.props.padding * 2 + (_this.props.marker_width + _this.props.column_padding) * (d3.max(default_parsed_result.markers, function (d) {
@@ -37,7 +38,8 @@ requirejs(["static/script/electrophoresis", "static/regression/regression"], fun
 				}) + 1) - _this.props.column_padding,
 				electro_height: 300,
 				render_dis: false,
-				render_length: true
+				render_length: true,
+				regression_method: default_regression_method
 			};
 			return _this;
 		}
@@ -65,9 +67,12 @@ requirejs(["static/script/electrophoresis", "static/regression/regression"], fun
 					return [p[0], p[1]];
 				});
 				var result = regression("power", data);
-				return points.map(function (p) {
-					return [p[0], p[1] ? p[1] : result.equation[0] * Math.pow(p[0], result.equation[1]), p[2]];
-				});
+				return {
+					points: points.map(function (p) {
+						return [p[0], p[1] ? p[1] : result.equation[0] * Math.pow(p[0], result.equation[1]), p[2]];
+					}),
+					regression_result: result
+				};
 			}
 		}, {
 			key: "logarithmic_regression",
@@ -78,9 +83,12 @@ requirejs(["static/script/electrophoresis", "static/regression/regression"], fun
 					return [p[0], Math.log10(p[1])];
 				});
 				var result = regression("linear", data);
-				return points.map(function (p) {
-					return [p[0], p[1] ? p[1] : Math.pow(10, result.equation[1] + result.equation[0] * p[0]), p[2]];
-				});
+				return {
+					points: points.map(function (p) {
+						return [p[0], p[1] ? p[1] : Math.pow(10, result.equation[1] + result.equation[0] * p[0]), p[2]];
+					}),
+					regression_result: result
+				};
 			}
 		}, {
 			key: "linear_regression",
@@ -91,20 +99,57 @@ requirejs(["static/script/electrophoresis", "static/regression/regression"], fun
 					return [p[0], p[1]];
 				});
 				var result = regression("linear", data);
-				return points.map(function (p) {
-					return [p[0], p[1] ? p[1] : result.equation[1] + result.equation[0] * p[0], p[2]];
+				return {
+					points: points.map(function (p) {
+						return [p[0], p[1] ? p[1] : result.equation[1] + result.equation[0] * p[0], p[2]];
+					}),
+					regression_result: result
+				};
+			}
+		}, {
+			key: "polynomial_regression",
+			value: function polynomial_regression(points) {
+				var data = points.filter(function (p) {
+					return p[1];
+				}).map(function (p) {
+					return [p[0], p[1]];
 				});
+				var result = regression("polynomial", data, 5);
+				return {
+					points: points.map(function (p) {
+						return [p[0], p[1] ? p[1] : function () {
+							var sum = 0;
+							result.equation.forEach(function (n, idx) {
+								sum += n * Math.pow(p[0], idx);
+							});
+							return sum;
+						}(), p[2]];
+					}),
+					regression_result: result
+				};
 			}
 		}, {
 			key: "estimate_length",
-			value: function estimate_length(markers) {
+			value: function estimate_length(method, markers) {
 				var points = markers.map(function (marker) {
 					return [marker[1], marker[2], marker[0]];
 				});
-				var result = this.linear_regression(points);
-				return result.map(function (marker) {
+				var result;
+				switch (method) {
+					case "power":
+						result = this.power_regression(points);
+						break;
+					case "logarithmic":
+						result = this.logarithmic_regression(points);
+						break;
+					case "linear":
+						result = this.linear_regression(points);
+						break;
+				}
+				result.points = result.points.map(function (marker) {
 					return [marker[2], marker[0], marker[1]];
 				});
+				return result;
 			}
 		}, {
 			key: "parse_marker_input",
@@ -129,7 +174,7 @@ requirejs(["static/script/electrophoresis", "static/regression/regression"], fun
 			value: function marker_input_changed(e) {
 				var input = e.target.value;
 				var result = this.parse_marker_input(input);
-				result.markers = this.estimate_length(result.markers);
+				result.markers = this.estimate_length(this.state.regression_method, result.markers).points;
 				this.setState({
 					markers: result.markers,
 					marker_label: result.marker_label,
@@ -137,6 +182,16 @@ requirejs(["static/script/electrophoresis", "static/regression/regression"], fun
 						return d[0];
 					}) + 1) - this.props.column_padding,
 					marker_input: input
+				});
+			}
+		}, {
+			key: "regression_method_changed",
+			value: function regression_method_changed(e) {
+				var result = this.parse_marker_input(this.state.marker_input);
+				result.markers = this.estimate_length(e.target.value, result.markers).points;
+				this.setState({
+					markers: result.markers,
+					regression_method: e.target.value
 				});
 			}
 		}, {
@@ -151,19 +206,97 @@ requirejs(["static/script/electrophoresis", "static/regression/regression"], fun
 					React.createElement("textarea", { onChange: function onChange(e) {
 							return _this2.marker_input_changed(e);
 						}, defaultValue: this.state.marker_input, cols: "50", rows: "5" }),
-					React.createElement("input", { type: "checkbox", onChange: function onChange(e) {
-							return _this2.render_distance_changed(e);
-						}, checked: this.state.render_dis }),
-					"render distance",
-					React.createElement("input", { type: "checkbox", onChange: function onChange(e) {
-							return _this2.render_length_changed(e);
-						}, checked: this.state.render_length }),
-					"render base length"
+					React.createElement(
+						"table",
+						null,
+						React.createElement(
+							"tbody",
+							null,
+							React.createElement(
+								"tr",
+								null,
+								React.createElement(
+									"td",
+									null,
+									React.createElement("input", { type: "checkbox", onChange: function onChange(e) {
+											return _this2.render_distance_changed(e);
+										}, checked: this.state.render_dis }),
+									"render distance"
+								)
+							),
+							React.createElement(
+								"tr",
+								null,
+								React.createElement(
+									"td",
+									null,
+									React.createElement("input", { type: "checkbox", onChange: function onChange(e) {
+											return _this2.render_length_changed(e);
+										}, checked: this.state.render_length }),
+									"render base length"
+								)
+							),
+							React.createElement(
+								"tr",
+								null,
+								React.createElement(
+									"td",
+									null,
+									"regression method:",
+									React.createElement(
+										"select",
+										{ name: "regression_method", defaultValue: this.state.regression_method, onChange: function onChange(e) {
+												return _this2.regression_method_changed(e);
+											} },
+										React.createElement(
+											"option",
+											{ value: "power" },
+											"power"
+										),
+										React.createElement(
+											"option",
+											{ value: "logarithmic" },
+											"logarithmic"
+										),
+										React.createElement(
+											"option",
+											{ value: "linear" },
+											"linear"
+										)
+									)
+								)
+							)
+						)
+					),
+					React.createElement(RegressionGraph, { regression_result: this.estimate_length(this.state.regression_method, this.parse_marker_input(this.state.marker_input).markers), orig_input: this.parse_marker_input(this.state.marker_input), regression_method: this.state.regression_method })
 				);
 			}
 		}]);
 
 		return BaseLen;
+	}(React.Component);
+
+	var RegressionGraph = function (_React$Component2) {
+		_inherits(RegressionGraph, _React$Component2);
+
+		function RegressionGraph() {
+			_classCallCheck(this, RegressionGraph);
+
+			return _possibleConstructorReturn(this, Object.getPrototypeOf(RegressionGraph).apply(this, arguments));
+		}
+
+		_createClass(RegressionGraph, [{
+			key: "render",
+			value: function render() {
+				return React.createElement(
+					"div",
+					null,
+					"regression graph"
+				);
+			}
+		}]);
+
+		return RegressionGraph;
 	}(React.Component);
 
 	var mountingPoint = document.createElement('div');
