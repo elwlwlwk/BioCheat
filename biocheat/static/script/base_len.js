@@ -10,7 +10,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-requirejs(["static/script/electrophoresis", "static/regression/regression_r"], function () {
+requirejs(["static/script/electrophoresis", "static/script/regression_graph", "static/regression/regression_r"], function () {
 
 	var styles = {
 		padding: 40,
@@ -268,35 +268,12 @@ requirejs(["static/script/electrophoresis", "static/regression/regression_r"], f
 							)
 						)
 					),
-					React.createElement(RegressionGraph, { regression_result: this.estimate_length(this.state.regression_method, this.parse_marker_input(this.state.marker_input).markers), orig_input: this.parse_marker_input(this.state.marker_input), regression_method: this.state.regression_method })
+					React.createElement(RegressionGraph, { width: 300, height: 300, padding: 40, regression_result: this.estimate_length(this.state.regression_method, this.parse_marker_input(this.state.marker_input).markers), orig_input: this.parse_marker_input(this.state.marker_input), regression_method: this.state.regression_method })
 				);
 			}
 		}]);
 
 		return BaseLen;
-	}(React.Component);
-
-	var RegressionGraph = function (_React$Component2) {
-		_inherits(RegressionGraph, _React$Component2);
-
-		function RegressionGraph() {
-			_classCallCheck(this, RegressionGraph);
-
-			return _possibleConstructorReturn(this, Object.getPrototypeOf(RegressionGraph).apply(this, arguments));
-		}
-
-		_createClass(RegressionGraph, [{
-			key: "render",
-			value: function render() {
-				return React.createElement(
-					"div",
-					null,
-					"regression graph"
-				);
-			}
-		}]);
-
-		return RegressionGraph;
 	}(React.Component);
 
 	var mountingPoint = document.createElement('div');

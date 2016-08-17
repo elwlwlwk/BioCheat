@@ -10,18 +10,18 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var XYAxis = function (_React$Component) {
-	_inherits(XYAxis, _React$Component);
+var ElectroXYAxis = function (_React$Component) {
+	_inherits(ElectroXYAxis, _React$Component);
 
-	function XYAxis() {
-		_classCallCheck(this, XYAxis);
+	function ElectroXYAxis() {
+		_classCallCheck(this, ElectroXYAxis);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(XYAxis).apply(this, arguments));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(ElectroXYAxis).apply(this, arguments));
 	}
 
-	_createClass(XYAxis, [{
-		key: "renderAxis",
-		value: function renderAxis(props) {
+	_createClass(ElectroXYAxis, [{
+		key: "renderElectroAxis",
+		value: function renderElectroAxis(props) {
 			return function (coords, index) {
 				var col_num = d3.max(props.markers, function (d) {
 					return d[0];
@@ -39,12 +39,12 @@ var XYAxis = function (_React$Component) {
 			return React.createElement(
 				"g",
 				null,
-				this.props.marker_label.map(this.renderAxis(this.props))
+				this.props.marker_label.map(this.renderElectroAxis(this.props))
 			);
 		}
 	}]);
 
-	return XYAxis;
+	return ElectroXYAxis;
 }(React.Component);
 
 var Markers = function (_React$Component2) {
@@ -141,7 +141,7 @@ var Electrophoresis = function (_React$Component3) {
 				React.createElement(
 					"svg",
 					{ width: this.props.electro_width, height: this.props.electro_height },
-					React.createElement(XYAxis, _extends({}, this.state, scales, this.props)),
+					React.createElement(ElectroXYAxis, _extends({}, this.state, scales, this.props)),
 					React.createElement(Markers, _extends({}, this.state, scales, this.props))
 				)
 			);

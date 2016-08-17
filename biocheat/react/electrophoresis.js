@@ -1,5 +1,5 @@
-class XYAxis extends React.Component{
-	renderAxis(props){
+class ElectroXYAxis extends React.Component{
+	renderElectroAxis(props){
 		return (coords, index) => {
 			var col_num= d3.max(props.markers, (d) => d[0])+1;
 			return <text x={props.xScale(coords[0])} y="15" dy="0.35em" fontSize="10px" key={index}>{ coords[1] }</text>;
@@ -7,7 +7,7 @@ class XYAxis extends React.Component{
 	}
 	render(){
 		return <g>
-			{ this.props.marker_label.map(this.renderAxis(this.props)) }
+			{ this.props.marker_label.map(this.renderElectroAxis(this.props)) }
 		</g>
 	}
 }
@@ -60,7 +60,7 @@ class Electrophoresis extends React.Component{
 		var scales= { xScale: xScale, yScale: yScale };
 		return <div>
 			<svg width={this.props.electro_width} height={this.props.electro_height}>
-				<XYAxis {...this.state} {...scales} {...this.props}/>
+				<ElectroXYAxis {...this.state} {...scales} {...this.props}/>
 				<Markers {...this.state} {...scales} {...this.props}/>
 			</svg>
 		</div>;

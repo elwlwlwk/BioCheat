@@ -1,4 +1,4 @@
-requirejs(["static/script/electrophoresis", "static/regression/regression_r"], function(){
+requirejs(["static/script/electrophoresis", "static/script/regression_graph", "static/regression/regression_r"], function(){
 
 var styles={
 	padding: 40,
@@ -155,14 +155,8 @@ class BaseLen extends React.Component{
 						</td>
 					</tr>
 				</tbody></table>
-				<RegressionGraph regression_result={this.estimate_length(this.state.regression_method, this.parse_marker_input(this.state.marker_input).markers)} orig_input={this.parse_marker_input(this.state.marker_input)} regression_method={this.state.regression_method}/>
+				<RegressionGraph width={300} height={300} padding={40} regression_result={this.estimate_length(this.state.regression_method, this.parse_marker_input(this.state.marker_input).markers)} orig_input={this.parse_marker_input(this.state.marker_input)} regression_method={this.state.regression_method}/>
 			</div>
-	}
-}
-
-class RegressionGraph extends React.Component{
-	render(){
-		return <div>regression graph</div>
 	}
 }
 
