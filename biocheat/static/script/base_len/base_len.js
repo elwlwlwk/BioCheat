@@ -10,7 +10,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-requirejs(["static/script/electrophoresis", "static/script/regression_graph", "static/regression/regression_r"], function () {
+requirejs(["static/script/base_len/electrophoresis", "static/script/base_len/regression_graph", "static/regression/regression_r"], function () {
 
 	var styles = {
 		padding: 40,

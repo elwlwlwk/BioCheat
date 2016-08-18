@@ -1,4 +1,4 @@
-requirejs(["static/script/base_len/electrophoresis", "static/script/base_len/regression_graph", "static/regression/base_len/regression_r"], function(){
+requirejs(["static/script/base_len/electrophoresis", "static/script/base_len/regression_graph", "static/regression/regression_r"], function(){
 
 var styles={
 	padding: 40,
