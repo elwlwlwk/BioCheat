@@ -203,72 +203,56 @@ requirejs(["static/script/electrophoresis", "static/script/regression_graph", "s
 					"div",
 					null,
 					React.createElement(Electrophoresis, _extends({}, this.props, this.state)),
-					React.createElement("textarea", { onChange: function onChange(e) {
+					React.createElement("textarea", { className: "form-control", onChange: function onChange(e) {
 							return _this2.marker_input_changed(e);
 						}, defaultValue: this.state.marker_input, cols: "50", rows: "5" }),
 					React.createElement(
-						"table",
-						null,
+						"div",
+						{ className: "form-group" },
+						React.createElement("input", { type: "checkbox", onChange: function onChange(e) {
+								return _this2.render_distance_changed(e);
+							}, checked: this.state.render_dis }),
+						"render distance",
+						React.createElement("input", { type: "checkbox", onChange: function onChange(e) {
+								return _this2.render_length_changed(e);
+							}, checked: this.state.render_length }),
+						"render base length"
+					),
+					React.createElement(
+						"div",
+						{ className: "form-group" },
 						React.createElement(
-							"tbody",
+							"label",
 							null,
+							"regression method:"
+						),
+						React.createElement(
+							"select",
+							{ name: "regression_method", defaultValue: this.state.regression_method, onChange: function onChange(e) {
+									return _this2.regression_method_changed(e);
+								} },
 							React.createElement(
-								"tr",
-								null,
-								React.createElement(
-									"td",
-									null,
-									React.createElement("input", { type: "checkbox", onChange: function onChange(e) {
-											return _this2.render_distance_changed(e);
-										}, checked: this.state.render_dis }),
-									"render distance"
-								)
+								"option",
+								{ value: "power" },
+								"power"
 							),
 							React.createElement(
-								"tr",
-								null,
-								React.createElement(
-									"td",
-									null,
-									React.createElement("input", { type: "checkbox", onChange: function onChange(e) {
-											return _this2.render_length_changed(e);
-										}, checked: this.state.render_length }),
-									"render base length"
-								)
+								"option",
+								{ value: "logarithmic" },
+								"logarithmic"
 							),
 							React.createElement(
-								"tr",
-								null,
-								React.createElement(
-									"td",
-									null,
-									"regression method:",
-									React.createElement(
-										"select",
-										{ name: "regression_method", defaultValue: this.state.regression_method, onChange: function onChange(e) {
-												return _this2.regression_method_changed(e);
-											} },
-										React.createElement(
-											"option",
-											{ value: "power" },
-											"power"
-										),
-										React.createElement(
-											"option",
-											{ value: "logarithmic" },
-											"logarithmic"
-										),
-										React.createElement(
-											"option",
-											{ value: "linear" },
-											"linear"
-										)
-									)
-								)
+								"option",
+								{ value: "linear" },
+								"linear"
 							)
 						)
 					),
-					React.createElement(RegressionGraph, { width: 300, height: 300, padding: 40, regression_result: this.estimate_length(this.state.regression_method, this.parse_marker_input(this.state.marker_input).markers), orig_input: this.parse_marker_input(this.state.marker_input), regression_method: this.state.regression_method })
+					React.createElement(
+						"div",
+						null,
+						React.createElement(RegressionGraph, { width: 300, height: 300, padding: 40, regression_result: this.estimate_length(this.state.regression_method, this.parse_marker_input(this.state.marker_input).markers), orig_input: this.parse_marker_input(this.state.marker_input), regression_method: this.state.regression_method })
+					)
 				);
 			}
 		}]);

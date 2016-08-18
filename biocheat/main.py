@@ -3,7 +3,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello():
-	return render_template('test.html')
+	return render_template('main.html')
 
 @app.route('/base_len')
 def base_len():
@@ -15,4 +15,4 @@ def restrict_map():
 
 if __name__ == '__main__':
 	app.debug= True
-	app.run(host='0.0.0.0')
+	app.run(host='0.0.0.0', port=80)

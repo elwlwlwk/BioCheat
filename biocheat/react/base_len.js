@@ -135,27 +135,23 @@ class BaseLen extends React.Component{
 	render(){
 			return <div>
 				<Electrophoresis {...this.props} { ...this.state }/>
-				<textarea onChange={ (e) => this.marker_input_changed(e) } defaultValue={this.state.marker_input} cols="50" rows="5">
+				<textarea className="form-control" onChange={ (e) => this.marker_input_changed(e) } defaultValue={this.state.marker_input} cols="50" rows="5">
 				</textarea>
-				<table><tbody>
-					<tr>
-						<td><input type="checkbox" onChange= { (e) => this.render_distance_changed(e) } checked={this.state.render_dis} />render distance</td>
-					</tr>
-					<tr>
-						<td><input type="checkbox" onChange= { (e) => this.render_length_changed(e) } checked={this.state.render_length} />render base length</td>
-					</tr>
-					<tr>
-						<td>
-							regression method:
-							<select name="regression_method" defaultValue={this.state.regression_method} onChange= { (e) => this.regression_method_changed(e) } >
-								<option value="power">power</option>
-								<option value="logarithmic">logarithmic</option>
-								<option value="linear">linear</option>
-							</select>
-						</td>
-					</tr>
-				</tbody></table>
-				<RegressionGraph width={300} height={300} padding={40} regression_result={this.estimate_length(this.state.regression_method, this.parse_marker_input(this.state.marker_input).markers)} orig_input={this.parse_marker_input(this.state.marker_input)} regression_method={this.state.regression_method}/>
+				<div className="form-group">
+					<input type="checkbox" onChange= { (e) => this.render_distance_changed(e) } checked={this.state.render_dis} />render distance
+					<input type="checkbox" onChange= { (e) => this.render_length_changed(e) } checked={this.state.render_length} />render base length
+				</div>
+				<div className="form-group">
+					<label>regression method:</label>
+					<select name="regression_method" defaultValue={this.state.regression_method} onChange= { (e) => this.regression_method_changed(e) } >
+						<option value="power">power</option>
+						<option value="logarithmic">logarithmic</option>
+						<option value="linear">linear</option>
+					</select>
+				</div>
+				<div>
+					<RegressionGraph width={300} height={300} padding={40} regression_result={this.estimate_length(this.state.regression_method, this.parse_marker_input(this.state.marker_input).markers)} orig_input={this.parse_marker_input(this.state.marker_input)} regression_method={this.state.regression_method}/>
+				</div>
 			</div>
 	}
 }
