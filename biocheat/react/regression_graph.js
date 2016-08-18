@@ -1,30 +1,30 @@
 class RegressionGraph extends React.Component{
-	gen_path(method, result, xScale, yScale){
+	gen_path(method, result, points, xScale, yScale){
 		var equation= result.regression_result.equation;
 		switch(method){
 			case "power":
-				var M= "M"+ xScale(d3.max(result.regression_result.points, (d) => d[0])/100)+ ","+ yScale(equation[0]* Math.pow(d3.max(result.regression_result.points, (d) => d[0])/100, equation[1]));
+				var M= "M"+ xScale(d3.max(points, (d) => d[0])/100)+ ","+ yScale(equation[0]* Math.pow(d3.max(points, (d) => d[0])/100, equation[1]));
 				var L= "";
 				for(var i=1; i<50; i++){
-					var x= d3.max(result.regression_result.points, (d) => d[0])/50*i;
+					var x= d3.max(points, (d) => d[0])/50*i;
 					var y= equation[0]* Math.pow(x, equation[1]);
 					L+="L"+xScale(x)+","+yScale(y);
 				}
 				return M+L;
 			case "logarithmic":
-				var M= "M"+ xScale(d3.max(result.regression_result.points, (d) => d[0])/100)+ ","+ yScale(equation[0]* d3.max(result.regression_result.points, (d) => d[0])/100 + equation[1]);
+				var M= "M"+ xScale(d3.max(points, (d) => d[0])/100)+ ","+ yScale(equation[0]* d3.max(points, (d) => d[0])/100 + equation[1]);
 				var L= "";
 				for(var i=1; i<50; i++){
-					var x= d3.max(result.regression_result.points, (d) => d[0])/50*i;
+					var x= d3.max(points, (d) => d[0])/50*i;
 					var y= equation[0]* x+ equation[1];
 					L+="L"+xScale(x)+","+yScale(y);
 				}
 				return M+L;
 			case "linear":
-				var M= "M"+ xScale(d3.max(result.regression_result.points, (d) => d[0])/100)+ ","+ yScale(equation[0]* d3.max(result.regression_result.points, (d) => d[0])/100 + equation[1]);
+				var M= "M"+ xScale(d3.max(points, (d) => d[0])/100)+ ","+ yScale(equation[0]* d3.max(points, (d) => d[0])/100 + equation[1]);
 				var L= "";
 				for(var i=1; i<50; i++){
-					var x= d3.max(result.regression_result.points, (d) => d[0])/50*i;
+					var x= d3.max(points, (d) => d[0])/50*i;
 					var y= equation[0]* x+ equation[1];
 					if(y<0){
 						break;
@@ -41,7 +41,7 @@ class RegressionGraph extends React.Component{
 		var xScale= d3.scaleLinear().domain([0, d3.max(regressed_points, (d) => d[0])*1.1]).range([this.props.padding, this.props.width-this.props.padding]);
 		var yScale= d3.scaleLinear().domain([0, d3.max(regressed_points, (d) => d[1])*1.1]).range([this.props.height-this.props.padding, 0]);
 
-		var path= this.gen_path(this.props.regression_method, this.props.regression_result, xScale, yScale);
+		var path= this.gen_path(this.props.regression_method, this.props.regression_result, regressed_points, xScale, yScale);
 
 		function render_point(coords, index){
 			return <circle cx={xScale(coords[0])} cy={yScale(coords[1])} r={2} stroke="black" key={index}/>
@@ -60,7 +60,7 @@ class RegressionGraph extends React.Component{
 		var xScale= d3.scaleLinear().domain([0, d3.max(regressed_points, (d) => d[0])*1.1]).range([this.props.padding, this.props.width-this.props.padding]);
 		var yScale= d3.scaleLinear().domain([0, d3.max(regressed_points, (d) => Math.log10(d[1]))*1.1]).range([this.props.height-this.props.padding, 0]);
 
-		var path= this.gen_path(this.props.regression_method, this.props.regression_result, xScale, yScale);
+		var path= this.gen_path(this.props.regression_method, this.props.regression_result, regressed_points, xScale, yScale);
 
 		function render_point(coords, index){
 			return <circle cx={xScale(coords[0])} cy={yScale(coords[1])} r={2} stroke="black" key={index}/>
@@ -79,7 +79,7 @@ class RegressionGraph extends React.Component{
 		var xScale= d3.scaleLinear().domain([0, d3.max(regressed_points, (d) => d[0])*1.1]).range([this.props.padding, this.props.width-this.props.padding]);
 		var yScale= d3.scaleLinear().domain([0, d3.max(regressed_points, (d) => d[1])*1.1]).range([this.props.height-this.props.padding, 0]);
 
-		var path= this.gen_path(this.props.regression_method, this.props.regression_result, xScale, yScale);
+		var path= this.gen_path(this.props.regression_method, this.props.regression_result, regressed_points, xScale, yScale);
 
 		function render_point(coords, index){
 			return <circle cx={xScale(coords[0])} cy={yScale(coords[1])} r={2} stroke="black" key={index}/>

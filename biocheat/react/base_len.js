@@ -9,7 +9,7 @@ var styles={
 class BaseLen extends React.Component{
 	constructor(props){
 		super(props);
-		var default_marker_input= "ladder: 2-23130 2.6-10000 2.8-8000 3.1-6000 3.3-5000 3.6-4000 4-3000 4.6-2000 5.1-1500 5.8-1000\nA: 1.3 2.5 5.5";
+		var default_marker_input= "ladder: 2.6-10000 2.8-8000 3.1-6000 3.3-5000 3.6-4000 4-3000 4.6-2000 5.1-1500 5.8-1000\nA: 2.5 5.5 6.4";
 		var default_parsed_result= this.parse_marker_input(default_marker_input);
 		var default_regression_method= "power";
 		this.state= {

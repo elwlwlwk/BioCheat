@@ -21,18 +21,18 @@ var RegressionGraph = function (_React$Component) {
 
 	_createClass(RegressionGraph, [{
 		key: "gen_path",
-		value: function gen_path(method, result, xScale, yScale) {
+		value: function gen_path(method, result, points, xScale, yScale) {
 			var equation = result.regression_result.equation;
 			switch (method) {
 				case "power":
-					var M = "M" + xScale(d3.max(result.regression_result.points, function (d) {
+					var M = "M" + xScale(d3.max(points, function (d) {
 						return d[0];
-					}) / 100) + "," + yScale(equation[0] * Math.pow(d3.max(result.regression_result.points, function (d) {
+					}) / 100) + "," + yScale(equation[0] * Math.pow(d3.max(points, function (d) {
 						return d[0];
 					}) / 100, equation[1]));
 					var L = "";
 					for (var i = 1; i < 50; i++) {
-						var x = d3.max(result.regression_result.points, function (d) {
+						var x = d3.max(points, function (d) {
 							return d[0];
 						}) / 50 * i;
 						var y = equation[0] * Math.pow(x, equation[1]);
@@ -40,14 +40,14 @@ var RegressionGraph = function (_React$Component) {
 					}
 					return M + L;
 				case "logarithmic":
-					var M = "M" + xScale(d3.max(result.regression_result.points, function (d) {
+					var M = "M" + xScale(d3.max(points, function (d) {
 						return d[0];
-					}) / 100) + "," + yScale(equation[0] * d3.max(result.regression_result.points, function (d) {
+					}) / 100) + "," + yScale(equation[0] * d3.max(points, function (d) {
 						return d[0];
 					}) / 100 + equation[1]);
 					var L = "";
 					for (var i = 1; i < 50; i++) {
-						var x = d3.max(result.regression_result.points, function (d) {
+						var x = d3.max(points, function (d) {
 							return d[0];
 						}) / 50 * i;
 						var y = equation[0] * x + equation[1];
@@ -55,14 +55,14 @@ var RegressionGraph = function (_React$Component) {
 					}
 					return M + L;
 				case "linear":
-					var M = "M" + xScale(d3.max(result.regression_result.points, function (d) {
+					var M = "M" + xScale(d3.max(points, function (d) {
 						return d[0];
-					}) / 100) + "," + yScale(equation[0] * d3.max(result.regression_result.points, function (d) {
+					}) / 100) + "," + yScale(equation[0] * d3.max(points, function (d) {
 						return d[0];
 					}) / 100 + equation[1]);
 					var L = "";
 					for (var i = 1; i < 50; i++) {
-						var x = d3.max(result.regression_result.points, function (d) {
+						var x = d3.max(points, function (d) {
 							return d[0];
 						}) / 50 * i;
 						var y = equation[0] * x + equation[1];
@@ -92,7 +92,7 @@ var RegressionGraph = function (_React$Component) {
 				return d[1];
 			}) * 1.1]).range([this.props.height - this.props.padding, 0]);
 
-			var path = this.gen_path(this.props.regression_method, this.props.regression_result, xScale, yScale);
+			var path = this.gen_path(this.props.regression_method, this.props.regression_result, regressed_points, xScale, yScale);
 
 			function render_point(coords, index) {
 				return React.createElement("circle", { cx: xScale(coords[0]), cy: yScale(coords[1]), r: 2, stroke: "black", key: index });
@@ -128,7 +128,7 @@ var RegressionGraph = function (_React$Component) {
 				return Math.log10(d[1]);
 			}) * 1.1]).range([this.props.height - this.props.padding, 0]);
 
-			var path = this.gen_path(this.props.regression_method, this.props.regression_result, xScale, yScale);
+			var path = this.gen_path(this.props.regression_method, this.props.regression_result, regressed_points, xScale, yScale);
 
 			function render_point(coords, index) {
 				return React.createElement("circle", { cx: xScale(coords[0]), cy: yScale(coords[1]), r: 2, stroke: "black", key: index });
@@ -164,7 +164,7 @@ var RegressionGraph = function (_React$Component) {
 				return d[1];
 			}) * 1.1]).range([this.props.height - this.props.padding, 0]);
 
-			var path = this.gen_path(this.props.regression_method, this.props.regression_result, xScale, yScale);
+			var path = this.gen_path(this.props.regression_method, this.props.regression_result, regressed_points, xScale, yScale);
 
 			function render_point(coords, index) {
 				return React.createElement("circle", { cx: xScale(coords[0]), cy: yScale(coords[1]), r: 2, stroke: "black", key: index });
