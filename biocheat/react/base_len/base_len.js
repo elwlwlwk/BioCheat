@@ -138,7 +138,7 @@ class BaseLen extends React.Component{
 				<textarea onChange={ (e) => this.marker_input_changed(e) } defaultValue={this.state.marker_input} cols="50" rows="5">
 				</textarea>
 				<div className="form-group">
-					<input type="checkbox" onChange= { (e) => this.render_distance_changed(e) } checked={this.state.render_dis} />render distance
+					<input type="checkbox" onChange= { (e) => this.render_distance_changed(e) } checked={this.state.render_dis} />render distance<br/>
 					<input type="checkbox" onChange= { (e) => this.render_length_changed(e) } checked={this.state.render_length} />render base length
 				</div>
 				<div className="form-group">

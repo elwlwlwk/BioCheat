@@ -213,6 +213,7 @@ requirejs(["static/script/base_len/electrophoresis", "static/script/base_len/reg
 								return _this2.render_distance_changed(e);
 							}, checked: this.state.render_dis }),
 						"render distance",
+						React.createElement("br", null),
 						React.createElement("input", { type: "checkbox", onChange: function onChange(e) {
 								return _this2.render_length_changed(e);
 							}, checked: this.state.render_length }),
