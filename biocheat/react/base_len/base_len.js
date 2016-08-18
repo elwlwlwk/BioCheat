@@ -1,4 +1,4 @@
-requirejs(["static/script/electrophoresis", "static/script/regression_graph", "static/regression/regression_r"], function(){
+requirejs(["static/script/base_len/electrophoresis", "static/script/base_len/regression_graph", "static/regression/base_len/regression_r"], function(){
 
 var styles={
 	padding: 40,
@@ -135,7 +135,7 @@ class BaseLen extends React.Component{
 	render(){
 			return <div>
 				<Electrophoresis {...this.props} { ...this.state }/>
-				<textarea className="form-control" onChange={ (e) => this.marker_input_changed(e) } defaultValue={this.state.marker_input} cols="50" rows="5">
+				<textarea onChange={ (e) => this.marker_input_changed(e) } defaultValue={this.state.marker_input} cols="50" rows="5">
 				</textarea>
 				<div className="form-group">
 					<input type="checkbox" onChange= { (e) => this.render_distance_changed(e) } checked={this.state.render_dis} />render distance

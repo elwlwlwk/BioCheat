@@ -203,7 +203,7 @@ requirejs(["static/script/electrophoresis", "static/script/regression_graph", "s
 					"div",
 					null,
 					React.createElement(Electrophoresis, _extends({}, this.props, this.state)),
-					React.createElement("textarea", { className: "form-control", onChange: function onChange(e) {
+					React.createElement("textarea", { onChange: function onChange(e) {
 							return _this2.marker_input_changed(e);
 						}, defaultValue: this.state.marker_input, cols: "50", rows: "5" }),
 					React.createElement(
