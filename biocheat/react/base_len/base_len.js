@@ -16,8 +16,8 @@ class BaseLen extends React.Component{
 			markers: this.estimate_length(default_regression_method, default_parsed_result.markers).points,
 			marker_label: default_parsed_result.marker_label,
 			marker_input: default_marker_input,
-			electro_width: this.props.padding*2+ (this.props.marker_width+ this.props.column_padding)* (d3.max(default_parsed_result.markers, (d) => d[0])+1) - this.props.column_padding,
-			electro_height: 300,
+			width: this.props.padding*2+ (this.props.marker_width+ this.props.column_padding)* (d3.max(default_parsed_result.markers, (d) => d[0])+1) - this.props.column_padding,
+			height: 300,
 			render_dis: false,
 			render_length: true,
 			regression_method: default_regression_method,
@@ -118,7 +118,7 @@ class BaseLen extends React.Component{
 		this.setState({
 			markers: result.markers,
 			marker_label: result.marker_label,
-			electro_width: this.props.padding*2+ (this.props.marker_width+ this.props.column_padding)* (d3.max(result.markers, (d) => d[0])+1) - this.props.column_padding,
+			width: this.props.padding*2+ (this.props.marker_width+ this.props.column_padding)* (d3.max(result.markers, (d) => d[0])+1) - this.props.column_padding,
 			marker_input: input,
 		});
 	}
