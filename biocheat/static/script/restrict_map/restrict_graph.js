@@ -1,5 +1,7 @@
 "use strict";
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -31,11 +33,7 @@ var RestrictGraph = function (_React$Component) {
 			if (this.props.exclude_ladder) {
 				cols.delete(0);
 			}
-			var frag_padding = d3.min(this.props.markers.filter(function (marker) {
-				return cols.has(marker[0]);
-			}), function (d) {
-				return d[2];
-			}) / 3;
+			var frag_padding = 20;
 			cols.forEach(function (col) {
 				return col_length.push(_this2.props.markers.filter(function (marker) {
 					return marker[0] == col;
@@ -43,15 +41,20 @@ var RestrictGraph = function (_React$Component) {
 					return Math.round(parseFloat(marker[2]));
 				}).reduce(function (a, b) {
 					return a + b;
-				}) + (_this2.props.markers.filter(function (marker) {
-					return marker[0] == col;
-				}).length - 1) * frag_padding);
+				}));
 			});
 
 			var height = this.props.row_padding * cols.size + this.props.padding * 2;
+			var fragScale = d3.scaleLinear().domain([0, d3.max(col_length)]).range([0, this.props.width - this.props.padding * 2 - frag_padding * d3.max([].concat(_toConsumableArray(cols)).map(function (col) {
+				return _this2.props.markers.filter(function (marker) {
+					return marker[0] == col;
+				});
+			}), function (col) {
+				return col.length;
+			})]);
+			var yScale = d3.scaleLinear().domain([d3.min([].concat(_toConsumableArray(cols))), d3.max([].concat(_toConsumableArray(cols)))]).range([this.props.padding, height - this.props.padding]);
 
-			var xScale = d3.scaleLinear().domain([0, d3.max(col_length)]).range([this.props.padding, this.props.width - this.props.padding]);
-			var yScale = d3.scaleLinear().domain([d3.min([].concat(_toConsumableArray(cols))), d3.max([].concat(_toConsumableArray(cols)))]).range([this.props.padding, this.height - this.props.padding]);
+			var scale = { fragScale: fragScale, yScale: yScale };
 
 			return React.createElement(
 				"div",
@@ -59,7 +62,11 @@ var RestrictGraph = function (_React$Component) {
 				React.createElement(
 					"div",
 					null,
-					React.createElement("svg", { width: this.props.width, height: height })
+					React.createElement(
+						"svg",
+						{ width: this.props.width, height: height },
+						React.createElement(FragmentGraph, _extends({}, this.props, scale, { cols: cols, frag_padding: frag_padding }))
+					)
 				),
 				React.createElement(
 					"div",
@@ -75,4 +82,50 @@ var RestrictGraph = function (_React$Component) {
 	}]);
 
 	return RestrictGraph;
+}(React.Component);
+
+var FragmentGraph = function (_React$Component2) {
+	_inherits(FragmentGraph, _React$Component2);
+
+	function FragmentGraph() {
+		_classCallCheck(this, FragmentGraph);
+
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(FragmentGraph).apply(this, arguments));
+	}
+
+	_createClass(FragmentGraph, [{
+		key: "renderFragment",
+		value: function renderFragment(marker, idx, row) {
+			var x = this.props.fragScale([0].concat(row.slice(0, idx).map(function (mark) {
+				return mark[2];
+			})).reduce(function (a, b) {
+				return a + b;
+			})) + this.props.frag_padding * idx + parseInt(this.props.padding);
+			return React.createElement("rect", { width: this.props.fragScale(marker[2]), height: "2", x: x, y: this.props.yScale(marker[0]), key: idx });
+		}
+	}, {
+		key: "render",
+		value: function render() {
+			var _this4 = this;
+
+			var markers = this.props.markers.filter(function (marker) {
+				return _this4.props.cols.has(marker[0]);
+			});
+			return React.createElement(
+				"g",
+				null,
+				[].concat(_toConsumableArray(this.props.cols)).map(function (col) {
+					return _this4.props.markers.filter(function (marker) {
+						return marker[0] == col;
+					});
+				}).map(function (row) {
+					return row.map(function (marker, idx) {
+						return _this4.renderFragment(marker, idx, row);
+					});
+				})
+			);
+		}
+	}]);
+
+	return FragmentGraph;
 }(React.Component);
