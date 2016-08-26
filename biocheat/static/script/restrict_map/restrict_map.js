@@ -24,21 +24,27 @@ var RestrictMap = function (_React$Component) {
 
 		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(RestrictMap).call(this, props));
 
-		var default_marker_input = "ladder: 2.6-10000 2.8-8000 3.1-6000 3.3-5000 3.6-4000 4-3000 4.6-2000 5.1-1500 5.8-1000\nA: 2.5 5.5 6.4";
-		var default_parsed_result = _this.parse_marker_input(default_marker_input);
+		var default_marker_inputs = ["ladder: 2.6-10000 2.8-8000 3.1-6000 3.3-5000 3.6-4000 4-3000 4.6-2000 5.1-1500 5.8-1000", "A: 4.3 4.55", "B: 5.1 4", "A+B: 6.05 5.1 4.55"];
+		var default_parsed_result = _this.parse_marker_input(default_marker_inputs.reduce(function (a, b) {
+			return a + "\n" + b;
+		}));
 		var default_regression_method = "power";
+		var default_DNA_form = "linear";
+		var default_digest_manner = "double";
 		_this.state = {
 			markers: _this.estimate_length(default_regression_method, default_parsed_result.markers).points,
 			marker_label: default_parsed_result.marker_label,
-			marker_input: default_marker_input,
-			electro_width: _this.props.padding * 2 + (_this.props.marker_width + _this.props.column_padding) * (d3.max(default_parsed_result.markers, function (d) {
+			marker_inputs: default_marker_inputs,
+			width: _this.props.padding * 2 + (_this.props.marker_width + _this.props.column_padding) * (d3.max(default_parsed_result.markers, function (d) {
 				return d[0];
 			}) + 1) - _this.props.column_padding,
-			electro_height: 300,
+			height: 300,
 			render_dis: false,
 			render_length: true,
 			exclude_ladder: true,
-			regression_method: default_regression_method
+			regression_method: default_regression_method,
+			DNA_form: default_DNA_form,
+			digest_manner: default_digest_manner
 		};
 		return _this;
 	}
@@ -166,8 +172,13 @@ var RestrictMap = function (_React$Component) {
 			var markers = [];
 			var marker_label = [];
 			columns.forEach(function (column, idx) {
-				var label = column.split(":")[0].trim();
-				var elements = column.split(":")[1].trim().split(/[\s,]+/);
+				try {
+					var label = column.split(":")[0].trim();
+					var elements = column.split(":")[1].trim().split(/[\s,]+/);
+				} catch (e) {
+					var label = "";
+					var elements = column.trim().split(/[\s,]+/);
+				}
 				marker_label.push([idx, label]);
 				elements.forEach(function (marker) {
 					markers.push([idx, isNaN(parseFloat(marker.split("-")[0])) ? 0 : parseFloat(marker.split("-")[0]), isNaN(parseFloat(marker.split("-")[1])) ? null : parseFloat(marker.split("-")[1])]);
@@ -177,23 +188,45 @@ var RestrictMap = function (_React$Component) {
 		}
 	}, {
 		key: "marker_input_changed",
-		value: function marker_input_changed(e) {
+		value: function marker_input_changed(e, method) {
 			var input = e.target.value;
-			var result = this.parse_marker_input(input);
+			var marker_inputs = this.state.marker_inputs.slice(0);
+			switch (method) {
+				case "ladder":
+					marker_inputs[0] = input;
+					break;
+				case "first":
+					marker_inputs[1] = input;
+					break;
+				case "second":
+					marker_inputs[2] = input;
+					break;
+				case "double":
+					marker_inputs[3] = input;
+					break;
+				case "partial":
+					marker_inputs[1] = input;
+					break;
+			}
+			var result = this.parse_marker_input(marker_inputs.reduce(function (a, b) {
+				return a + "\n" + b;
+			}));
 			result.markers = this.estimate_length(this.state.regression_method, result.markers).points;
 			this.setState({
 				markers: result.markers,
 				marker_label: result.marker_label,
-				electro_width: this.props.padding * 2 + (this.props.marker_width + this.props.column_padding) * (d3.max(result.markers, function (d) {
+				width: this.props.padding * 2 + (this.props.marker_width + this.props.column_padding) * (d3.max(result.markers, function (d) {
 					return d[0];
 				}) + 1) - this.props.column_padding,
-				marker_input: input
+				marker_inputs: marker_inputs
 			});
 		}
 	}, {
 		key: "regression_method_changed",
 		value: function regression_method_changed(e) {
-			var result = this.parse_marker_input(this.state.marker_input);
+			var result = this.parse_marker_input(this.state.marker_inputs.reduce(function (a, b) {
+				return a + "\n" + b;
+			}));
 			result.markers = this.estimate_length(e.target.value, result.markers).points;
 			this.setState({
 				markers: result.markers,
@@ -201,34 +234,234 @@ var RestrictMap = function (_React$Component) {
 			});
 		}
 	}, {
+		key: "DNA_form_changed",
+		value: function DNA_form_changed(e) {
+			this.setState({
+				DNA_form: e.target.value
+			});
+		}
+	}, {
+		key: "digest_manner_changed",
+		value: function digest_manner_changed(e) {
+			var digest_manner = e.target.value;
+			var default_marker_inputs = [];
+			switch (digest_manner) {
+				case "double":
+					default_marker_inputs.push("ladder: 2.6-10000 2.8-8000 3.1-6000 3.3-5000 3.6-4000 4-3000 4.6-2000 5.1-1500 5.8-1000");
+					default_marker_inputs.push("A: 4.3 4.55");
+					default_marker_inputs.push("B: 5.1 4");
+					default_marker_inputs.push("A+B: 6.05 5.1 4.55");
+					break;
+				case "partial":
+					default_marker_inputs.push("ladder: 2.6-10000 2.8-8000 3.1-6000 3.3-5000 3.6-4000 4-3000 4.6-2000 5.1-1500 5.8-1000");
+					default_marker_inputs.push("A: 4.3 4.55");
+					break;
+			}
+
+			var result = this.parse_marker_input(default_marker_inputs.reduce(function (a, b) {
+				return a + "\n" + b;
+			}));
+			result.markers = this.estimate_length(this.state.regression_method, result.markers).points;
+
+			this.setState({
+				digest_manner: digest_manner,
+				markers: result.markers,
+				marker_label: result.marker_label,
+				width: this.props.padding * 2 + (this.props.marker_width + this.props.column_padding) * (d3.max(result.markers, function (d) {
+					return d[0];
+				}) + 1) - this.props.column_padding,
+				marker_inputs: default_marker_inputs
+			});
+		}
+	}, {
+		key: "render_input_area",
+		value: function render_input_area() {
+			var _this2 = this;
+
+			if (this.state.digest_manner == "double") {
+				return React.createElement(
+					"div",
+					null,
+					React.createElement(
+						"div",
+						{ className: "form-group" },
+						React.createElement(
+							"label",
+							{ className: "col-sm-2 control-label" },
+							"DNA Ladder"
+						),
+						React.createElement(
+							"div",
+							{ className: "col-sm-10" },
+							React.createElement("input", { className: "form-control", defaultValue: this.state.marker_inputs[0], onChange: function onChange(e) {
+									return _this2.marker_input_changed(e, "ladder");
+								} })
+						)
+					),
+					React.createElement(
+						"div",
+						{ className: "form-group" },
+						React.createElement(
+							"label",
+							{ className: "col-sm-2 control-label" },
+							"First Digest"
+						),
+						React.createElement(
+							"div",
+							{ className: "col-sm-10" },
+							React.createElement("input", { className: "form-control", defaultValue: this.state.marker_inputs[1], onChange: function onChange(e) {
+									return _this2.marker_input_changed(e, "first");
+								} })
+						)
+					),
+					React.createElement(
+						"div",
+						{ className: "form-group" },
+						React.createElement(
+							"label",
+							{ className: "col-sm-2 control-label" },
+							"Second Digest"
+						),
+						React.createElement(
+							"div",
+							{ className: "col-sm-10" },
+							React.createElement("input", { className: "form-control", defaultValue: this.state.marker_inputs[2], onChange: function onChange(e) {
+									return _this2.marker_input_changed(e, "second");
+								} })
+						)
+					),
+					React.createElement(
+						"div",
+						{ className: "form-group" },
+						React.createElement(
+							"label",
+							{ className: "col-sm-2 control-label" },
+							"Double Digest"
+						),
+						React.createElement(
+							"div",
+							{ className: "col-sm-10" },
+							React.createElement("input", { className: "form-control", defaultValue: this.state.marker_inputs[3], onChange: function onChange(e) {
+									return _this2.marker_input_changed(e, "double");
+								} })
+						)
+					),
+					React.createElement("textarea", { onChange: function onChange(e) {
+							return _this2.marker_input_changed(e);
+						}, defaultValue: this.state.marker_input, cols: "50", rows: "5" })
+				);
+			} else if (this.state.digest_manner == "partial") {
+				return React.createElement(
+					"div",
+					null,
+					React.createElement(
+						"div",
+						{ className: "form-group" },
+						React.createElement(
+							"label",
+							{ className: "col-sm-2 control-label" },
+							"DNA Ladder"
+						),
+						React.createElement(
+							"div",
+							{ className: "col-sm-10" },
+							React.createElement("input", { className: "form-control", onChange: function onChange(e) {
+									return _this2.marker_input_changed(e, "ladder");
+								} })
+						)
+					),
+					React.createElement(
+						"div",
+						{ className: "form-group" },
+						React.createElement(
+							"label",
+							{ className: "col-sm-2 control-label" },
+							"Partial Digest"
+						),
+						React.createElement(
+							"div",
+							{ className: "col-sm-10" },
+							React.createElement("input", { className: "form-control", onChange: function onChange(e) {
+									return _this2.marker_input_changed(e, "partial");
+								} })
+						)
+					)
+				);
+			}
+		}
+	}, {
 		key: "render",
 		value: function render() {
-			var _this2 = this;
+			var _this3 = this;
 
 			return React.createElement(
 				"div",
 				{ className: "col-sm-12" },
 				React.createElement(Electrophoresis, _extends({}, this.props, this.state)),
-				React.createElement("textarea", { onChange: function onChange(e) {
-						return _this2.marker_input_changed(e);
-					}, defaultValue: this.state.marker_input, cols: "50", rows: "5" }),
+				React.createElement(
+					"div",
+					{ className: "form-group" },
+					React.createElement(
+						"label",
+						null,
+						"Digest manner:"
+					),
+					React.createElement(
+						"select",
+						{ name: "digest_manner", defaultValue: this.state.digest_manner, onChange: function onChange(e) {
+								return _this3.digest_manner_changed(e);
+							} },
+						React.createElement(
+							"option",
+							{ value: "double" },
+							"double"
+						),
+						React.createElement(
+							"option",
+							{ value: "partial", disabled: true },
+							"partial"
+						)
+					)
+				),
+				this.render_input_area(),
+				React.createElement(
+					"div",
+					{ className: "form-group" },
+					React.createElement(
+						"label",
+						null,
+						"DNA form:"
+					),
+					React.createElement(
+						"select",
+						{ name: "DNA_Form", defaultValue: this.state.DNA_Form, onChange: function onChange(e) {
+								return _this3.DNA_form_changed(e);
+							} },
+						React.createElement(
+							"option",
+							{ value: "linear" },
+							"linear"
+						),
+						React.createElement(
+							"option",
+							{ value: "circular" },
+							"circular"
+						)
+					)
+				),
 				React.createElement(
 					"div",
 					{ className: "form-group" },
 					React.createElement("input", { type: "checkbox", onChange: function onChange(e) {
-							return _this2.render_distance_changed(e);
+							return _this3.render_distance_changed(e);
 						}, checked: this.state.render_dis }),
 					"render distance",
 					React.createElement("br", null),
 					React.createElement("input", { type: "checkbox", onChange: function onChange(e) {
-							return _this2.render_length_changed(e);
+							return _this3.render_length_changed(e);
 						}, checked: this.state.render_length }),
 					"render base length",
-					React.createElement("br", null),
-					React.createElement("input", { type: "checkbox", onChange: function onChange(e) {
-							return _this2.exclude_ladder_changed(e);
-						}, checked: this.state.exclude_ladder }),
-					"exclude first column(ladder)"
+					React.createElement("br", null)
 				),
 				React.createElement(
 					"div",
@@ -241,7 +474,7 @@ var RestrictMap = function (_React$Component) {
 					React.createElement(
 						"select",
 						{ name: "regression_method", defaultValue: this.state.regression_method, onChange: function onChange(e) {
-								return _this2.regression_method_changed(e);
+								return _this3.regression_method_changed(e);
 							} },
 						React.createElement(
 							"option",
@@ -263,7 +496,11 @@ var RestrictMap = function (_React$Component) {
 				React.createElement(
 					"div",
 					{ id: "regression_div", className: "collapse" },
-					React.createElement(RegressionGraph, { width: 300, height: 300, padding: 40, regression_result: this.estimate_length(this.state.regression_method, this.parse_marker_input(this.state.marker_input).markers), orig_input: this.parse_marker_input(this.state.marker_input), regression_method: this.state.regression_method })
+					React.createElement(RegressionGraph, { width: 300, height: 300, padding: 40, regression_result: this.estimate_length(this.state.regression_method, this.parse_marker_input(this.state.marker_inputs.reduce(function (a, b) {
+							return a + "\n" + b;
+						})).markers), orig_input: this.parse_marker_input(this.state.marker_inputs.reduce(function (a, b) {
+							return a + "\n" + b;
+						})), regression_method: this.state.regression_method })
 				),
 				React.createElement(
 					"div",
@@ -274,7 +511,7 @@ var RestrictMap = function (_React$Component) {
 						"Show Regression Graph"
 					)
 				),
-				React.createElement(RestrictGraph, _extends({}, this.props, this.state, { width: "500", height: "500", row_padding: "50", padding: "30" }))
+				React.createElement(RestrictGraph, _extends({}, this.props, this.state, { width: "500", height: "500", row_padding: "50", padding: "30", label_padding: "60" }))
 			);
 		}
 	}]);

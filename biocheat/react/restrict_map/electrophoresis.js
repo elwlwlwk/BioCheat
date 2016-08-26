@@ -55,11 +55,11 @@ class Markers extends React.Component{
 }
 class Electrophoresis extends React.Component{
 	render(){
-		var xScale= d3.scaleLinear().domain([0, d3.max(this.props.markers, (d) => d[0])]).range([this.props.padding, this.props.electro_width-this.props.padding-this.props.marker_width]);
-		var yScale= d3.scaleLinear().domain([0, d3.max(this.props.markers, (d) => d[1])]).range([this.props.padding, this.props.electro_height-this.props.padding]);
+		var xScale= d3.scaleLinear().domain([0, d3.max(this.props.markers, (d) => d[0])]).range([this.props.padding, this.props.width-this.props.padding-this.props.marker_width]);
+		var yScale= d3.scaleLinear().domain([0, d3.max(this.props.markers, (d) => d[1])]).range([this.props.padding, this.props.height-this.props.padding]);
 		var scales= { xScale: xScale, yScale: yScale };
 		return <div>
-			<svg width={this.props.electro_width} height={this.props.electro_height}>
+			<svg width={this.props.width} height={this.props.height}>
 				<ElectroXYAxis {...this.state} {...scales} {...this.props}/>
 				<Markers {...this.state} {...scales} {...this.props}/>
 			</svg>

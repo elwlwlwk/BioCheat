@@ -22,6 +22,9 @@ var RestrictGraph = function (_React$Component) {
 	}
 
 	_createClass(RestrictGraph, [{
+		key: "findRestrictMap",
+		value: function findRestrictMap() {}
+	}, {
 		key: "render",
 		value: function render() {
 			var _this2 = this;
@@ -33,7 +36,7 @@ var RestrictGraph = function (_React$Component) {
 			if (this.props.exclude_ladder) {
 				cols.delete(0);
 			}
-			var frag_padding = 20;
+			var frag_padding = 25;
 			cols.forEach(function (col) {
 				return col_length.push(_this2.props.markers.filter(function (marker) {
 					return marker[0] == col;
@@ -55,6 +58,8 @@ var RestrictGraph = function (_React$Component) {
 			var yScale = d3.scaleLinear().domain([d3.min([].concat(_toConsumableArray(cols))), d3.max([].concat(_toConsumableArray(cols)))]).range([this.props.padding, height - this.props.padding]);
 
 			var scale = { fragScale: fragScale, yScale: yScale };
+
+			this.findRestrictMap();
 
 			return React.createElement(
 				"div",
@@ -100,8 +105,26 @@ var FragmentGraph = function (_React$Component2) {
 				return mark[2];
 			})).reduce(function (a, b) {
 				return a + b;
-			})) + this.props.frag_padding * idx + parseInt(this.props.padding);
-			return React.createElement("rect", { width: this.props.fragScale(marker[2]), height: "2", x: x, y: this.props.yScale(marker[0]), key: idx });
+			})) + this.props.frag_padding * idx + parseInt(this.props.label_padding);
+			return React.createElement(
+				"g",
+				null,
+				React.createElement(
+					"text",
+					{ x: x, y: this.props.yScale(marker[0]) - 4, fontSize: "10px" },
+					Math.round(marker[2])
+				),
+				React.createElement("rect", { width: this.props.fragScale(marker[2]), height: "2", x: x, y: this.props.yScale(marker[0]), key: idx })
+			);
+		}
+	}, {
+		key: "renderLabel",
+		value: function renderLabel(label) {
+			return React.createElement(
+				"text",
+				{ x: 0, y: this.props.yScale(label[0]), fontSize: "10", key: label[0] },
+				label[1]
+			);
 		}
 	}, {
 		key: "render",
@@ -114,6 +137,11 @@ var FragmentGraph = function (_React$Component2) {
 			return React.createElement(
 				"g",
 				null,
+				this.props.marker_label.filter(function (label) {
+					return _this4.props.cols.has(label[0]);
+				}).map(function (label) {
+					return _this4.renderLabel(label);
+				}),
 				[].concat(_toConsumableArray(this.props.cols)).map(function (col) {
 					return _this4.props.markers.filter(function (marker) {
 						return marker[0] == col;

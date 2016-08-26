@@ -130,17 +130,17 @@ var Electrophoresis = function (_React$Component3) {
 		value: function render() {
 			var xScale = d3.scaleLinear().domain([0, d3.max(this.props.markers, function (d) {
 				return d[0];
-			})]).range([this.props.padding, this.props.electro_width - this.props.padding - this.props.marker_width]);
+			})]).range([this.props.padding, this.props.width - this.props.padding - this.props.marker_width]);
 			var yScale = d3.scaleLinear().domain([0, d3.max(this.props.markers, function (d) {
 				return d[1];
-			})]).range([this.props.padding, this.props.electro_height - this.props.padding]);
+			})]).range([this.props.padding, this.props.height - this.props.padding]);
 			var scales = { xScale: xScale, yScale: yScale };
 			return React.createElement(
 				"div",
 				null,
 				React.createElement(
 					"svg",
-					{ width: this.props.electro_width, height: this.props.electro_height },
+					{ width: this.props.width, height: this.props.height },
 					React.createElement(ElectroXYAxis, _extends({}, this.state, scales, this.props)),
 					React.createElement(Markers, _extends({}, this.state, scales, this.props))
 				)
