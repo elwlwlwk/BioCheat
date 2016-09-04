@@ -278,115 +278,113 @@ var RestrictMap = function (_React$Component) {
 		value: function render_input_area() {
 			var _this2 = this;
 
-			if (this.state.digest_manner == "double") {
-				return React.createElement(
-					"div",
-					null,
-					React.createElement(
+			switch (this.state.digest_manner) {
+				case "double":
+					return React.createElement(
 						"div",
-						{ className: "form-group" },
+						null,
 						React.createElement(
-							"label",
-							{ className: "col-sm-2 control-label" },
-							"DNA Ladder"
+							"div",
+							{ className: "form-group" },
+							React.createElement(
+								"label",
+								{ className: "col-sm-2 control-label" },
+								"DNA Ladder"
+							),
+							React.createElement(
+								"div",
+								{ className: "col-sm-10" },
+								React.createElement("input", { className: "form-control", defaultValue: this.state.marker_inputs[0], onChange: function onChange(e) {
+										return _this2.marker_input_changed(e, "ladder");
+									} })
+							)
 						),
 						React.createElement(
 							"div",
-							{ className: "col-sm-10" },
-							React.createElement("input", { className: "form-control", defaultValue: this.state.marker_inputs[0], onChange: function onChange(e) {
-									return _this2.marker_input_changed(e, "ladder");
-								} })
-						)
-					),
-					React.createElement(
-						"div",
-						{ className: "form-group" },
-						React.createElement(
-							"label",
-							{ className: "col-sm-2 control-label" },
-							"First Digest"
+							{ className: "form-group" },
+							React.createElement(
+								"label",
+								{ className: "col-sm-2 control-label" },
+								"First Digest"
+							),
+							React.createElement(
+								"div",
+								{ className: "col-sm-10" },
+								React.createElement("input", { className: "form-control", defaultValue: this.state.marker_inputs[1], onChange: function onChange(e) {
+										return _this2.marker_input_changed(e, "first");
+									} })
+							)
 						),
 						React.createElement(
 							"div",
-							{ className: "col-sm-10" },
-							React.createElement("input", { className: "form-control", defaultValue: this.state.marker_inputs[1], onChange: function onChange(e) {
-									return _this2.marker_input_changed(e, "first");
-								} })
-						)
-					),
-					React.createElement(
-						"div",
-						{ className: "form-group" },
-						React.createElement(
-							"label",
-							{ className: "col-sm-2 control-label" },
-							"Second Digest"
+							{ className: "form-group" },
+							React.createElement(
+								"label",
+								{ className: "col-sm-2 control-label" },
+								"Second Digest"
+							),
+							React.createElement(
+								"div",
+								{ className: "col-sm-10" },
+								React.createElement("input", { className: "form-control", defaultValue: this.state.marker_inputs[2], onChange: function onChange(e) {
+										return _this2.marker_input_changed(e, "second");
+									} })
+							)
 						),
 						React.createElement(
 							"div",
-							{ className: "col-sm-10" },
-							React.createElement("input", { className: "form-control", defaultValue: this.state.marker_inputs[2], onChange: function onChange(e) {
-									return _this2.marker_input_changed(e, "second");
-								} })
+							{ className: "form-group" },
+							React.createElement(
+								"label",
+								{ className: "col-sm-2 control-label" },
+								"Double Digest"
+							),
+							React.createElement(
+								"div",
+								{ className: "col-sm-10" },
+								React.createElement("input", { className: "form-control", defaultValue: this.state.marker_inputs[3], onChange: function onChange(e) {
+										return _this2.marker_input_changed(e, "double");
+									} })
+							)
 						)
-					),
-					React.createElement(
+					);
+				case "partial":
+					return React.createElement(
 						"div",
-						{ className: "form-group" },
+						null,
 						React.createElement(
-							"label",
-							{ className: "col-sm-2 control-label" },
-							"Double Digest"
+							"div",
+							{ className: "form-group" },
+							React.createElement(
+								"label",
+								{ className: "col-sm-2 control-label" },
+								"DNA Ladder"
+							),
+							React.createElement(
+								"div",
+								{ className: "col-sm-10" },
+								React.createElement("input", { className: "form-control", onChange: function onChange(e) {
+										return _this2.marker_input_changed(e, "ladder");
+									} })
+							)
 						),
 						React.createElement(
 							"div",
-							{ className: "col-sm-10" },
-							React.createElement("input", { className: "form-control", defaultValue: this.state.marker_inputs[3], onChange: function onChange(e) {
-									return _this2.marker_input_changed(e, "double");
-								} })
+							{ className: "form-group" },
+							React.createElement(
+								"label",
+								{ className: "col-sm-2 control-label" },
+								"Partial Digest"
+							),
+							React.createElement(
+								"div",
+								{ className: "col-sm-10" },
+								React.createElement("input", { className: "form-control", onChange: function onChange(e) {
+										return _this2.marker_input_changed(e, "partial");
+									} })
+							)
 						)
-					),
-					React.createElement("textarea", { onChange: function onChange(e) {
-							return _this2.marker_input_changed(e);
-						}, defaultValue: this.state.marker_input, cols: "50", rows: "5" })
-				);
-			} else if (this.state.digest_manner == "partial") {
-				return React.createElement(
-					"div",
-					null,
-					React.createElement(
-						"div",
-						{ className: "form-group" },
-						React.createElement(
-							"label",
-							{ className: "col-sm-2 control-label" },
-							"DNA Ladder"
-						),
-						React.createElement(
-							"div",
-							{ className: "col-sm-10" },
-							React.createElement("input", { className: "form-control", onChange: function onChange(e) {
-									return _this2.marker_input_changed(e, "ladder");
-								} })
-						)
-					),
-					React.createElement(
-						"div",
-						{ className: "form-group" },
-						React.createElement(
-							"label",
-							{ className: "col-sm-2 control-label" },
-							"Partial Digest"
-						),
-						React.createElement(
-							"div",
-							{ className: "col-sm-10" },
-							React.createElement("input", { className: "form-control", onChange: function onChange(e) {
-									return _this2.marker_input_changed(e, "partial");
-								} })
-						)
-					)
-				);
+					);
 			}
 		}
 	}, {

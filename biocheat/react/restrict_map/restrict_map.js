@@ -155,7 +155,6 @@ class RestrictMap extends React.Component{
 		});
 	}
 
-
 	regression_method_changed(e){
 		var result= this.parse_marker_input(this.state.marker_inputs.reduce( (a,b) => a+ "\n"+ b));
 		result.markers= this.estimate_length(e.target.value, result.markers).points;
@@ -200,50 +199,49 @@ class RestrictMap extends React.Component{
 	}
 
 	render_input_area(){
-		if(this.state.digest_manner== "double"){
-			return <div>
-				<div className="form-group">
-					<label className="col-sm-2 control-label">DNA Ladder</label>
-					<div className="col-sm-10">
-						<input className="form-control" defaultValue={this.state.marker_inputs[0]} onChange= { (e) => this.marker_input_changed(e, "ladder") } ></input>
+		switch(this.state.digest_manner){
+			case "double":
+				return <div>
+					<div className="form-group">
+						<label className="col-sm-2 control-label">DNA Ladder</label>
+						<div className="col-sm-10">
+							<input className="form-control" defaultValue={this.state.marker_inputs[0]} onChange= { (e) => this.marker_input_changed(e, "ladder") } ></input>
+						</div>
 					</div>
-				</div>
-				<div className="form-group">
-					<label className="col-sm-2 control-label">First Digest</label>
-					<div className="col-sm-10">
-						<input className="form-control" defaultValue={this.state.marker_inputs[1]} onChange= { (e) => this.marker_input_changed(e, "first") } ></input>
+					<div className="form-group">
+						<label className="col-sm-2 control-label">First Digest</label>
+						<div className="col-sm-10">
+							<input className="form-control" defaultValue={this.state.marker_inputs[1]} onChange= { (e) => this.marker_input_changed(e, "first") } ></input>
+						</div>
 					</div>
-				</div>
-				<div className="form-group">
-					<label className="col-sm-2 control-label">Second Digest</label>
-					<div className="col-sm-10">
-						<input className="form-control" defaultValue={this.state.marker_inputs[2]} onChange= { (e) => this.marker_input_changed(e, "second") } ></input>
+					<div className="form-group">
+						<label className="col-sm-2 control-label">Second Digest</label>
+						<div className="col-sm-10">
+							<input className="form-control" defaultValue={this.state.marker_inputs[2]} onChange= { (e) => this.marker_input_changed(e, "second") } ></input>
+						</div>
 					</div>
-				</div>
-				<div className="form-group">
-					<label className="col-sm-2 control-label">Double Digest</label>
-					<div className="col-sm-10">
-						<input className="form-control" defaultValue={this.state.marker_inputs[3]} onChange= { (e) => this.marker_input_changed(e, "double") } ></input>
+					<div className="form-group">
+						<label className="col-sm-2 control-label">Double Digest</label>
+						<div className="col-sm-10">
+							<input className="form-control" defaultValue={this.state.marker_inputs[3]} onChange= { (e) => this.marker_input_changed(e, "double") } ></input>
+						</div>
 					</div>
-				</div>
-				<textarea onChange={ (e) => this.marker_input_changed(e) } defaultValue={this.state.marker_input} cols="50" rows="5"></textarea>
-			</div>;
-		}
-		else if(this.state.digest_manner== "partial"){
-			return <div>
-				<div className="form-group">
-					<label className="col-sm-2 control-label">DNA Ladder</label>
-					<div className="col-sm-10">
-						<input className="form-control" onChange= { (e) => this.marker_input_changed(e, "ladder") } ></input>
+				</div>;
+			case "partial":
+				return <div>
+					<div className="form-group">
+						<label className="col-sm-2 control-label">DNA Ladder</label>
+						<div className="col-sm-10">
+							<input className="form-control" onChange= { (e) => this.marker_input_changed(e, "ladder") } ></input>
+						</div>
 					</div>
-				</div>
-				<div className="form-group">
-					<label className="col-sm-2 control-label">Partial Digest</label>
-					<div className="col-sm-10">
-						<input className="form-control" onChange= { (e) => this.marker_input_changed(e, "partial") } ></input>
+					<div className="form-group">
+						<label className="col-sm-2 control-label">Partial Digest</label>
+						<div className="col-sm-10">
+							<input className="form-control" onChange= { (e) => this.marker_input_changed(e, "partial") } ></input>
+						</div>
 					</div>
-				</div>
-			</div>;
+				</div>;
 		}
 	}
 
