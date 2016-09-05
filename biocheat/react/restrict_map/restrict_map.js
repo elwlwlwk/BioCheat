@@ -281,7 +281,7 @@ class RestrictMap extends React.Component{
 				<div>
 					<button type="button" className="btn btn-primary" data-toggle="collapse" data-target="#regression_div">Show Regression Graph</button>
 				</div>
-				<RestrictGraph {...this.props} {...this.state} width="500" height="500" row_padding="50" padding="30" label_padding="60" />
+				<RestrictGraph {...this.props} {...this.state} width={500} height={500} row_padding={50} padding={30} label_padding={60} />
 			</div>
 	}
 }

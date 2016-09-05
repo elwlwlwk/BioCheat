@@ -509,7 +509,7 @@ var RestrictMap = function (_React$Component) {
 						"Show Regression Graph"
 					)
 				),
-				React.createElement(RestrictGraph, _extends({}, this.props, this.state, { width: "500", height: "500", row_padding: "50", padding: "30", label_padding: "60" }))
+				React.createElement(RestrictGraph, _extends({}, this.props, this.state, { width: 500, height: 500, row_padding: 50, padding: 30, label_padding: 60 }))
 			);
 		}
 	}]);
