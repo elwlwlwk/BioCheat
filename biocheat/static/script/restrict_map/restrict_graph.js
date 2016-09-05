@@ -133,11 +133,15 @@ var RestrictGraph = function (_React$Component) {
 		}
 	}, {
 		key: "render_restrict_map",
-		value: function render_restrict_map(restrict_maps, fragScale) {
+		value: function render_restrict_map(restrict_map, fragScale, label) {
 			switch (this.props.DNA_form) {
 				case "linear":
 					//var fragScale= d3.scaleLinear().domain([0, restrict_maps[0][3].reduce( (a, b) => a+b )]).range([0, this.props.width- this.props.padding*2])
-					return React.createElement(LinearRestrictMap, _extends({}, this.props, { restrict_maps: restrict_maps, favorite: restrict_maps[0], fragScale: fragScale, padding: 30 }));
+					return React.createElement(
+						"div",
+						null,
+						React.createElement(LinearRestrictMap, _extends({}, this.props, { favorite: restrict_map, fragScale: fragScale, padding: 30, label: label }))
+					);
 					break;
 				case "circular":
 					break;
@@ -195,7 +199,27 @@ var RestrictGraph = function (_React$Component) {
 				React.createElement(
 					"div",
 					null,
-					this.render_restrict_map(restrict_maps, fragScale)
+					this.render_restrict_map(restrict_maps[0], fragScale, "restrict_map")
+				),
+				React.createElement(
+					"div",
+					null,
+					React.createElement(
+						"div",
+						{ id: "candidate_div", className: "collapse" },
+						restrict_maps.map(function (restrict_map, idx) {
+							return _this2.render_restrict_map(restrict_map, fragScale, idx + 1);
+						})
+					),
+					React.createElement(
+						"div",
+						null,
+						React.createElement(
+							"button",
+							{ type: "button", className: "btn btn-primary", "data-toggle": "collapse", "data-target": "#candidate_div" },
+							"Show All Candidates"
+						)
+					)
 				)
 			);
 		}
@@ -226,7 +250,7 @@ var FragmentGraph = function (_React$Component2) {
 				null,
 				React.createElement(
 					"text",
-					{ x: x, y: this.props.yScale(marker[0]) - 4, fontSize: "10px" },
+					{ x: x, y: this.props.yScale(marker[0]) - 4, fontSize: "10px", key: "enzyme" + idx },
 					Math.round(marker[2])
 				),
 				React.createElement("rect", { width: this.props.fragScale(marker[2]), height: "2", x: x, y: this.props.yScale(marker[0]), key: idx })
@@ -309,7 +333,7 @@ var LinearRestrictMap = function (_React$Component3) {
 			}
 			return React.createElement(
 				"g",
-				null,
+				{ key: idx },
 				React.createElement(
 					"text",
 					{ x: x, y: 28, fontSize: "10px", key: "label" + idx },
@@ -328,8 +352,8 @@ var LinearRestrictMap = function (_React$Component3) {
 				{ width: this.props.width, height: 70 },
 				React.createElement(
 					"text",
-					{ x: 0, y: 35, fontSize: "10" },
-					"restrict map"
+					{ x: 0, y: 35, fontSize: "10", key: this.props.label },
+					this.props.label
 				),
 				React.createElement("rect", { width: this.props.fragScale(this.props.favorite[3].reduce(function (a, b) {
 						return a + b;

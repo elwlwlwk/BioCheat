@@ -89,11 +89,11 @@ class RestrictGraph extends React.Component{
 		}
 	}
 
-	render_restrict_map(restrict_maps, fragScale){
+	render_restrict_map(restrict_map, fragScale, label){
 		switch(this.props.DNA_form){
 			case "linear":
 				//var fragScale= d3.scaleLinear().domain([0, restrict_maps[0][3].reduce( (a, b) => a+b )]).range([0, this.props.width- this.props.padding*2])
-				return <LinearRestrictMap {...this.props} restrict_maps={restrict_maps} favorite={restrict_maps[0]} fragScale={fragScale} padding={30}/>
+				return <div><LinearRestrictMap {...this.props} favorite={restrict_map} fragScale={fragScale} padding={30} label={label}/></div>
 				break;
 			case "circular":
 				break;
@@ -124,7 +124,15 @@ class RestrictGraph extends React.Component{
 				</svg>
 			</div>
 			<div>
-				{this.render_restrict_map(restrict_maps, fragScale)}
+				{this.render_restrict_map(restrict_maps[0], fragScale, "restrict_map")}
+			</div>
+			<div>
+				<div id="candidate_div" className="collapse">
+					{restrict_maps.map( (restrict_map, idx) => this.render_restrict_map(restrict_map, fragScale, idx+1) )}
+				</div>
+				<div>
+					<button type="button" className="btn btn-primary" data-toggle="collapse" data-target="#candidate_div">Show All Candidates</button>
+				</div>
 			</div>
 		</div>;
 	}
@@ -134,7 +142,7 @@ class FragmentGraph extends React.Component{
 	render_fragment(marker, idx, row){
 		var x= this.props.fragScale([0].concat(row.slice(0, idx).map( (mark) => mark[2] )).reduce( (a, b) => a+b ))+ this.props.frag_padding* idx+ this.props.label_padding;
 		return <g>
-			<text x={x} y={this.props.yScale(marker[0])-4} fontSize="10px">{Math.round(marker[2])}</text>
+			<text x={x} y={this.props.yScale(marker[0])-4} fontSize="10px" key={"enzyme"+idx}>{Math.round(marker[2])}</text>
 			<rect width={this.props.fragScale(marker[2])} height="2" x={x} y={this.props.yScale(marker[0])} key={idx}/>
 		</g>;
 	}
@@ -168,7 +176,7 @@ class LinearRestrictMap extends React.Component{
 				return marker_label[2][1];
 			}
 		}
-		return <g>
+		return <g key={idx}>
 			<text x={x} y={28} fontSize="10px" key={"label"+idx}>{get_label(markers, this.props.marker_label)}</text>
 			<rect x={x} y={30} width={2} height={5} key={"restrict_site"+idx}/>
 		</g>
@@ -176,7 +184,7 @@ class LinearRestrictMap extends React.Component{
 
 	render(){
 		return <svg width={this.props.width} height={70}>
-			<text x={0} y={35} fontSize="10">restrict map</text>
+			<text x={0} y={35} fontSize="10" key={this.props.label}>{this.props.label}</text>
 			<rect width={this.props.fragScale(this.props.favorite[3].reduce( (a, b) => a+b ))} x={this.props.label_padding} y={35} height={2}/>
 			{this.props.favorite[3].map( (marker, idx) => this.render_len(marker, idx) )}
 			{this.props.favorite[3].slice(0,-1).map( (marker, idx) => this.render_restrict_point(this.props.favorite, marker, idx) )}
