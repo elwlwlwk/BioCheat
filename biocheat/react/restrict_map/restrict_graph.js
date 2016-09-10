@@ -33,7 +33,7 @@ class RestrictGraph extends React.Component{
 			return combi;
 		}
 
-		function calc_affinity(a, b, a_b){
+		function calc_linear_double_affinity(a, b, a_b){
 			var affinity=0;
 			var pos_a_b=0;
 			var affinity_a_b=[];
@@ -44,7 +44,7 @@ class RestrictGraph extends React.Component{
 				var pos_a=0;
 				a.slice(0,-1).forEach( (e_a) => {
 					pos_a+= e_a;
-					a_affinity.push( Math.exp(Math.abs(pos_a_b- pos_a)* -1) );
+					a_affinity.push( Math.exp(Math.pow(pos_a_b- pos_a, 2)* -0.1) );
 				})
 				affinity+= d3.max(a_affinity);
 
@@ -52,13 +52,85 @@ class RestrictGraph extends React.Component{
 				var pos_b=0;
 				b.slice(0,-1).forEach( (e_b) => {
 					pos_b+= e_b;
-					b_affinity.push( Math.exp(Math.abs(pos_a_b- pos_b)* -1) );
+					b_affinity.push( Math.exp(Math.pow(pos_a_b- pos_b, 2)* -0.1) );
 				})
 				affinity+= d3.max(b_affinity);
 
 				affinity_a_b.push({a:d3.max(a_affinity), b:d3.max(b_affinity)})
 			});
 			return [affinity, affinity_a_b];
+		}
+
+		function calc_circular_double_affinity(a, b, a_b){
+			var pos_a= [0];
+			var pos_b=[0];
+			var pos_a_b=[0];
+
+			a.slice(0,-1).forEach( (e_a, idx, a) => {
+				pos_a.push(a.slice(0,idx+1).reduce( (a,b)=> a+b ));
+			})
+			b.slice(0,-1).forEach( (e_b, idx, b) => {
+				pos_b.push(b.slice(0,idx+1).reduce( (a,b)=> a+b ));
+			})
+			a_b.slice(0,-1).forEach( (e_a_b, idx, a_b) => {
+				pos_a_b.push(a_b.slice(0,idx+1).reduce( (a,b)=> a+b ));
+			})
+
+			function rotate_DNA(pos, distance){
+				return pos.map( (p) => p+distance>=100? p+distance-100: p+distance )
+			}
+
+			var affinities=[];
+			pos_a_b.forEach( (e_a_b, idx_a_b, p_a_b) => {
+				var a_start_pos= e_a_b;
+				/*
+				var except_a_start_pos= p_a_b.slice(0, idx_a_b).concat(p_a_b.slice(idx_a_b+1));
+				except_a_start_pos.forEach( (b_s) => {
+					var b_start_pos= b_s;
+				})
+				*/
+				p_a_b.forEach( (e_a_b) => {
+					var b_start_pos= e_a_b;
+
+					var rotated_a= rotate_DNA(pos_a, a_start_pos).sort();
+					var rotated_b= rotate_DNA(pos_b, b_start_pos).sort();
+
+					var rotation_affinity= 0;
+					var rotation_affinity_a_b=[];
+
+					p_a_b.forEach( (p_a_b) => {
+						var a_affinity=[];
+						rotated_a.forEach( (r_a) => {
+							a_affinity.push( Math.exp(Math.pow(p_a_b- r_a, 2)* -0.1) );
+						});
+						var b_affinity=[];
+						rotated_b.forEach( (r_b) => {
+							b_affinity.push( Math.exp(Math.pow(p_a_b- r_b, 2)* -0.1) );
+						});
+						rotation_affinity+= d3.max(a_affinity)+ d3.max(b_affinity);
+						rotation_affinity_a_b.push({a: d3.max(a_affinity), b: d3.max(b_affinity)});
+					})
+					affinities.push([rotation_affinity, rotation_affinity_a_b, a_start_pos, b_start_pos]);
+				})
+			})
+			return affinities.sort( (a,b) => a[0]<b[0] )[0];
+		}
+
+		function remove_duplications(combis, DNA_form){
+			var result=[];
+			switch(DNA_form){
+				case "linear":
+					combis.forEach( (combi) => {
+						if(!result.map( (r) => JSON.stringify(r) ).includes(JSON.stringify(combi.slice(0).reverse()))){
+							result.push(combi);
+						}
+					})
+					break;
+				case "circular":
+					result= combis;
+					break;
+			}
+			return result;
 		}
 
 		switch(this.props.digest_manner){
@@ -72,18 +144,25 @@ class RestrictGraph extends React.Component{
 				var comb_a_b= find_all_combi(markers_a_b.map( (e) => e[2] ));
 
 				var result=[];
+
+				comb_a_b= remove_duplications(comb_a_b, this.props.DNA_form);
 				
 				comb_a.forEach( (a) => {
 					comb_b.forEach( (b) =>{
 						comb_a_b.forEach( (a_b) =>{
-							var affinity= calc_affinity(relative_mapper(a), relative_mapper(b), relative_mapper(a_b));
+							switch(this.props.DNA_form){
+								case "linear":
+									var affinity= calc_linear_double_affinity(relative_mapper(a), relative_mapper(b), relative_mapper(a_b));
+									break;
+								case "circular":
+									var affinity= calc_circular_double_affinity(relative_mapper(a), relative_mapper(b), relative_mapper(a_b));
+									break;
+							}
 							result.push([affinity[0], a.slice(0), b.slice(0), a_b.slice(0), affinity[1]]);
 						})
 					})
 				})
 				return result.sort( (r1, r2) => r1[0]< r2[0]? 1: -1 );
-
-				break;
 			case "partial":
 				break;
 		}
@@ -132,6 +211,7 @@ class RestrictGraph extends React.Component{
 				</div>
 				<div>
 					<button type="button" className="btn btn-primary" data-toggle="collapse" data-target="#candidate_div">Show All Candidates</button>
+					(sorted by affinity)
 				</div>
 			</div>
 		</div>;

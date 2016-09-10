@@ -22,14 +22,15 @@ var RestrictMap = function (_React$Component) {
 	function RestrictMap(props) {
 		_classCallCheck(this, RestrictMap);
 
+		//var default_marker_inputs=["ladder: 2.6-10000 2.8-8000 3.1-6000 3.3-5000 3.6-4000 4-3000 4.6-2000 5.1-1500 5.8-1000", "A: 4.3 4.55", "B: 5.1 4", "A+B: 6.05 5.1 4.55"];
 		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(RestrictMap).call(this, props));
 
-		var default_marker_inputs = ["ladder: 2.6-10000 2.8-8000 3.1-6000 3.3-5000 3.6-4000 4-3000 4.6-2000 5.1-1500 5.8-1000", "A: 4.3 4.55", "B: 5.1 4", "A+B: 6.05 5.1 4.55"];
+		var default_marker_inputs = ["ladder: 2.6-10000 2.8-8000 3.1-6000 3.3-5000 3.6-4000 4-3000 4.6-2000 5.1-1500 5.8-1000", "A: 2.95 4", "B: 3.1 3.6", "A+B: 3.6 4 4.6 5.8"];
 		var default_parsed_result = _this.parse_marker_input(default_marker_inputs.reduce(function (a, b) {
 			return a + "\n" + b;
 		}));
 		var default_regression_method = "power";
-		var default_DNA_form = "linear";
+		var default_DNA_form = "circular";
 		var default_digest_manner = "double";
 		_this.state = {
 			markers: _this.estimate_length(default_regression_method, default_parsed_result.markers).points,
@@ -251,6 +252,11 @@ var RestrictMap = function (_React$Component) {
 					default_marker_inputs.push("A: 4.3 4.55");
 					default_marker_inputs.push("B: 5.1 4");
 					default_marker_inputs.push("A+B: 6.05 5.1 4.55");
+					/*default_marker_inputs.push("ladder: 2.6-10000 2.8-8000 3.1-6000 3.3-5000 3.6-4000 4-3000 4.6-2000 5.1-1500 5.8-1000");
+     default_marker_inputs.push("A: 2.95 4");
+     default_marker_inputs.push("B: 3.1 3.6");
+     default_marker_inputs.push("A+B: 3.6 4 4.6 5.8");
+     */
 					break;
 				case "partial":
 					default_marker_inputs.push("ladder: 2.6-10000 2.8-8000 3.1-6000 3.3-5000 3.6-4000 4-3000 4.6-2000 5.1-1500 5.8-1000");
@@ -421,7 +427,6 @@ var RestrictMap = function (_React$Component) {
 						)
 					)
 				),
-				this.render_input_area(),
 				React.createElement(
 					"div",
 					{ className: "form-group" },
@@ -432,7 +437,7 @@ var RestrictMap = function (_React$Component) {
 					),
 					React.createElement(
 						"select",
-						{ name: "DNA_Form", defaultValue: this.state.DNA_Form, onChange: function onChange(e) {
+						{ name: "DNA_Form", defaultValue: this.state.DNA_form, onChange: function onChange(e) {
 								return _this3.DNA_form_changed(e);
 							} },
 						React.createElement(
@@ -447,6 +452,7 @@ var RestrictMap = function (_React$Component) {
 						)
 					)
 				),
+				this.render_input_area(),
 				React.createElement(
 					"div",
 					{ className: "form-group" },

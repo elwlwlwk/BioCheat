@@ -7,10 +7,11 @@ var styles={
 class RestrictMap extends React.Component{
 	constructor(props){
 		super(props);
-		var default_marker_inputs=["ladder: 2.6-10000 2.8-8000 3.1-6000 3.3-5000 3.6-4000 4-3000 4.6-2000 5.1-1500 5.8-1000", "A: 4.3 4.55", "B: 5.1 4", "A+B: 6.05 5.1 4.55"];
+		//var default_marker_inputs=["ladder: 2.6-10000 2.8-8000 3.1-6000 3.3-5000 3.6-4000 4-3000 4.6-2000 5.1-1500 5.8-1000", "A: 4.3 4.55", "B: 5.1 4", "A+B: 6.05 5.1 4.55"];
+		var default_marker_inputs=["ladder: 2.6-10000 2.8-8000 3.1-6000 3.3-5000 3.6-4000 4-3000 4.6-2000 5.1-1500 5.8-1000", "A: 2.95 4", "B: 3.1 3.6", "A+B: 3.6 4 4.6 5.8"];
 		var default_parsed_result= this.parse_marker_input(default_marker_inputs.reduce( (a, b) => a+ "\n"+ b ));
 		var default_regression_method= "power";
-		var default_DNA_form= "linear";
+		var default_DNA_form= "circular";
 		var default_digest_manner= "double";
 		this.state= {
 			markers: this.estimate_length(default_regression_method, default_parsed_result.markers).points,
@@ -179,6 +180,11 @@ class RestrictMap extends React.Component{
 				default_marker_inputs.push("A: 4.3 4.55");
 				default_marker_inputs.push("B: 5.1 4");
 				default_marker_inputs.push("A+B: 6.05 5.1 4.55");
+				/*default_marker_inputs.push("ladder: 2.6-10000 2.8-8000 3.1-6000 3.3-5000 3.6-4000 4-3000 4.6-2000 5.1-1500 5.8-1000");
+				default_marker_inputs.push("A: 2.95 4");
+				default_marker_inputs.push("B: 3.1 3.6");
+				default_marker_inputs.push("A+B: 3.6 4 4.6 5.8");
+				*/
 				break;
 			case "partial":
 				default_marker_inputs.push("ladder: 2.6-10000 2.8-8000 3.1-6000 3.3-5000 3.6-4000 4-3000 4.6-2000 5.1-1500 5.8-1000");
@@ -255,14 +261,14 @@ class RestrictMap extends React.Component{
 						<option value="partial" disabled={true}>partial</option>
 					</select>
 				</div>
-				{this.render_input_area()}
 				<div className="form-group">
 					<label>DNA form:</label>
-					<select name="DNA_Form" defaultValue={this.state.DNA_Form} onChange= { (e) => this.DNA_form_changed(e) } >
+					<select name="DNA_Form" defaultValue={this.state.DNA_form} onChange= { (e) => this.DNA_form_changed(e) } >
 						<option value="linear">linear</option>
 						<option value="circular">circular</option>
 					</select>
 				</div>
+				{this.render_input_area()}
 				<div className="form-group">
 					<input type="checkbox" onChange= { (e) => this.render_distance_changed(e) } checked={this.state.render_dis} />render distance<br/>
 					<input type="checkbox" onChange= { (e) => this.render_length_changed(e) } checked={this.state.render_length} />render base length<br/>

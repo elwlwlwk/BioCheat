@@ -29,6 +29,7 @@ var RestrictGraph = function (_React$Component) {
 	}, {
 		key: "find_restrict_map",
 		value: function find_restrict_map(markers) {
+			var _this2 = this;
 
 			function relative_mapper(markers) {
 				var scale = d3.scaleLinear().domain([0, markers.reduce(function (a, b) {
@@ -62,7 +63,7 @@ var RestrictGraph = function (_React$Component) {
 				return combi;
 			}
 
-			function calc_affinity(a, b, a_b) {
+			function calc_linear_double_affinity(a, b, a_b) {
 				var affinity = 0;
 				var pos_a_b = 0;
 				var affinity_a_b = [];
@@ -73,7 +74,7 @@ var RestrictGraph = function (_React$Component) {
 					var pos_a = 0;
 					a.slice(0, -1).forEach(function (e_a) {
 						pos_a += e_a;
-						a_affinity.push(Math.exp(Math.abs(pos_a_b - pos_a) * -1));
+						a_affinity.push(Math.exp(Math.pow(pos_a_b - pos_a, 2) * -0.1));
 					});
 					affinity += d3.max(a_affinity);
 
@@ -81,13 +82,97 @@ var RestrictGraph = function (_React$Component) {
 					var pos_b = 0;
 					b.slice(0, -1).forEach(function (e_b) {
 						pos_b += e_b;
-						b_affinity.push(Math.exp(Math.abs(pos_a_b - pos_b) * -1));
+						b_affinity.push(Math.exp(Math.pow(pos_a_b - pos_b, 2) * -0.1));
 					});
 					affinity += d3.max(b_affinity);
 
 					affinity_a_b.push({ a: d3.max(a_affinity), b: d3.max(b_affinity) });
 				});
 				return [affinity, affinity_a_b];
+			}
+
+			function calc_circular_double_affinity(a, b, a_b) {
+				var pos_a = [0];
+				var pos_b = [0];
+				var pos_a_b = [0];
+
+				a.slice(0, -1).forEach(function (e_a, idx, a) {
+					pos_a.push(a.slice(0, idx + 1).reduce(function (a, b) {
+						return a + b;
+					}));
+				});
+				b.slice(0, -1).forEach(function (e_b, idx, b) {
+					pos_b.push(b.slice(0, idx + 1).reduce(function (a, b) {
+						return a + b;
+					}));
+				});
+				a_b.slice(0, -1).forEach(function (e_a_b, idx, a_b) {
+					pos_a_b.push(a_b.slice(0, idx + 1).reduce(function (a, b) {
+						return a + b;
+					}));
+				});
+
+				function rotate_DNA(pos, distance) {
+					return pos.map(function (p) {
+						return p + distance >= 100 ? p + distance - 100 : p + distance;
+					});
+				}
+
+				var affinities = [];
+				pos_a_b.forEach(function (e_a_b, idx_a_b, p_a_b) {
+					var a_start_pos = e_a_b;
+					/*
+     var except_a_start_pos= p_a_b.slice(0, idx_a_b).concat(p_a_b.slice(idx_a_b+1));
+     except_a_start_pos.forEach( (b_s) => {
+     	var b_start_pos= b_s;
+     })
+     */
+					p_a_b.forEach(function (e_a_b) {
+						var b_start_pos = e_a_b;
+
+						var rotated_a = rotate_DNA(pos_a, a_start_pos).sort();
+						var rotated_b = rotate_DNA(pos_b, b_start_pos).sort();
+
+						var rotation_affinity = 0;
+						var rotation_affinity_a_b = [];
+
+						p_a_b.forEach(function (p_a_b) {
+							var a_affinity = [];
+							rotated_a.forEach(function (r_a) {
+								a_affinity.push(Math.exp(Math.pow(p_a_b - r_a, 2) * -0.1));
+							});
+							var b_affinity = [];
+							rotated_b.forEach(function (r_b) {
+								b_affinity.push(Math.exp(Math.pow(p_a_b - r_b, 2) * -0.1));
+							});
+							rotation_affinity += d3.max(a_affinity) + d3.max(b_affinity);
+							rotation_affinity_a_b.push({ a: d3.max(a_affinity), b: d3.max(b_affinity) });
+						});
+						affinities.push([rotation_affinity, rotation_affinity_a_b, a_start_pos, b_start_pos]);
+					});
+				});
+				return affinities.sort(function (a, b) {
+					return a[0] < b[0];
+				})[0];
+			}
+
+			function remove_duplications(combis, DNA_form) {
+				var result = [];
+				switch (DNA_form) {
+					case "linear":
+						combis.forEach(function (combi) {
+							if (!result.map(function (r) {
+								return JSON.stringify(r);
+							}).includes(JSON.stringify(combi.slice(0).reverse()))) {
+								result.push(combi);
+							}
+						});
+						break;
+					case "circular":
+						result = combis;
+						break;
+				}
+				return result;
 			}
 
 			switch (this.props.digest_manner) {
@@ -114,10 +199,19 @@ var RestrictGraph = function (_React$Component) {
 
 					var result = [];
 
+					comb_a_b = remove_duplications(comb_a_b, this.props.DNA_form);
+
 					comb_a.forEach(function (a) {
 						comb_b.forEach(function (b) {
 							comb_a_b.forEach(function (a_b) {
-								var affinity = calc_affinity(relative_mapper(a), relative_mapper(b), relative_mapper(a_b));
+								switch (_this2.props.DNA_form) {
+									case "linear":
+										var affinity = calc_linear_double_affinity(relative_mapper(a), relative_mapper(b), relative_mapper(a_b));
+										break;
+									case "circular":
+										var affinity = calc_circular_double_affinity(relative_mapper(a), relative_mapper(b), relative_mapper(a_b));
+										break;
+								}
 								result.push([affinity[0], a.slice(0), b.slice(0), a_b.slice(0), affinity[1]]);
 							});
 						});
@@ -125,8 +219,6 @@ var RestrictGraph = function (_React$Component) {
 					return result.sort(function (r1, r2) {
 						return r1[0] < r2[0] ? 1 : -1;
 					});
-
-					break;
 				case "partial":
 					break;
 			}
@@ -150,7 +242,7 @@ var RestrictGraph = function (_React$Component) {
 	}, {
 		key: "render",
 		value: function render() {
-			var _this2 = this;
+			var _this3 = this;
 
 			var col_length = [];
 			var cols = new Set(this.props.markers.map(function (marker) {
@@ -161,7 +253,7 @@ var RestrictGraph = function (_React$Component) {
 			}
 			var frag_padding = 25;
 			cols.forEach(function (col) {
-				return col_length.push(_this2.props.markers.filter(function (marker) {
+				return col_length.push(_this3.props.markers.filter(function (marker) {
 					return marker[0] == col;
 				}).map(function (marker) {
 					return Math.round(parseFloat(marker[2]));
@@ -172,7 +264,7 @@ var RestrictGraph = function (_React$Component) {
 
 			var height = this.props.row_padding * cols.size + this.props.padding * 2;
 			var fragScale = d3.scaleLinear().domain([0, d3.max(col_length)]).range([0, this.props.width - this.props.padding - this.props.label_padding - frag_padding * d3.max([].concat(_toConsumableArray(cols)).map(function (col) {
-				return _this2.props.markers.filter(function (marker) {
+				return _this3.props.markers.filter(function (marker) {
 					return marker[0] == col;
 				});
 			}), function (col) {
@@ -208,7 +300,7 @@ var RestrictGraph = function (_React$Component) {
 						"div",
 						{ id: "candidate_div", className: "collapse" },
 						restrict_maps.map(function (restrict_map, idx) {
-							return _this2.render_restrict_map(restrict_map, fragScale, idx + 1);
+							return _this3.render_restrict_map(restrict_map, fragScale, idx + 1);
 						})
 					),
 					React.createElement(
@@ -218,7 +310,8 @@ var RestrictGraph = function (_React$Component) {
 							"button",
 							{ type: "button", className: "btn btn-primary", "data-toggle": "collapse", "data-target": "#candidate_div" },
 							"Show All Candidates"
-						)
+						),
+						"(sorted by affinity)"
 					)
 				)
 			);
@@ -268,26 +361,26 @@ var FragmentGraph = function (_React$Component2) {
 	}, {
 		key: "render",
 		value: function render() {
-			var _this4 = this;
+			var _this5 = this;
 
 			var markers = this.props.markers.filter(function (marker) {
-				return _this4.props.cols.has(marker[0]);
+				return _this5.props.cols.has(marker[0]);
 			});
 			return React.createElement(
 				"g",
 				null,
 				this.props.marker_label.filter(function (label) {
-					return _this4.props.cols.has(label[0]);
+					return _this5.props.cols.has(label[0]);
 				}).map(function (label) {
-					return _this4.render_label(label);
+					return _this5.render_label(label);
 				}),
 				[].concat(_toConsumableArray(this.props.cols)).map(function (col) {
-					return _this4.props.markers.filter(function (marker) {
+					return _this5.props.markers.filter(function (marker) {
 						return marker[0] == col;
 					});
 				}).map(function (row) {
 					return row.map(function (marker, idx) {
-						return _this4.render_fragment(marker, idx, row);
+						return _this5.render_fragment(marker, idx, row);
 					});
 				})
 			);
@@ -345,7 +438,7 @@ var LinearRestrictMap = function (_React$Component3) {
 	}, {
 		key: "render",
 		value: function render() {
-			var _this6 = this;
+			var _this7 = this;
 
 			return React.createElement(
 				"svg",
@@ -359,10 +452,10 @@ var LinearRestrictMap = function (_React$Component3) {
 						return a + b;
 					})), x: this.props.label_padding, y: 35, height: 2 }),
 				this.props.favorite[3].map(function (marker, idx) {
-					return _this6.render_len(marker, idx);
+					return _this7.render_len(marker, idx);
 				}),
 				this.props.favorite[3].slice(0, -1).map(function (marker, idx) {
-					return _this6.render_restrict_point(_this6.props.favorite, marker, idx);
+					return _this7.render_restrict_point(_this7.props.favorite, marker, idx);
 				})
 			);
 		}
