@@ -2,3 +2,13 @@
 {% block title %}
 <title>Calculate Restrict Map From Electrophoresis Result</title>
 {% endblock %}
+
+{% block body %}
+<h1>Calculate Restrict Map From Electrophoresis Result</h1>
+<hr />
+<h3>How to use</h3>
+<p>
+	Input your electrophoresis result.
+</p>
+<script src="{{ url_for('static', filename='script/restrict_map/restrict_map.js') }}"></script>
+{% endblock %}
