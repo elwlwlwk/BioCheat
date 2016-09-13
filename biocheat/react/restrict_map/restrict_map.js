@@ -258,7 +258,7 @@ class RestrictMap extends React.Component{
 					<label>Digest manner:</label>
 					<select name="digest_manner" defaultValue={this.state.digest_manner} onChange= { (e) => this.digest_manner_changed(e) } >
 						<option value="double">double</option>
-						<option value="partial" disabled={true}>partial</option>
+						<option value="partial" disabled={true}>partial (will be implemented)</option>
 					</select>
 				</div>
 				<div className="form-group">

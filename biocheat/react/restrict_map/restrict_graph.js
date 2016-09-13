@@ -172,10 +172,13 @@ class RestrictGraph extends React.Component{
 		switch(this.props.DNA_form){
 			case "linear":
 				//var fragScale= d3.scaleLinear().domain([0, restrict_maps[0][3].reduce( (a, b) => a+b )]).range([0, this.props.width- this.props.padding*2])
-				return <div><LinearRestrictMap {...this.props} favorite={restrict_map} fragScale={fragScale} padding={30} label={label}/></div>
-				break;
+				return <div>
+					<LinearRestrictMap {...this.props} restrict_map={restrict_map} fragScale={fragScale} padding={30} label={label}/>
+				</div>
 			case "circular":
-				break;
+				return <div>
+					<CircularRestrictMap {...this.props} restrict_map={restrict_map} width={250} height={250} padding={25}/>
+				</div>
 		}
 	}
 
@@ -242,12 +245,12 @@ class FragmentGraph extends React.Component{
 
 class LinearRestrictMap extends React.Component{
 	render_len(marker, idx){
-		var x= this.props.fragScale([0].concat(this.props.favorite[3].slice(0, idx)).reduce( (a, b) => a+b ) )+ this.props.label_padding;
+		var x= this.props.fragScale([0].concat(this.props.restrict_map[3].slice(0, idx)).reduce( (a, b) => a+b ) )+ this.props.label_padding;
 		return <text x={x} y={50} fontSize="10px" key={idx}>{Math.round(marker)}</text>
 	}
 
 	render_restrict_point(markers, marker, idx){
-		var x= this.props.fragScale([0].concat(this.props.favorite[3].slice(0, idx)).reduce( (a, b) => a+b )+ marker )+ this.props.label_padding;
+		var x= this.props.fragScale([0].concat(this.props.restrict_map[3].slice(0, idx)).reduce( (a, b) => a+b )+ marker )+ this.props.label_padding;
 		function get_label(markers, marker_label){
 			if(markers[4][idx].a> markers[4][idx].b){
 				return marker_label[1][1];
@@ -265,9 +268,65 @@ class LinearRestrictMap extends React.Component{
 	render(){
 		return <svg width={this.props.width} height={70}>
 			<text x={0} y={35} fontSize="10" key={this.props.label}>{this.props.label}</text>
-			<rect width={this.props.fragScale(this.props.favorite[3].reduce( (a, b) => a+b ))} x={this.props.label_padding} y={35} height={2}/>
-			{this.props.favorite[3].map( (marker, idx) => this.render_len(marker, idx) )}
-			{this.props.favorite[3].slice(0,-1).map( (marker, idx) => this.render_restrict_point(this.props.favorite, marker, idx) )}
+			<rect width={this.props.fragScale(this.props.restrict_map[3].reduce( (a, b) => a+b ))} x={this.props.label_padding} y={35} height={2}/>
+			{this.props.restrict_map[3].map( (marker, idx) => this.render_len(marker, idx) )}
+			{this.props.restrict_map[3].slice(0,-1).map( (marker, idx) => this.render_restrict_point(this.props.restrict_map, marker, idx) )}
 		</svg>
+	}
+}
+
+class CircularRestrictMap extends React.Component{
+	constructor(props){
+		super(props);
+		this.state={
+			bias: 0,
+		}
+	}
+	render_fragment(fragment, idx){
+		var fragScale= d3.scaleLinear().domain([0, this.props.restrict_map[3].reduce( (a, b) => a+b )]).range([0, Math.PI*2]);
+		var start_angle= fragScale( [0].concat(this.props.restrict_map[3].slice(0,idx)).reduce( (a,b) => a+b ) )+this.state.bias;
+		var end_angle= start_angle+ fragScale(fragment);
+		var arc= d3.arc().innerRadius(this.props.width/2-this.props.padding-10).outerRadius(this.props.width/2-this.props.padding).startAngle(start_angle).endAngle(end_angle);
+
+		return <g>
+			<path d={arc()} id="1" stroke="black" strokeWidth="2" fill="none" transform={`translate(${this.props.width/2},${this.props.width/2})`}/>
+		</g>
+	}
+	render_label(fragment, idx){
+		var fragScale= d3.scaleLinear().domain([0, this.props.restrict_map[3].reduce( (a, b) => a+b )]).range([0, Math.PI*2]);
+		var start_angle= fragScale( [0].concat(this.props.restrict_map[3].slice(0,idx)).reduce( (a,b) => a+b ) )+this.state.bias;
+		var end_angle= start_angle+ fragScale(fragment);
+		var arc= d3.arc().innerRadius(this.props.width/2-this.props.padding).outerRadius(this.props.width/2- this.props.padding).startAngle(start_angle).endAngle(end_angle);
+		var marker_label= this.props.restrict_map[4][idx].a> this.props.restrict_map[4][idx].b? this.props.marker_label[1][1]: this.props.marker_label[2][1]
+		var textpath= `<textpath xlink:href=${"#label_path_"+idx}>${marker_label}</textpath>`;
+		return <g>
+			<defs>
+				<path id={"label_path_"+idx} d={arc()} stroke="red" strokeWidth="2" fill="none" transform={`translate(${this.props.width/2},${this.props.width/2})`}/>
+			</defs>
+			<text fontSize="10px" dangerouslySetInnerHTML={{__html: textpath }}></text>
+		</g>
+	}
+	render_length(fragment, idx){
+		var fragScale= d3.scaleLinear().domain([0, this.props.restrict_map[3].reduce( (a, b) => a+b )]).range([0, Math.PI*2]);
+		var start_angle= fragScale( [0].concat(this.props.restrict_map[3].slice(0,idx)).reduce( (a,b) => a+b ) )+this.state.bias;
+		var end_angle= start_angle+ fragScale(fragment);
+		var arc= d3.arc().innerRadius(this.props.width/2-this.props.padding-20).outerRadius(this.props.width/2- this.props.padding-20).startAngle(start_angle).endAngle(end_angle);
+		var marker_label= this.props.restrict_map[4][idx].a> this.props.restrict_map[4][idx].b? this.props.marker_label[1][1]: this.props.marker_label[2][1]
+		var textpath= `<textpath xlink:href=${"#length_path_"+idx}>${Math.round(fragment)}</textpath>`;
+		return <g>
+			<defs>
+				<path id={"length_path_"+idx} d={arc()} stroke="red" strokeWidth="2" fill="none" transform={`translate(${this.props.width/2},${this.props.width/2})`}/>
+			</defs>
+			<text fontSize="10px" dangerouslySetInnerHTML={{__html: textpath }}></text>
+		</g>
+	}
+	render(){
+		var mask_arc= d3.arc().innerRadius(this.props.width/2-this.props.padding).outerRadius(this.props.width/2-this.props.padding).startAngle(0).endAngle(Math.PI*2);
+		return <svg width={this.props.width} height={this.props.height} xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" >
+			{ this.props.restrict_map[3].map((fragment, idx) => this.render_fragment(fragment, idx)) }
+			<path d={mask_arc()} stroke="white" strokeWidth="4" fill="none" transform={`translate(${this.props.width/2},${this.props.width/2})`}/>
+			{ this.props.restrict_map[3].map((fragment, idx) => this.render_label(fragment, idx)) }
+			{ this.props.restrict_map[3].map((fragment, idx) => this.render_length(fragment, idx)) }
+		</svg>;
 	}
 }

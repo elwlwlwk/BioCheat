@@ -232,11 +232,14 @@ var RestrictGraph = function (_React$Component) {
 					return React.createElement(
 						"div",
 						null,
-						React.createElement(LinearRestrictMap, _extends({}, this.props, { favorite: restrict_map, fragScale: fragScale, padding: 30, label: label }))
+						React.createElement(LinearRestrictMap, _extends({}, this.props, { restrict_map: restrict_map, fragScale: fragScale, padding: 30, label: label }))
 					);
-					break;
 				case "circular":
-					break;
+					return React.createElement(
+						"div",
+						null,
+						React.createElement(CircularRestrictMap, _extends({}, this.props, { restrict_map: restrict_map, width: 250, height: 250, padding: 25 }))
+					);
 			}
 		}
 	}, {
@@ -402,7 +405,7 @@ var LinearRestrictMap = function (_React$Component3) {
 	_createClass(LinearRestrictMap, [{
 		key: "render_len",
 		value: function render_len(marker, idx) {
-			var x = this.props.fragScale([0].concat(this.props.favorite[3].slice(0, idx)).reduce(function (a, b) {
+			var x = this.props.fragScale([0].concat(this.props.restrict_map[3].slice(0, idx)).reduce(function (a, b) {
 				return a + b;
 			})) + this.props.label_padding;
 			return React.createElement(
@@ -414,7 +417,7 @@ var LinearRestrictMap = function (_React$Component3) {
 	}, {
 		key: "render_restrict_point",
 		value: function render_restrict_point(markers, marker, idx) {
-			var x = this.props.fragScale([0].concat(this.props.favorite[3].slice(0, idx)).reduce(function (a, b) {
+			var x = this.props.fragScale([0].concat(this.props.restrict_map[3].slice(0, idx)).reduce(function (a, b) {
 				return a + b;
 			}) + marker) + this.props.label_padding;
 			function get_label(markers, marker_label) {
@@ -448,18 +451,124 @@ var LinearRestrictMap = function (_React$Component3) {
 					{ x: 0, y: 35, fontSize: "10", key: this.props.label },
 					this.props.label
 				),
-				React.createElement("rect", { width: this.props.fragScale(this.props.favorite[3].reduce(function (a, b) {
+				React.createElement("rect", { width: this.props.fragScale(this.props.restrict_map[3].reduce(function (a, b) {
 						return a + b;
 					})), x: this.props.label_padding, y: 35, height: 2 }),
-				this.props.favorite[3].map(function (marker, idx) {
+				this.props.restrict_map[3].map(function (marker, idx) {
 					return _this7.render_len(marker, idx);
 				}),
-				this.props.favorite[3].slice(0, -1).map(function (marker, idx) {
-					return _this7.render_restrict_point(_this7.props.favorite, marker, idx);
+				this.props.restrict_map[3].slice(0, -1).map(function (marker, idx) {
+					return _this7.render_restrict_point(_this7.props.restrict_map, marker, idx);
 				})
 			);
 		}
 	}]);
 
 	return LinearRestrictMap;
+}(React.Component);
+
+var CircularRestrictMap = function (_React$Component4) {
+	_inherits(CircularRestrictMap, _React$Component4);
+
+	function CircularRestrictMap(props) {
+		_classCallCheck(this, CircularRestrictMap);
+
+		var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(CircularRestrictMap).call(this, props));
+
+		_this8.state = {
+			bias: 0
+		};
+		return _this8;
+	}
+
+	_createClass(CircularRestrictMap, [{
+		key: "render_fragment",
+		value: function render_fragment(fragment, idx) {
+			var fragScale = d3.scaleLinear().domain([0, this.props.restrict_map[3].reduce(function (a, b) {
+				return a + b;
+			})]).range([0, Math.PI * 2]);
+			var start_angle = fragScale([0].concat(this.props.restrict_map[3].slice(0, idx)).reduce(function (a, b) {
+				return a + b;
+			})) + this.state.bias;
+			var end_angle = start_angle + fragScale(fragment);
+			var arc = d3.arc().innerRadius(this.props.width / 2 - this.props.padding - 10).outerRadius(this.props.width / 2 - this.props.padding).startAngle(start_angle).endAngle(end_angle);
+
+			return React.createElement(
+				"g",
+				null,
+				React.createElement("path", { d: arc(), id: "1", stroke: "black", strokeWidth: "2", fill: "none", transform: "translate(" + this.props.width / 2 + "," + this.props.width / 2 + ")" })
+			);
+		}
+	}, {
+		key: "render_label",
+		value: function render_label(fragment, idx) {
+			var fragScale = d3.scaleLinear().domain([0, this.props.restrict_map[3].reduce(function (a, b) {
+				return a + b;
+			})]).range([0, Math.PI * 2]);
+			var start_angle = fragScale([0].concat(this.props.restrict_map[3].slice(0, idx)).reduce(function (a, b) {
+				return a + b;
+			})) + this.state.bias;
+			var end_angle = start_angle + fragScale(fragment);
+			var arc = d3.arc().innerRadius(this.props.width / 2 - this.props.padding).outerRadius(this.props.width / 2 - this.props.padding).startAngle(start_angle).endAngle(end_angle);
+			var marker_label = this.props.restrict_map[4][idx].a > this.props.restrict_map[4][idx].b ? this.props.marker_label[1][1] : this.props.marker_label[2][1];
+			var textpath = "<textpath xlink:href=" + ("#label_path_" + idx) + ">" + marker_label + "</textpath>";
+			return React.createElement(
+				"g",
+				null,
+				React.createElement(
+					"defs",
+					null,
+					React.createElement("path", { id: "label_path_" + idx, d: arc(), stroke: "red", strokeWidth: "2", fill: "none", transform: "translate(" + this.props.width / 2 + "," + this.props.width / 2 + ")" })
+				),
+				React.createElement("text", { fontSize: "10px", dangerouslySetInnerHTML: { __html: textpath } })
+			);
+		}
+	}, {
+		key: "render_length",
+		value: function render_length(fragment, idx) {
+			var fragScale = d3.scaleLinear().domain([0, this.props.restrict_map[3].reduce(function (a, b) {
+				return a + b;
+			})]).range([0, Math.PI * 2]);
+			var start_angle = fragScale([0].concat(this.props.restrict_map[3].slice(0, idx)).reduce(function (a, b) {
+				return a + b;
+			})) + this.state.bias;
+			var end_angle = start_angle + fragScale(fragment);
+			var arc = d3.arc().innerRadius(this.props.width / 2 - this.props.padding - 20).outerRadius(this.props.width / 2 - this.props.padding - 20).startAngle(start_angle).endAngle(end_angle);
+			var marker_label = this.props.restrict_map[4][idx].a > this.props.restrict_map[4][idx].b ? this.props.marker_label[1][1] : this.props.marker_label[2][1];
+			var textpath = "<textpath xlink:href=" + ("#length_path_" + idx) + ">" + Math.round(fragment) + "</textpath>";
+			return React.createElement(
+				"g",
+				null,
+				React.createElement(
+					"defs",
+					null,
+					React.createElement("path", { id: "length_path_" + idx, d: arc(), stroke: "red", strokeWidth: "2", fill: "none", transform: "translate(" + this.props.width / 2 + "," + this.props.width / 2 + ")" })
+				),
+				React.createElement("text", { fontSize: "10px", dangerouslySetInnerHTML: { __html: textpath } })
+			);
+		}
+	}, {
+		key: "render",
+		value: function render() {
+			var _this9 = this;
+
+			var mask_arc = d3.arc().innerRadius(this.props.width / 2 - this.props.padding).outerRadius(this.props.width / 2 - this.props.padding).startAngle(0).endAngle(Math.PI * 2);
+			return React.createElement(
+				"svg",
+				{ width: this.props.width, height: this.props.height, xmlns: "http://www.w3.org/2000/svg", xmlnsXlink: "http://www.w3.org/1999/xlink" },
+				this.props.restrict_map[3].map(function (fragment, idx) {
+					return _this9.render_fragment(fragment, idx);
+				}),
+				React.createElement("path", { d: mask_arc(), stroke: "white", strokeWidth: "4", fill: "none", transform: "translate(" + this.props.width / 2 + "," + this.props.width / 2 + ")" }),
+				this.props.restrict_map[3].map(function (fragment, idx) {
+					return _this9.render_label(fragment, idx);
+				}),
+				this.props.restrict_map[3].map(function (fragment, idx) {
+					return _this9.render_length(fragment, idx);
+				})
+			);
+		}
+	}]);
+
+	return CircularRestrictMap;
 }(React.Component);
