@@ -46,7 +46,6 @@ class RestrictGraph extends React.Component{
 					pos_a+= e_a;
 					a_affinity.push( Math.exp(Math.pow(pos_a_b- pos_a, 2)* -0.1) );
 				})
-				affinity+= d3.max(a_affinity);
 
 				var b_affinity=[];
 				var pos_b=0;
@@ -54,7 +53,7 @@ class RestrictGraph extends React.Component{
 					pos_b+= e_b;
 					b_affinity.push( Math.exp(Math.pow(pos_a_b- pos_b, 2)* -0.1) );
 				})
-				affinity+= d3.max(b_affinity);
+				affinity+= d3.max(a_affinity.concat(b_affinity));
 
 				affinity_a_b.push({a:d3.max(a_affinity), b:d3.max(b_affinity)})
 			});
@@ -83,13 +82,8 @@ class RestrictGraph extends React.Component{
 			var affinities=[];
 			pos_a_b.forEach( (e_a_b, idx_a_b, p_a_b) => {
 				var a_start_pos= e_a_b;
-				/*
-				var except_a_start_pos= p_a_b.slice(0, idx_a_b).concat(p_a_b.slice(idx_a_b+1));
-				except_a_start_pos.forEach( (b_s) => {
-					var b_start_pos= b_s;
-				})
-				*/
-				p_a_b.forEach( (e_a_b) => {
+
+				pos_a_b.forEach( (e_a_b) => {
 					var b_start_pos= e_a_b;
 
 					var rotated_a= rotate_DNA(pos_a, a_start_pos).sort();
@@ -98,7 +92,7 @@ class RestrictGraph extends React.Component{
 					var rotation_affinity= 0;
 					var rotation_affinity_a_b=[];
 
-					p_a_b.forEach( (p_a_b) => {
+					pos_a_b.forEach( (p_a_b) => {
 						var a_affinity=[];
 						rotated_a.forEach( (r_a) => {
 							a_affinity.push( Math.exp(Math.pow(p_a_b- r_a, 2)* -0.1) );
@@ -107,7 +101,7 @@ class RestrictGraph extends React.Component{
 						rotated_b.forEach( (r_b) => {
 							b_affinity.push( Math.exp(Math.pow(p_a_b- r_b, 2)* -0.1) );
 						});
-						rotation_affinity+= d3.max(a_affinity)+ d3.max(b_affinity);
+						rotation_affinity+= d3.max(a_affinity.concat(b_affinity));
 						rotation_affinity_a_b.push({a: d3.max(a_affinity), b: d3.max(b_affinity)});
 					})
 					affinities.push([rotation_affinity, rotation_affinity_a_b, a_start_pos, b_start_pos]);
@@ -127,7 +121,26 @@ class RestrictGraph extends React.Component{
 					})
 					break;
 				case "circular":
-					result= combis;
+					function rotate(arr){
+						return arr.slice(-1).concat(arr.slice(0, -1));
+					}
+					result.push(combis[0]);
+					combis.forEach( (combi) => {
+						var dupli= false;
+						for(var i in result){
+							var comp= result[i].slice(0);
+							while(combi[0]!= comp[0]){
+								comp= rotate(comp);
+							}
+							if(JSON.stringify(comp)== JSON.stringify(combi)){
+								dupli= true;
+								break;
+							}
+						}
+						if(!dupli){
+							result.push(combi);
+						}
+					})
 					break;
 			}
 			return result;
@@ -177,7 +190,7 @@ class RestrictGraph extends React.Component{
 				</div>
 			case "circular":
 				return <div>
-					<CircularRestrictMap {...this.props} restrict_map={restrict_map} width={250} height={250} padding={25}/>
+					<CircularRestrictMap {...this.props} restrict_map={restrict_map} width={250} height={250} padding={25} label={label}/>
 				</div>
 		}
 	}
@@ -298,10 +311,10 @@ class CircularRestrictMap extends React.Component{
 		var end_angle= start_angle+ fragScale(fragment);
 		var arc= d3.arc().innerRadius(this.props.width/2-this.props.padding).outerRadius(this.props.width/2- this.props.padding).startAngle(start_angle).endAngle(end_angle);
 		var marker_label= this.props.restrict_map[4][idx].a> this.props.restrict_map[4][idx].b? this.props.marker_label[1][1]: this.props.marker_label[2][1]
-		var textpath= `<textpath xlink:href=${"#label_path_"+idx}>${marker_label}</textpath>`;
+		var textpath= `<textpath xlink:href=${"#"+this.props.label+"label_path_"+idx}>${marker_label}</textpath>`;
 		return <g>
 			<defs>
-				<path id={"label_path_"+idx} d={arc()} stroke="red" strokeWidth="2" fill="none" transform={`translate(${this.props.width/2},${this.props.width/2})`}/>
+				<path id={this.props.label+"label_path_"+idx} d={arc()} stroke="red" strokeWidth="2" fill="none" transform={`translate(${this.props.width/2},${this.props.width/2})`}/>
 			</defs>
 			<text fontSize="10px" dangerouslySetInnerHTML={{__html: textpath }}></text>
 		</g>
@@ -312,10 +325,10 @@ class CircularRestrictMap extends React.Component{
 		var end_angle= start_angle+ fragScale(fragment);
 		var arc= d3.arc().innerRadius(this.props.width/2-this.props.padding-20).outerRadius(this.props.width/2- this.props.padding-20).startAngle(start_angle).endAngle(end_angle);
 		var marker_label= this.props.restrict_map[4][idx].a> this.props.restrict_map[4][idx].b? this.props.marker_label[1][1]: this.props.marker_label[2][1]
-		var textpath= `<textpath xlink:href=${"#length_path_"+idx}>${Math.round(fragment)}</textpath>`;
+		var textpath= `<textpath xlink:href=${"#"+this.props.label+"length_path_"+idx}>${Math.round(fragment)}</textpath>`;
 		return <g>
 			<defs>
-				<path id={"length_path_"+idx} d={arc()} stroke="red" strokeWidth="2" fill="none" transform={`translate(${this.props.width/2},${this.props.width/2})`}/>
+				<path id={this.props.label+"length_path_"+idx} d={arc()} stroke="red" strokeWidth="2" fill="none" transform={`translate(${this.props.width/2},${this.props.width/2})`}/>
 			</defs>
 			<text fontSize="10px" dangerouslySetInnerHTML={{__html: textpath }}></text>
 		</g>
@@ -323,6 +336,7 @@ class CircularRestrictMap extends React.Component{
 	render(){
 		var mask_arc= d3.arc().innerRadius(this.props.width/2-this.props.padding).outerRadius(this.props.width/2-this.props.padding).startAngle(0).endAngle(Math.PI*2);
 		return <svg width={this.props.width} height={this.props.height} xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" >
+			<text x={0} y={35} fontSize="10" key={this.props.label}>{this.props.label}</text>
 			{ this.props.restrict_map[3].map((fragment, idx) => this.render_fragment(fragment, idx)) }
 			<path d={mask_arc()} stroke="white" strokeWidth="4" fill="none" transform={`translate(${this.props.width/2},${this.props.width/2})`}/>
 			{ this.props.restrict_map[3].map((fragment, idx) => this.render_label(fragment, idx)) }
