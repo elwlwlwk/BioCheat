@@ -158,7 +158,7 @@ class BaseLen extends React.Component{
 
 const mountingPoint= document.createElement('div');
 mountingPoint.className= 'react-app';
-document.body.appendChild(mountingPoint);
+document.getElementById("div_application").appendChild(mountingPoint);
 ReactDOM.render(<BaseLen {...styles}/>, mountingPoint);
 
 });

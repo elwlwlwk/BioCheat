@@ -33,10 +33,10 @@ requirejs(["static/script/base_len/electrophoresis", "static/script/base_len/reg
 				markers: _this.estimate_length(default_regression_method, default_parsed_result.markers).points,
 				marker_label: default_parsed_result.marker_label,
 				marker_input: default_marker_input,
-				electro_width: _this.props.padding * 2 + (_this.props.marker_width + _this.props.column_padding) * (d3.max(default_parsed_result.markers, function (d) {
+				width: _this.props.padding * 2 + (_this.props.marker_width + _this.props.column_padding) * (d3.max(default_parsed_result.markers, function (d) {
 					return d[0];
 				}) + 1) - _this.props.column_padding,
-				electro_height: 300,
+				height: 300,
 				render_dis: false,
 				render_length: true,
 				regression_method: default_regression_method
@@ -178,7 +178,7 @@ requirejs(["static/script/base_len/electrophoresis", "static/script/base_len/reg
 				this.setState({
 					markers: result.markers,
 					marker_label: result.marker_label,
-					electro_width: this.props.padding * 2 + (this.props.marker_width + this.props.column_padding) * (d3.max(result.markers, function (d) {
+					width: this.props.padding * 2 + (this.props.marker_width + this.props.column_padding) * (d3.max(result.markers, function (d) {
 						return d[0];
 					}) + 1) - this.props.column_padding,
 					marker_input: input
@@ -263,6 +263,6 @@ requirejs(["static/script/base_len/electrophoresis", "static/script/base_len/reg
 
 	var mountingPoint = document.createElement('div');
 	mountingPoint.className = 'react-app';
-	document.body.appendChild(mountingPoint);
+	document.getElementById("div_application").appendChild(mountingPoint);
 	ReactDOM.render(React.createElement(BaseLen, styles), mountingPoint);
 });
