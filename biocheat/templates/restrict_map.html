@@ -2,3 +2,36 @@
 {% block title %}
 <title>Calculate Restrict Map From Electrophoresis Result</title>
 {% endblock %}
+
+{% block body %}
+<h1>Calculate Restrict Map From Electrophoresis Result</h1>
+<hr />
+<h3>How to use</h3>
+<p>
+	Input your electrophoresis result. <b>Base length will be calculated if not given</b>, using given base length. You can choose regression method using when calculate base length.
+</p>
+<p>
+	You can choose digest manner(double, partial) and DNA form(linear, circular). Restrict map will be calculated usgin electrophoresis data. Candidates are sorted by affinity.
+</p
+<p>
+	<b>This application does not estimate overlapped marker.</b> If you want apply overlapped marker, enter repeatedly.(ex: A: 2.5 3 3)
+</p>
+<p>
+	<h4>Format</h4>
+	<blockquote>
+		<p>
+			[tag]: [transition distance]-[known base length] [transition distance]-[known base length]
+		</p>
+	</blockquote>
+</p>
+<p>
+	<h4>Example</h4>
+	<blockquote>
+		<p>
+			ladder: 2.6-10000 2.8-8000 3.1-6000 3.3-5000 3.6-4000 4-3000 4.6-2000 5.1-1500 5.8-1000<br/>
+			A: 2.5 5.5 6.4
+		</p>
+	</blockquote>
+</p>
+<script src="{{ url_for('static', filename='script/restrict_map/restrict_map.js') }}"></script>
+{% endblock %}

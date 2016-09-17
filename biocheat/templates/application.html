@@ -4,18 +4,27 @@
 		{% block title %}
 		<title>Welcome to Biocheat</title>
 		{% endblock %}
+		<script src="{{ url_for('static', filename= 'jquery/jquery-3.1.0.min.js') }}"></script>
 		<script src="{{ url_for('static', filename= 'd3/d3.js') }}"></script>
 		<script src="{{ url_for('static', filename= 'react/build/react.js') }}"></script>
 		<script src="{{ url_for('static', filename= 'react/build/react-dom.js') }}"></script>
 		<script src="{{ url_for('static', filename= 'require.js') }} "></script>
 
+		<link rel="stylesheet" href="{{ url_for('static', filename= 'default.css') }}" />
 		<link rel="stylesheet" href="{{ url_for('static', filename= 'bootstrap/css/bootstrap.min.css') }}" />
 		<script src="{{ url_for('static', filename= 'bootstrap/js/bootstrap.min.js') }} "></script>
 		{% block imports %}
 		{% endblock %}
 	</head>
 	<body>
+		<div id="div_application">
 		{% block body %}
 		{% endblock %}
+		</div>
+		<footer>
+			<hr/>
+			https://github.com/elwlwlwk/BioCheat<br/>
+			holo@wisewolf.org
+		</footer>
 	</body>
 </html>
