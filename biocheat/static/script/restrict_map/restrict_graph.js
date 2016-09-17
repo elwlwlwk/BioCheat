@@ -76,7 +76,6 @@ var RestrictGraph = function (_React$Component) {
 						pos_a += e_a;
 						a_affinity.push(Math.exp(Math.pow(pos_a_b - pos_a, 2) * -0.1));
 					});
-					affinity += d3.max(a_affinity);
 
 					var b_affinity = [];
 					var pos_b = 0;
@@ -84,7 +83,7 @@ var RestrictGraph = function (_React$Component) {
 						pos_b += e_b;
 						b_affinity.push(Math.exp(Math.pow(pos_a_b - pos_b, 2) * -0.1));
 					});
-					affinity += d3.max(b_affinity);
+					affinity += d3.max(a_affinity.concat(b_affinity));
 
 					affinity_a_b.push({ a: d3.max(a_affinity), b: d3.max(b_affinity) });
 				});
@@ -121,13 +120,8 @@ var RestrictGraph = function (_React$Component) {
 				var affinities = [];
 				pos_a_b.forEach(function (e_a_b, idx_a_b, p_a_b) {
 					var a_start_pos = e_a_b;
-					/*
-     var except_a_start_pos= p_a_b.slice(0, idx_a_b).concat(p_a_b.slice(idx_a_b+1));
-     except_a_start_pos.forEach( (b_s) => {
-     	var b_start_pos= b_s;
-     })
-     */
-					p_a_b.forEach(function (e_a_b) {
+
+					pos_a_b.forEach(function (e_a_b) {
 						var b_start_pos = e_a_b;
 
 						var rotated_a = rotate_DNA(pos_a, a_start_pos).sort();
@@ -136,7 +130,7 @@ var RestrictGraph = function (_React$Component) {
 						var rotation_affinity = 0;
 						var rotation_affinity_a_b = [];
 
-						p_a_b.forEach(function (p_a_b) {
+						pos_a_b.forEach(function (p_a_b) {
 							var a_affinity = [];
 							rotated_a.forEach(function (r_a) {
 								a_affinity.push(Math.exp(Math.pow(p_a_b - r_a, 2) * -0.1));
@@ -145,7 +139,7 @@ var RestrictGraph = function (_React$Component) {
 							rotated_b.forEach(function (r_b) {
 								b_affinity.push(Math.exp(Math.pow(p_a_b - r_b, 2) * -0.1));
 							});
-							rotation_affinity += d3.max(a_affinity) + d3.max(b_affinity);
+							rotation_affinity += d3.max(a_affinity.concat(b_affinity));
 							rotation_affinity_a_b.push({ a: d3.max(a_affinity), b: d3.max(b_affinity) });
 						});
 						affinities.push([rotation_affinity, rotation_affinity_a_b, a_start_pos, b_start_pos]);
@@ -158,20 +152,44 @@ var RestrictGraph = function (_React$Component) {
 
 			function remove_duplications(combis, DNA_form) {
 				var result = [];
-				switch (DNA_form) {
-					case "linear":
-						combis.forEach(function (combi) {
-							if (!result.map(function (r) {
-								return JSON.stringify(r);
-							}).includes(JSON.stringify(combi.slice(0).reverse()))) {
-								result.push(combi);
-							}
-						});
-						break;
-					case "circular":
-						result = combis;
-						break;
-				}
+
+				(function () {
+					switch (DNA_form) {
+						case "linear":
+							combis.forEach(function (combi) {
+								if (!result.map(function (r) {
+									return JSON.stringify(r);
+								}).includes(JSON.stringify(combi.slice(0).reverse()))) {
+									result.push(combi);
+								}
+							});
+							break;
+						case "circular":
+							var rotate = function rotate(arr) {
+								return arr.slice(-1).concat(arr.slice(0, -1));
+							};
+
+							result.push(combis[0]);
+							combis.forEach(function (combi) {
+								var dupli = false;
+								for (var i in result) {
+									var comp = result[i].slice(0);
+									while (combi[0] != comp[0]) {
+										comp = rotate(comp);
+									}
+									if (JSON.stringify(comp) == JSON.stringify(combi)) {
+										dupli = true;
+										break;
+									}
+								}
+								if (!dupli) {
+									result.push(combi);
+								}
+							});
+							break;
+					}
+				})();
+
 				return result;
 			}
 
@@ -238,7 +256,7 @@ var RestrictGraph = function (_React$Component) {
 					return React.createElement(
 						"div",
 						null,
-						React.createElement(CircularRestrictMap, _extends({}, this.props, { restrict_map: restrict_map, width: 250, height: 250, padding: 25 }))
+						React.createElement(CircularRestrictMap, _extends({}, this.props, { restrict_map: restrict_map, width: 250, height: 250, padding: 25, label: label }))
 					);
 			}
 		}
@@ -511,14 +529,14 @@ var CircularRestrictMap = function (_React$Component4) {
 			var end_angle = start_angle + fragScale(fragment);
 			var arc = d3.arc().innerRadius(this.props.width / 2 - this.props.padding).outerRadius(this.props.width / 2 - this.props.padding).startAngle(start_angle).endAngle(end_angle);
 			var marker_label = this.props.restrict_map[4][idx].a > this.props.restrict_map[4][idx].b ? this.props.marker_label[1][1] : this.props.marker_label[2][1];
-			var textpath = "<textpath xlink:href=" + ("#label_path_" + idx) + ">" + marker_label + "</textpath>";
+			var textpath = "<textpath xlink:href=" + ("#" + this.props.label + "label_path_" + idx) + ">" + marker_label + "</textpath>";
 			return React.createElement(
 				"g",
 				null,
 				React.createElement(
 					"defs",
 					null,
-					React.createElement("path", { id: "label_path_" + idx, d: arc(), stroke: "red", strokeWidth: "2", fill: "none", transform: "translate(" + this.props.width / 2 + "," + this.props.width / 2 + ")" })
+					React.createElement("path", { id: this.props.label + "label_path_" + idx, d: arc(), stroke: "red", strokeWidth: "2", fill: "none", transform: "translate(" + this.props.width / 2 + "," + this.props.width / 2 + ")" })
 				),
 				React.createElement("text", { fontSize: "10px", dangerouslySetInnerHTML: { __html: textpath } })
 			);
@@ -535,14 +553,14 @@ var CircularRestrictMap = function (_React$Component4) {
 			var end_angle = start_angle + fragScale(fragment);
 			var arc = d3.arc().innerRadius(this.props.width / 2 - this.props.padding - 20).outerRadius(this.props.width / 2 - this.props.padding - 20).startAngle(start_angle).endAngle(end_angle);
 			var marker_label = this.props.restrict_map[4][idx].a > this.props.restrict_map[4][idx].b ? this.props.marker_label[1][1] : this.props.marker_label[2][1];
-			var textpath = "<textpath xlink:href=" + ("#length_path_" + idx) + ">" + Math.round(fragment) + "</textpath>";
+			var textpath = "<textpath xlink:href=" + ("#" + this.props.label + "length_path_" + idx) + ">" + Math.round(fragment) + "</textpath>";
 			return React.createElement(
 				"g",
 				null,
 				React.createElement(
 					"defs",
 					null,
-					React.createElement("path", { id: "length_path_" + idx, d: arc(), stroke: "red", strokeWidth: "2", fill: "none", transform: "translate(" + this.props.width / 2 + "," + this.props.width / 2 + ")" })
+					React.createElement("path", { id: this.props.label + "length_path_" + idx, d: arc(), stroke: "red", strokeWidth: "2", fill: "none", transform: "translate(" + this.props.width / 2 + "," + this.props.width / 2 + ")" })
 				),
 				React.createElement("text", { fontSize: "10px", dangerouslySetInnerHTML: { __html: textpath } })
 			);
@@ -556,6 +574,11 @@ var CircularRestrictMap = function (_React$Component4) {
 			return React.createElement(
 				"svg",
 				{ width: this.props.width, height: this.props.height, xmlns: "http://www.w3.org/2000/svg", xmlnsXlink: "http://www.w3.org/1999/xlink" },
+				React.createElement(
+					"text",
+					{ x: 0, y: 35, fontSize: "10", key: this.props.label },
+					this.props.label
+				),
 				this.props.restrict_map[3].map(function (fragment, idx) {
 					return _this9.render_fragment(fragment, idx);
 				}),
