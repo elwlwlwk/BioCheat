@@ -526,6 +526,6 @@ var RestrictMap = function (_React$Component) {
 requirejs(["static/script/restrict_map/electrophoresis", "static/script/restrict_map/regression_graph", "static/regression/regression_r", "static/script/restrict_map/restrict_graph", "static/script/restrict_map/linear_dna"], function () {
 	var mountingPoint = document.createElement('div');
 	mountingPoint.className = 'react-app';
-	document.body.appendChild(mountingPoint);
+	document.getElementById("div_application").appendChild(mountingPoint);
 	ReactDOM.render(React.createElement(RestrictMap, styles), mountingPoint);
 });
