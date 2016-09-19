@@ -13,6 +13,10 @@ def base_len():
 def restrict_map():
 	return render_template('restrict_map.html')
 
+@app.route('/random_base_generator')
+def random_base_gen():
+	return render_template('random_base_gen.html')
+
 if __name__ == '__main__':
 	app.debug= True
 	app.run(host='0.0.0.0', port=80)

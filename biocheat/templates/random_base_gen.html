@@ -1,0 +1,14 @@
+{% extends "application.html" %}
+
+{% block title %}
+<title>Random Base Sequence Generator</title>
+{% endblock %}
+
+{% block imports %}
+{% endblock %}
+
+{% block body %}
+<h1>Random Base Sequence Generator</h1>
+<hr />
+<script src="{{ url_for('static', filename='script/random_base_gen/random_base_gen.js') }}"></script>
+{% endblock %}
