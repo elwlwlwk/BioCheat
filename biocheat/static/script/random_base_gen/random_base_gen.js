@@ -15,30 +15,118 @@ requirejs([], function () {
 		function RandomBaseGenerator(props) {
 			_classCallCheck(this, RandomBaseGenerator);
 
-			return _possibleConstructorReturn(this, Object.getPrototypeOf(RandomBaseGenerator).call(this, props));
+			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(RandomBaseGenerator).call(this, props));
+
+			_this.state = {
+				length: 1000,
+				GC_ratio: 50
+			};
+			return _this;
 		}
 
 		_createClass(RandomBaseGenerator, [{
-			key: "render",
-			value: function render() {
+			key: "render_ratio_controller",
+			value: function render_ratio_controller() {
+				var _this2 = this;
+
 				return React.createElement(
 					"div",
-					{ "class": "col-sm-12" },
+					{ className: "form_group" },
 					React.createElement(
-						"p",
-						null,
-						"Length: ",
-						React.createElement("input", { type: "text" }),
-						"bp"
+						"label",
+						{ className: "col-sm-4 control-label" },
+						"GC Ratio:"
 					),
 					React.createElement(
-						"p",
-						null,
+						"div",
+						{ className: "col-sm-6" },
+						React.createElement("input", { type: "range", step: "any", min: "0", max: "100", value: this.state.GC_ratio ? parseFloat(this.state.GC_ratio) : 0, onChange: function onChange(e) {
+								return _this2.GC_ratio_changed(e);
+							} })
+					),
+					React.createElement(
+						"div",
+						{ className: "col-sm-2" },
+						React.createElement("input", { type: "text", className: "form-control", value: this.state.GC_ratio, onChange: function onChange(e) {
+								return _this2.GC_ratio_changed(e);
+							} })
+					)
+				);
+			}
+		}, {
+			key: "generate_sequence",
+			value: function generate_sequence(e) {
+				var GC_count = Math.round(this.state.length * this.state.GC_ratio / 100);
+				var sequence = [];
+				for (var i = 0; i < GC_count; i++) {
+					sequence.push(Math.random() > 0.5 ? "G" : "C");
+				}
+				for (var _i = 0; _i < this.state.length - GC_count; _i++) {
+					sequence.push(Math.random() > 0.5 ? "A" : "T");
+				}
+
+				this.setState({
+					sequence: d3.shuffle(sequence)
+				});
+			}
+		}, {
+			key: "GC_ratio_changed",
+			value: function GC_ratio_changed(e) {
+				this.setState({
+					GC_ratio: e.target.value
+				});
+			}
+		}, {
+			key: "length_changed",
+			value: function length_changed(e) {
+				this.setState({
+					length: parseInt(e.target.value)
+				});
+			}
+		}, {
+			key: "render",
+			value: function render() {
+				var _this3 = this;
+
+				return React.createElement(
+					"div",
+					{ className: "col-sm-12" },
+					React.createElement(
+						"div",
+						{ className: "col-sm-6" },
 						React.createElement(
-							"textarea",
-							null,
-							"test"
+							"div",
+							{ className: "form_group" },
+							React.createElement(
+								"label",
+								{ className: "col-sm-4 control-label" },
+								"Length(bp):"
+							),
+							React.createElement(
+								"div",
+								{ className: "col-sm-8" },
+								React.createElement("input", { type: "text", className: "form-control", value: this.state.length, onChange: function onChange(e) {
+										return _this3.length_changed(e);
+									} })
+							)
+						),
+						this.render_ratio_controller(),
+						React.createElement(
+							"div",
+							{ className: "form_group" },
+							React.createElement(
+								"button",
+								{ className: "btn btn-primary", onClick: function onClick(e) {
+										return _this3.generate_sequence(e);
+									} },
+								"generate"
+							)
 						)
+					),
+					React.createElement(
+						"div",
+						{ className: "col-sm-12" },
+						React.createElement("textarea", { className: "form-control", rows: "10", value: this.state.sequence ? this.state.sequence.toString().replace(/\,/g, "") : "" })
 					)
 				);
 			}
