@@ -19,7 +19,9 @@ requirejs([], function () {
 
 			_this.state = {
 				length: 1000,
-				GC_ratio: 50
+				GC_ratio: 50,
+				T2U: false,
+				sequence: []
 			};
 			return _this;
 		}
@@ -39,14 +41,14 @@ requirejs([], function () {
 					),
 					React.createElement(
 						"div",
-						{ className: "col-sm-6" },
+						{ className: "col-sm-5" },
 						React.createElement("input", { type: "range", step: "any", min: "0", max: "100", value: this.state.GC_ratio ? parseFloat(this.state.GC_ratio) : 0, onChange: function onChange(e) {
 								return _this2.GC_ratio_changed(e);
 							} })
 					),
 					React.createElement(
 						"div",
-						{ className: "col-sm-2" },
+						{ className: "col-sm-3" },
 						React.createElement("input", { type: "text", className: "form-control", value: this.state.GC_ratio, onChange: function onChange(e) {
 								return _this2.GC_ratio_changed(e);
 							} })
@@ -63,6 +65,12 @@ requirejs([], function () {
 				}
 				for (var _i = 0; _i < this.state.length - GC_count; _i++) {
 					sequence.push(Math.random() > 0.5 ? "A" : "T");
+				}
+
+				if (this.state.T2U) {
+					sequence = sequence.map(function (elem) {
+						return elem == "T" ? "U" : elem;
+					});
 				}
 
 				this.setState({
@@ -82,6 +90,62 @@ requirejs([], function () {
 				this.setState({
 					length: parseInt(e.target.value)
 				});
+			}
+		}, {
+			key: "T2U_changed",
+			value: function T2U_changed(e) {
+				this.setState({
+					T2U: e.target.checked
+				});
+			}
+		}, {
+			key: "render_visual",
+			value: function render_visual() {
+				var block_size = 10;
+				var padding = 30;
+				var col_size = 50;
+				var width = col_size * block_size + padding * 2;
+				var height = Math.ceil(this.state.sequence.length / col_size) * 10 + padding * 2;
+
+				var seq = this.state.sequence.map(function (elem, idx) {
+					return [idx % col_size, Math.floor(idx / col_size), elem];
+				});
+
+				var xScale = d3.scaleLinear().domain([0, col_size - 1]).range([padding, width - padding - block_size]);
+				var yScale = d3.scaleLinear().domain([0, d3.max(seq, function (d) {
+					return d[1];
+				})]).range([padding, height - padding - block_size]);
+				var scale = {
+					xScale: xScale,
+					yScale: yScale
+				};
+
+				function render_block(d) {
+					var color;
+					switch (d[2]) {
+						case "A":
+							color = "#B24848";
+							break;
+						case "G":
+							color = "#B09A47";
+							break;
+						case "T":
+						case "U":
+							color = "#476FAD";
+							break;
+						case "C":
+							color = "#599562";
+							break;
+					}
+					return React.createElement("rect", { width: block_size, height: block_size, x: xScale(d[0]), y: yScale(d[1]), fill: color });
+				}
+				return React.createElement(
+					"svg",
+					{ width: width, height: height },
+					seq.map(function (d) {
+						return render_block(d);
+					})
+				);
 			}
 		}, {
 			key: "render",
@@ -115,6 +179,18 @@ requirejs([], function () {
 							"div",
 							{ className: "form_group" },
 							React.createElement(
+								"label",
+								null,
+								React.createElement("input", { type: "checkbox", checked: this.state.T2U, onChange: function onChange(e) {
+										return _this3.T2U_changed(e);
+									} }),
+								" Thymine to Uracil"
+							)
+						),
+						React.createElement(
+							"div",
+							{ className: "form_group" },
+							React.createElement(
 								"button",
 								{ className: "btn btn-primary", onClick: function onClick(e) {
 										return _this3.generate_sequence(e);
@@ -127,6 +203,11 @@ requirejs([], function () {
 						"div",
 						{ className: "col-sm-12" },
 						React.createElement("textarea", { className: "form-control", rows: "10", value: this.state.sequence ? this.state.sequence.toString().replace(/\,/g, "") : "" })
+					),
+					React.createElement(
+						"div",
+						{ className: "col-sm-12" },
+						this.render_visual()
 					)
 				);
 			}
