@@ -120,28 +120,37 @@ requirejs([], function () {
 					yScale: yScale
 				};
 
+				var base_color = { "A": "#B24848", "G": "#B09A47", "T": "#476FAD", "U": "#476FAD", "C": "#599562" };
+
 				function render_block(d) {
-					var color;
-					switch (d[2]) {
-						case "A":
-							color = "#B24848";
-							break;
-						case "G":
-							color = "#B09A47";
-							break;
-						case "T":
-						case "U":
-							color = "#476FAD";
-							break;
-						case "C":
-							color = "#599562";
-							break;
-					}
-					return React.createElement("rect", { width: block_size, height: block_size, x: xScale(d[0]), y: yScale(d[1]), fill: color });
+					return React.createElement("rect", { width: block_size, height: block_size, x: xScale(d[0]), y: yScale(d[1]), fill: base_color[d[2]] });
 				}
 				return React.createElement(
 					"svg",
 					{ width: width, height: height },
+					React.createElement(XYAxis, { xScale: d3.scaleLinear().domain([0, col_size]).range([padding, width - padding]), yScale: d3.scaleLinear().domain([0, d3.max(seq, function (d) {
+							return d[1];
+						}) + 1]).range([padding, height - padding]), padding: padding }),
+					React.createElement(
+						"text",
+						{ x: width - padding / 2, y: 15, fill: base_color["A"], fontWeight: "bold" },
+						"A"
+					),
+					React.createElement(
+						"text",
+						{ x: width - padding / 2, y: 30, fill: base_color["G"], fontWeight: "bold" },
+						"G"
+					),
+					React.createElement(
+						"text",
+						{ x: width - padding / 2, y: 45, fill: base_color["T"], fontWeight: "bold" },
+						this.state.T2U ? "U" : "T"
+					),
+					React.createElement(
+						"text",
+						{ x: width - padding / 2, y: 60, fill: base_color["C"], fontWeight: "bold" },
+						"C"
+					),
 					seq.map(function (d) {
 						return render_block(d);
 					})
@@ -214,6 +223,84 @@ requirejs([], function () {
 		}]);
 
 		return RandomBaseGenerator;
+	}(React.Component);
+
+	var XYAxis = function (_React$Component2) {
+		_inherits(XYAxis, _React$Component2);
+
+		function XYAxis() {
+			_classCallCheck(this, XYAxis);
+
+			return _possibleConstructorReturn(this, Object.getPrototypeOf(XYAxis).apply(this, arguments));
+		}
+
+		_createClass(XYAxis, [{
+			key: "render",
+			value: function render() {
+				var xSettings = {
+					translate: "translate(0, " + (this.props.padding - 10) + ")",
+					scale: this.props.xScale,
+					orient: 'top'
+				};
+				var ySettings = {
+					translate: "translate(" + (this.props.padding - 10) + ", 0)",
+					scale: this.props.yScale,
+					orient: 'left'
+				};
+				return React.createElement(
+					"g",
+					{ className: "xy-axis" },
+					React.createElement(Axis, xSettings),
+					React.createElement(Axis, ySettings)
+				);
+			}
+		}]);
+
+		return XYAxis;
+	}(React.Component);
+
+	var Axis = function (_React$Component3) {
+		_inherits(Axis, _React$Component3);
+
+		function Axis() {
+			_classCallCheck(this, Axis);
+
+			return _possibleConstructorReturn(this, Object.getPrototypeOf(Axis).apply(this, arguments));
+		}
+
+		_createClass(Axis, [{
+			key: "componentDidMount",
+			value: function componentDidMount() {
+				this.renderRegressionAxis();
+			}
+		}, {
+			key: "componentDidUpdate",
+			value: function componentDidUpdate() {
+				this.renderRegressionAxis();
+			}
+		}, {
+			key: "renderRegressionAxis",
+			value: function renderRegressionAxis() {
+				var node = this.refs.regression_axis;
+				var axis;
+				switch (this.props.orient) {
+					case "top":
+						axis = d3.axisTop(this.props.scale);
+						break;
+					case "left":
+						axis = d3.axisLeft(this.props.scale);
+						break;
+				}
+				d3.select(node).call(axis);
+			}
+		}, {
+			key: "render",
+			value: function render() {
+				return React.createElement("g", { className: "regression_axis", ref: "regression_axis", transform: this.props.translate });
+			}
+		}]);
+
+		return Axis;
 	}(React.Component);
 
 	var mountingPoint = document.createElement('div');

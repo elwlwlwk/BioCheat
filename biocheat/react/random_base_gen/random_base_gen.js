@@ -77,26 +77,17 @@ class RandomBaseGenerator extends React.Component{
 			yScale: yScale,
 		}
 
+		var base_color={"A":"#B24848", "G":"#B09A47","T":"#476FAD","U":"#476FAD","C":"#599562"};
+
 		function render_block(d){
-			var color;
-			switch(d[2]){
-				case "A":
-					color="#B24848"
-					break;
-				case "G":
-					color="#B09A47"
-					break;
-				case "T":
-				case "U":
-					color="#476FAD"
-					break;
-				case "C":
-					color="#599562"
-					break;
-			}
-			return <rect width={block_size} height={block_size} x={xScale(d[0])} y={yScale(d[1])} fill={color}/>
+			return <rect width={block_size} height={block_size} x={xScale(d[0])} y={yScale(d[1])} fill={base_color[d[2]]}/>
 		}
 		return <svg width={width} height={height}>
+			<XYAxis xScale={d3.scaleLinear().domain([0, col_size]).range([padding, width-padding])} yScale={d3.scaleLinear().domain([0, d3.max(seq, (d) => d[1])+1]).range([padding, height-padding])} padding={padding} />
+			<text x={width-padding/2} y={15} fill={base_color["A"]} fontWeight="bold" >A</text>
+			<text x={width-padding/2} y={30} fill={base_color["G"]} fontWeight="bold" >G</text>
+			<text x={width-padding/2} y={45} fill={base_color["T"]} fontWeight="bold" >{this.state.T2U? "U":"T"}</text>
+			<text x={width-padding/2} y={60} fill={base_color["C"]} fontWeight="bold" >C</text>
 			{seq.map( (d) => render_block(d) )}
 		</svg>
 	}
@@ -127,6 +118,53 @@ class RandomBaseGenerator extends React.Component{
 				{this.render_visual()}
 			</div>
 		</div>
+	}
+}
+
+class XYAxis extends React.Component{
+	render(){
+		const xSettings = {
+			translate: `translate(0, ${this.props.padding-10})`,
+			scale: this.props.xScale,
+			orient: 'top'
+		};
+		const ySettings = {
+			translate: `translate(${this.props.padding-10}, 0)`,
+			scale: this.props.yScale,
+			orient: 'left'
+		};
+		return <g className="xy-axis">
+			<Axis {...xSettings}/>
+			<Axis {...ySettings}/>
+		</g>
+	}
+}
+
+class Axis extends React.Component{
+	componentDidMount(){
+		this.renderRegressionAxis();
+	}
+
+	componentDidUpdate(){
+		this.renderRegressionAxis();
+	}
+
+	renderRegressionAxis(){
+		var node= this.refs.regression_axis;
+		var axis;
+		switch(this.props.orient){
+			case "top":
+				axis= d3.axisTop(this.props.scale);
+				break;
+			case "left":
+				axis= d3.axisLeft(this.props.scale);
+				break;
+		}
+		d3.select(node).call(axis);
+	}
+
+	render(){
+		return <g className="regression_axis" ref="regression_axis" transform={this.props.translate}></g>
 	}
 }
 
