@@ -25,7 +25,8 @@ requirejs([], function () {
 				length: 1000,
 				GC_ratio: 50,
 				T2U: false,
-				sequence: []
+				sequence: [],
+				base_color: { "A": "#B24848", "G": "#B09A47", "T": "#476FAD", "U": "#476FAD", "C": "#599562" }
 			};
 			return _this;
 		}
@@ -124,7 +125,7 @@ requirejs([], function () {
 					yScale: yScale
 				};
 
-				var base_color = { "A": "#B24848", "G": "#B09A47", "T": "#476FAD", "U": "#476FAD", "C": "#599562" };
+				var base_color = this.state.base_color;
 
 				function render_block(d) {
 					return React.createElement("rect", { width: block_size, height: block_size, x: xScale(d[0]), y: yScale(d[1]), fill: base_color[d[2]] });
@@ -147,7 +148,7 @@ requirejs([], function () {
 					),
 					React.createElement(
 						"text",
-						{ x: width - padding / 2, y: 45, fill: base_color["T"], fontWeight: "bold" },
+						{ x: width - padding / 2, y: 45, fill: this.state.T2U ? base_color["U"] : base_color["T"], fontWeight: "bold" },
 						this.state.T2U ? "U" : "T"
 					),
 					React.createElement(
@@ -159,6 +160,15 @@ requirejs([], function () {
 						return render_block(d);
 					})
 				);
+			}
+		}, {
+			key: "base_color_changed",
+			value: function base_color_changed(e, base) {
+				var base_color = this.state.base_color;
+				base_color[base] = e.target.value;
+				this.setState({
+					base_color: base_color
+				});
 			}
 		}, {
 			key: "render",
@@ -221,6 +231,87 @@ requirejs([], function () {
 						"div",
 						{ className: "col-sm-12" },
 						this.render_visual()
+					),
+					React.createElement(
+						"div",
+						{ className: "col-sm-12" },
+						React.createElement(
+							"div",
+							{ id: "regression_div", className: "collapse col-sm-6" },
+							React.createElement(
+								"div",
+								{ className: "form_group" },
+								React.createElement(
+									"label",
+									{ className: "col-sm-2 control-label" },
+									"A"
+								),
+								React.createElement(
+									"div",
+									{ className: "col-sm-10" },
+									React.createElement("input", { className: "form-control", defaultValue: this.state.base_color["A"], onChange: function onChange(e) {
+											return _this3.base_color_changed(e, "A");
+										} })
+								)
+							),
+							React.createElement(
+								"div",
+								{ className: "form_group" },
+								React.createElement(
+									"label",
+									{ className: "col-sm-2 control-label" },
+									"G"
+								),
+								React.createElement(
+									"div",
+									{ className: "col-sm-10" },
+									React.createElement("input", { className: "form-control", defaultValue: this.state.base_color["G"], onChange: function onChange(e) {
+											return _this3.base_color_changed(e, "G");
+										} })
+								)
+							),
+							React.createElement(
+								"div",
+								{ className: "form_group" },
+								React.createElement(
+									"label",
+									{ className: "col-sm-2 control-label" },
+									this.state.T2U ? "U" : "T"
+								),
+								React.createElement(
+									"div",
+									{ className: "col-sm-10" },
+									React.createElement("input", { className: "form-control", defaultValue: this.state.T2U ? this.state.base_color["U"] : this.state.base_color["T"], onChange: function onChange(e) {
+											return _this3.base_color_changed(e, _this3.state.T2U ? "U" : "T");
+										} })
+								)
+							),
+							React.createElement(
+								"div",
+								{ className: "form_group" },
+								React.createElement(
+									"label",
+									{ className: "col-sm-2 control-label" },
+									"C"
+								),
+								React.createElement(
+									"div",
+									{ className: "col-sm-10" },
+									React.createElement("input", { className: "form-control", defaultValue: this.state.base_color["C"], onChange: function onChange(e) {
+											return _this3.base_color_changed(e, "C");
+										} })
+								)
+							)
+						),
+						React.createElement(
+							"div",
+							{ className: "col-sm-12" },
+							React.createElement(
+								"button",
+								{ type: "button", className: "btn btn-primary", "data-toggle": "collapse", "data-target": "#regression_div" },
+								"Change Base Color"
+							)
+						)
 					)
 				);
 			}

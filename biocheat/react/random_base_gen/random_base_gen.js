@@ -9,6 +9,7 @@ class RandomBaseGenerator extends React.Component{
 			GC_ratio: 50,
 			T2U: false,
 			sequence: [],
+			base_color: {"A":"#B24848", "G":"#B09A47","T":"#476FAD","U":"#476FAD","C":"#599562"},
 		};
 	}
 
@@ -77,7 +78,7 @@ class RandomBaseGenerator extends React.Component{
 			yScale: yScale,
 		}
 
-		var base_color={"A":"#B24848", "G":"#B09A47","T":"#476FAD","U":"#476FAD","C":"#599562"};
+		var base_color= this.state.base_color;
 
 		function render_block(d){
 			return <rect width={block_size} height={block_size} x={xScale(d[0])} y={yScale(d[1])} fill={base_color[d[2]]}/>
@@ -86,10 +87,18 @@ class RandomBaseGenerator extends React.Component{
 			<XYAxis xScale={d3.scaleLinear().domain([0, col_size]).range([padding, width-padding])} yScale={d3.scaleLinear().domain([0, d3.max(seq, (d) => d[1])+1]).range([padding, height-padding])} padding={padding} seq={seq}/>
 			<text x={width-padding/2} y={15} fill={base_color["A"]} fontWeight="bold" >A</text>
 			<text x={width-padding/2} y={30} fill={base_color["G"]} fontWeight="bold" >G</text>
-			<text x={width-padding/2} y={45} fill={base_color["T"]} fontWeight="bold" >{this.state.T2U? "U":"T"}</text>
+			<text x={width-padding/2} y={45} fill={this.state.T2U?base_color["U"]:base_color["T"]} fontWeight="bold" >{this.state.T2U? "U":"T"}</text>
 			<text x={width-padding/2} y={60} fill={base_color["C"]} fontWeight="bold" >C</text>
 			{seq.map( (d) => render_block(d) )}
 		</svg>
+	}
+
+	base_color_changed(e, base){
+		var base_color= this.state.base_color;
+		base_color[base]= e.target.value;
+		this.setState({
+			base_color: base_color,
+		})
 	}
 
 	render(){
@@ -116,6 +125,37 @@ class RandomBaseGenerator extends React.Component{
 			</div>
 			<div className="col-sm-12">
 				{this.render_visual()}
+			</div>
+			<div className="col-sm-12">
+				<div id="regression_div" className="collapse col-sm-6">
+					<div className="form_group">
+						<label className="col-sm-2 control-label">A</label>
+						<div className="col-sm-10">
+							<input className="form-control" defaultValue={this.state.base_color["A"]} onChange={ (e) => this.base_color_changed(e, "A") }></input>
+						</div>
+					</div>
+					<div className="form_group">
+						<label className="col-sm-2 control-label">G</label>
+						<div className="col-sm-10">
+							<input className="form-control" defaultValue={this.state.base_color["G"]} onChange={ (e) => this.base_color_changed(e, "G") }></input>
+						</div>
+					</div>
+					<div className="form_group">
+						<label className="col-sm-2 control-label">{this.state.T2U?"U":"T"}</label>
+						<div className="col-sm-10">
+							<input className="form-control" defaultValue={this.state.T2U? this.state.base_color["U"]:this.state.base_color["T"]} onChange={ (e) => this.base_color_changed(e, this.state.T2U? "U":"T") }></input>
+						</div>
+					</div>
+					<div className="form_group">
+						<label className="col-sm-2 control-label">C</label>
+						<div className="col-sm-10">
+							<input className="form-control" defaultValue={this.state.base_color["C"]} onChange={ (e) => this.base_color_changed(e, "C") }></input>
+						</div>
+					</div>
+				</div>
+				<div className="col-sm-12">
+					<button type="button" className="btn btn-primary" data-toggle="collapse" data-target="#regression_div">Change Base Color</button>
+				</div>
 			</div>
 		</div>
 	}
