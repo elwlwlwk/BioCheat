@@ -83,7 +83,7 @@ class RandomBaseGenerator extends React.Component{
 			return <rect width={block_size} height={block_size} x={xScale(d[0])} y={yScale(d[1])} fill={base_color[d[2]]}/>
 		}
 		return <svg width={width} height={height}>
-			<XYAxis xScale={d3.scaleLinear().domain([0, col_size]).range([padding, width-padding])} yScale={d3.scaleLinear().domain([0, d3.max(seq, (d) => d[1])+1]).range([padding, height-padding])} padding={padding} />
+			<XYAxis xScale={d3.scaleLinear().domain([0, col_size]).range([padding, width-padding])} yScale={d3.scaleLinear().domain([0, d3.max(seq, (d) => d[1])+1]).range([padding, height-padding])} padding={padding} seq={seq}/>
 			<text x={width-padding/2} y={15} fill={base_color["A"]} fontWeight="bold" >A</text>
 			<text x={width-padding/2} y={30} fill={base_color["G"]} fontWeight="bold" >G</text>
 			<text x={width-padding/2} y={45} fill={base_color["T"]} fontWeight="bold" >{this.state.T2U? "U":"T"}</text>
@@ -131,11 +131,11 @@ class XYAxis extends React.Component{
 		const ySettings = {
 			translate: `translate(${this.props.padding-10}, 0)`,
 			scale: this.props.yScale,
-			orient: 'left'
+			orient: 'left',
 		};
 		return <g className="xy-axis">
 			<Axis {...xSettings}/>
-			<Axis {...ySettings}/>
+			<Axis {...ySettings} {...this.props}/>
 		</g>
 	}
 }
@@ -157,7 +157,9 @@ class Axis extends React.Component{
 				axis= d3.axisTop(this.props.scale);
 				break;
 			case "left":
-				axis= d3.axisLeft(this.props.scale);
+				var tickvalues=[...new Set(this.props.seq.map( (elem) => elem[1] ))];
+				tickvalues.push(d3.max(this.props.seq, (d) => d[1] )+1);
+				axis= d3.axisLeft(this.props.scale).tickValues(tickvalues);
 				break;
 		}
 		d3.select(node).call(axis);

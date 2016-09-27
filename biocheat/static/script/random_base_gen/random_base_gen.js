@@ -1,6 +1,10 @@
 "use strict";
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -130,7 +134,7 @@ requirejs([], function () {
 					{ width: width, height: height },
 					React.createElement(XYAxis, { xScale: d3.scaleLinear().domain([0, col_size]).range([padding, width - padding]), yScale: d3.scaleLinear().domain([0, d3.max(seq, function (d) {
 							return d[1];
-						}) + 1]).range([padding, height - padding]), padding: padding }),
+						}) + 1]).range([padding, height - padding]), padding: padding, seq: seq }),
 					React.createElement(
 						"text",
 						{ x: width - padding / 2, y: 15, fill: base_color["A"], fontWeight: "bold" },
@@ -251,7 +255,7 @@ requirejs([], function () {
 					"g",
 					{ className: "xy-axis" },
 					React.createElement(Axis, xSettings),
-					React.createElement(Axis, ySettings)
+					React.createElement(Axis, _extends({}, ySettings, this.props))
 				);
 			}
 		}]);
@@ -288,7 +292,13 @@ requirejs([], function () {
 						axis = d3.axisTop(this.props.scale);
 						break;
 					case "left":
-						axis = d3.axisLeft(this.props.scale);
+						var tickvalues = [].concat(_toConsumableArray(new Set(this.props.seq.map(function (elem) {
+							return elem[1];
+						}))));
+						tickvalues.push(d3.max(this.props.seq, function (d) {
+							return d[1];
+						}) + 1);
+						axis = d3.axisLeft(this.props.scale).tickValues(tickvalues);
 						break;
 				}
 				d3.select(node).call(axis);
