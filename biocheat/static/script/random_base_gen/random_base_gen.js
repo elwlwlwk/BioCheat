@@ -26,7 +26,8 @@ requirejs([], function () {
 				GC_ratio: 50,
 				T2U: false,
 				sequence: [],
-				base_color: { "A": "#B24848", "G": "#B09A47", "T": "#476FAD", "U": "#476FAD", "C": "#599562" }
+				base_color: { "A": "#B24848", "G": "#B09A47", "T": "#476FAD", "U": "#476FAD", "C": "#599562" },
+				render_visual: false
 			};
 			return _this;
 		}
@@ -106,6 +107,8 @@ requirejs([], function () {
 		}, {
 			key: "render_visual",
 			value: function render_visual() {
+				var _this3 = this;
+
 				var block_size = 10;
 				var padding = 30;
 				var col_size = 50;
@@ -131,106 +134,41 @@ requirejs([], function () {
 					return React.createElement("rect", { width: block_size, height: block_size, x: xScale(d[0]), y: yScale(d[1]), fill: base_color[d[2]] });
 				}
 				return React.createElement(
-					"svg",
-					{ width: width, height: height },
-					React.createElement(XYAxis, { xScale: d3.scaleLinear().domain([0, col_size]).range([padding, width - padding]), yScale: d3.scaleLinear().domain([0, d3.max(seq, function (d) {
-							return d[1];
-						}) + 1]).range([padding, height - padding]), padding: padding, seq: seq }),
-					React.createElement(
-						"text",
-						{ x: width - padding / 2, y: 15, fill: base_color["A"], fontWeight: "bold" },
-						"A"
-					),
-					React.createElement(
-						"text",
-						{ x: width - padding / 2, y: 30, fill: base_color["G"], fontWeight: "bold" },
-						"G"
-					),
-					React.createElement(
-						"text",
-						{ x: width - padding / 2, y: 45, fill: this.state.T2U ? base_color["U"] : base_color["T"], fontWeight: "bold" },
-						this.state.T2U ? "U" : "T"
-					),
-					React.createElement(
-						"text",
-						{ x: width - padding / 2, y: 60, fill: base_color["C"], fontWeight: "bold" },
-						"C"
-					),
-					seq.map(function (d) {
-						return render_block(d);
-					})
-				);
-			}
-		}, {
-			key: "base_color_changed",
-			value: function base_color_changed(e, base) {
-				var base_color = this.state.base_color;
-				base_color[base] = e.target.value;
-				this.setState({
-					base_color: base_color
-				});
-			}
-		}, {
-			key: "render",
-			value: function render() {
-				var _this3 = this;
-
-				return React.createElement(
 					"div",
 					{ className: "col-sm-12" },
 					React.createElement(
 						"div",
-						{ className: "col-sm-6" },
+						{ className: "col-sm-12" },
 						React.createElement(
-							"div",
-							{ className: "form_group" },
+							"svg",
+							{ width: width, height: height },
+							React.createElement(XYAxis, { xScale: d3.scaleLinear().domain([0, col_size]).range([padding, width - padding]), yScale: d3.scaleLinear().domain([0, d3.max(seq, function (d) {
+									return d[1];
+								}) + 1]).range([padding, height - padding]), padding: padding, seq: seq }),
 							React.createElement(
-								"label",
-								{ className: "col-sm-4 control-label" },
-								"Length(bp):"
+								"text",
+								{ x: width - padding / 2, y: 15, fill: base_color["A"], fontWeight: "bold" },
+								"A"
 							),
 							React.createElement(
-								"div",
-								{ className: "col-sm-8" },
-								React.createElement("input", { type: "text", className: "form-control", value: this.state.length, onChange: function onChange(e) {
-										return _this3.length_changed(e);
-									} })
-							)
-						),
-						this.render_ratio_controller(),
-						React.createElement(
-							"div",
-							{ className: "form_group" },
+								"text",
+								{ x: width - padding / 2, y: 30, fill: base_color["G"], fontWeight: "bold" },
+								"G"
+							),
 							React.createElement(
-								"label",
-								null,
-								React.createElement("input", { type: "checkbox", checked: this.state.T2U, onChange: function onChange(e) {
-										return _this3.T2U_changed(e);
-									} }),
-								" Thymine to Uracil"
-							)
-						),
-						React.createElement(
-							"div",
-							{ className: "form_group" },
+								"text",
+								{ x: width - padding / 2, y: 45, fill: this.state.T2U ? base_color["U"] : base_color["T"], fontWeight: "bold" },
+								this.state.T2U ? "U" : "T"
+							),
 							React.createElement(
-								"button",
-								{ className: "btn btn-primary", onClick: function onClick(e) {
-										return _this3.generate_sequence(e);
-									} },
-								"generate"
-							)
+								"text",
+								{ x: width - padding / 2, y: 60, fill: base_color["C"], fontWeight: "bold" },
+								"C"
+							),
+							seq.map(function (d) {
+								return render_block(d);
+							})
 						)
-					),
-					React.createElement(
-						"div",
-						{ className: "col-sm-12" },
-						React.createElement("textarea", { className: "form-control", rows: "10", value: this.state.sequence ? this.state.sequence.toString().replace(/\,/g, "") : "" })
-					),
-					React.createElement(
-						"div",
-						{ className: "col-sm-12" },
-						this.render_visual()
 					),
 					React.createElement(
 						"div",
@@ -312,6 +250,98 @@ requirejs([], function () {
 								"Change Base Color"
 							)
 						)
+					)
+				);
+			}
+		}, {
+			key: "base_color_changed",
+			value: function base_color_changed(e, base) {
+				var base_color = this.state.base_color;
+				base_color[base] = e.target.value;
+				this.setState({
+					base_color: base_color
+				});
+			}
+		}, {
+			key: "render_visual_changed",
+			value: function render_visual_changed(e) {
+				this.setState({
+					render_visual: e.target.checked
+				});
+			}
+		}, {
+			key: "render",
+			value: function render() {
+				var _this4 = this;
+
+				return React.createElement(
+					"div",
+					{ className: "col-sm-12" },
+					React.createElement(
+						"div",
+						{ className: "col-sm-6" },
+						React.createElement(
+							"div",
+							{ className: "form_group" },
+							React.createElement(
+								"label",
+								{ className: "col-sm-4 control-label" },
+								"Length(bp):"
+							),
+							React.createElement(
+								"div",
+								{ className: "col-sm-8" },
+								React.createElement("input", { type: "text", className: "form-control", defaultValue: this.state.length, onChange: function onChange(e) {
+										return _this4.length_changed(e);
+									} })
+							)
+						),
+						this.render_ratio_controller(),
+						React.createElement(
+							"div",
+							{ className: "form_group" },
+							React.createElement(
+								"label",
+								null,
+								React.createElement("input", { type: "checkbox", checked: this.state.T2U, onChange: function onChange(e) {
+										return _this4.T2U_changed(e);
+									} }),
+								" Thymine to Uracil"
+							)
+						),
+						React.createElement(
+							"div",
+							{ className: "form_group" },
+							React.createElement(
+								"button",
+								{ className: "btn btn-primary", onClick: function onClick(e) {
+										return _this4.generate_sequence(e);
+									} },
+								"generate"
+							)
+						)
+					),
+					React.createElement(
+						"div",
+						{ className: "col-sm-12" },
+						React.createElement("textarea", { className: "form-control", rows: "10", value: this.state.sequence ? this.state.sequence.toString().replace(/\,/g, "") : "" })
+					),
+					React.createElement(
+						"div",
+						{ className: "col-sm-12" },
+						React.createElement(
+							"label",
+							null,
+							React.createElement("input", { type: "checkbox", checked: this.state.render_visual, onChange: function onChange(e) {
+									return _this4.render_visual_changed(e);
+								} }),
+							" Render Visual"
+						)
+					),
+					React.createElement(
+						"div",
+						{ className: "col-sm-12" },
+						this.state.render_visual ? this.render_visual() : null
 					)
 				);
 			}

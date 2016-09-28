@@ -10,6 +10,7 @@ class RandomBaseGenerator extends React.Component{
 			T2U: false,
 			sequence: [],
 			base_color: {"A":"#B24848", "G":"#B09A47","T":"#476FAD","U":"#476FAD","C":"#599562"},
+			render_visual: false,
 		};
 	}
 
@@ -83,48 +84,16 @@ class RandomBaseGenerator extends React.Component{
 		function render_block(d){
 			return <rect width={block_size} height={block_size} x={xScale(d[0])} y={yScale(d[1])} fill={base_color[d[2]]}/>
 		}
-		return <svg width={width} height={height}>
-			<XYAxis xScale={d3.scaleLinear().domain([0, col_size]).range([padding, width-padding])} yScale={d3.scaleLinear().domain([0, d3.max(seq, (d) => d[1])+1]).range([padding, height-padding])} padding={padding} seq={seq}/>
-			<text x={width-padding/2} y={15} fill={base_color["A"]} fontWeight="bold" >A</text>
-			<text x={width-padding/2} y={30} fill={base_color["G"]} fontWeight="bold" >G</text>
-			<text x={width-padding/2} y={45} fill={this.state.T2U?base_color["U"]:base_color["T"]} fontWeight="bold" >{this.state.T2U? "U":"T"}</text>
-			<text x={width-padding/2} y={60} fill={base_color["C"]} fontWeight="bold" >C</text>
-			{seq.map( (d) => render_block(d) )}
-		</svg>
-	}
-
-	base_color_changed(e, base){
-		var base_color= this.state.base_color;
-		base_color[base]= e.target.value;
-		this.setState({
-			base_color: base_color,
-		})
-	}
-
-	render(){
 		return <div className="col-sm-12">
-			<div className="col-sm-6">
-				<div className="form_group">
-					<label className="col-sm-4 control-label">Length(bp):</label>
-					<div className="col-sm-8">
-						<input type="text" className="form-control" value={this.state.length} onChange={ (e) => this.length_changed(e) }></input>
-					</div>
-				</div>
-				{this.render_ratio_controller()}
-				<div className="form_group">
-					<label>
-						<input type="checkbox" checked={ this.state.T2U } onChange={ (e) => this.T2U_changed(e) }/> Thymine to Uracil
-					</label>
-				</div>
-				<div className="form_group">
-					<button className="btn btn-primary" onClick={ (e) => this.generate_sequence(e) }>generate</button>
-				</div>
-			</div>
 			<div className="col-sm-12">
-				<textarea className="form-control" rows="10" value={this.state.sequence? this.state.sequence.toString().replace(/\,/g,""): ""}></textarea>
-			</div>
-			<div className="col-sm-12">
-				{this.render_visual()}
+			<svg width={width} height={height}>
+				<XYAxis xScale={d3.scaleLinear().domain([0, col_size]).range([padding, width-padding])} yScale={d3.scaleLinear().domain([0, d3.max(seq, (d) => d[1])+1]).range([padding, height-padding])} padding={padding} seq={seq}/>
+				<text x={width-padding/2} y={15} fill={base_color["A"]} fontWeight="bold" >A</text>
+				<text x={width-padding/2} y={30} fill={base_color["G"]} fontWeight="bold" >G</text>
+				<text x={width-padding/2} y={45} fill={this.state.T2U?base_color["U"]:base_color["T"]} fontWeight="bold" >{this.state.T2U? "U":"T"}</text>
+				<text x={width-padding/2} y={60} fill={base_color["C"]} fontWeight="bold" >C</text>
+				{seq.map( (d) => render_block(d) )}
+			</svg>
 			</div>
 			<div className="col-sm-12">
 				<div id="regression_div" className="collapse col-sm-6">
@@ -156,6 +125,53 @@ class RandomBaseGenerator extends React.Component{
 				<div className="col-sm-12">
 					<button type="button" className="btn btn-primary" data-toggle="collapse" data-target="#regression_div">Change Base Color</button>
 				</div>
+			</div>
+		</div>
+	}
+
+	base_color_changed(e, base){
+		var base_color= this.state.base_color;
+		base_color[base]= e.target.value;
+		this.setState({
+			base_color: base_color,
+		})
+	}
+
+	render_visual_changed(e){
+		this.setState({
+			render_visual: e.target.checked,
+		})
+	}
+
+	render(){
+		return <div className="col-sm-12">
+			<div className="col-sm-6">
+				<div className="form_group">
+					<label className="col-sm-4 control-label">Length(bp):</label>
+					<div className="col-sm-8">
+						<input type="text" className="form-control" defaultValue={this.state.length} onChange={ (e) => this.length_changed(e) }></input>
+					</div>
+				</div>
+				{this.render_ratio_controller()}
+				<div className="form_group">
+					<label>
+						<input type="checkbox" checked={ this.state.T2U } onChange={ (e) => this.T2U_changed(e) }/> Thymine to Uracil
+					</label>
+				</div>
+				<div className="form_group">
+					<button className="btn btn-primary" onClick={ (e) => this.generate_sequence(e) }>generate</button>
+				</div>
+			</div>
+			<div className="col-sm-12">
+				<textarea className="form-control" rows="10" value={this.state.sequence? this.state.sequence.toString().replace(/\,/g,""): ""}></textarea>
+			</div>
+			<div className="col-sm-12">
+				<label>
+					<input type="checkbox" checked={ this.state.render_visual } onChange={ (e) => this.render_visual_changed(e) }/> Render Visual
+				</label>
+			</div>
+			<div className="col-sm-12">
+				{this.state.render_visual? this.render_visual():null}
 			</div>
 		</div>
 	}
