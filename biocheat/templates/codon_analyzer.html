@@ -1,0 +1,14 @@
+{% extends "application.html" %}
+
+{% block title %}
+<title>Codon Analyzer</title>
+{% endblock %}
+
+{% block imports %}
+{% endblock %}
+
+{% block body %}
+<h1>Codon Analyzer</h1>
+<hr />
+<script src="{{ url_for('static', filename='script/codon_analyzer/codon_analyzer.js') }}"></script>
+{% endblock %}

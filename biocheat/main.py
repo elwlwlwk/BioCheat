@@ -17,6 +17,10 @@ def restrict_map():
 def random_base_gen():
 	return render_template('random_base_gen.html')
 
+@app.route('/codon_analyzer')
+def codon_translation():
+	return render_template('codon_analyzer.html')
+
 if __name__ == '__main__':
 	app.debug= True
 	app.run(host='0.0.0.0', port=80)
