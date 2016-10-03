@@ -21,7 +21,8 @@ requirejs([], function () {
 				codon_ratio_organism: "custom",
 				codon_ratio_list: [],
 				codon_ratio: new Map(),
-				codon_translation: "standard"
+				codon_translation_organism: "standard",
+				codon_translation: new Map()
 			};
 			return _this;
 		}
@@ -86,7 +87,7 @@ requirejs([], function () {
 					base_combi_set.push(base_combi.splice(0, 4));
 				}
 
-				function render_base_combi(base_set, codon_ratio) {
+				function render_base_combi(base_set, react_this) {
 					return React.createElement(
 						"tr",
 						null,
@@ -98,7 +99,9 @@ requirejs([], function () {
 						React.createElement(
 							"td",
 							null,
-							React.createElement("input", { size: "5", value: codon_ratio.get(base_set[0]) })
+							React.createElement("input", { size: "5", onChange: function onChange(e) {
+									return react_this.ratio_table_changed(e, base_set[0]);
+								}, value: react_this.state.codon_ratio.get(base_set[0]) })
 						),
 						React.createElement(
 							"td",
@@ -108,7 +111,9 @@ requirejs([], function () {
 						React.createElement(
 							"td",
 							null,
-							React.createElement("input", { size: "5", value: codon_ratio.get(base_set[1]) })
+							React.createElement("input", { size: "5", onChange: function onChange(e) {
+									return react_this.ratio_table_changed(e, base_set[1]);
+								}, value: react_this.state.codon_ratio.get(base_set[1]) })
 						),
 						React.createElement(
 							"td",
@@ -118,7 +123,9 @@ requirejs([], function () {
 						React.createElement(
 							"td",
 							null,
-							React.createElement("input", { size: "5", value: codon_ratio.get(base_set[2]) })
+							React.createElement("input", { size: "5", onChange: function onChange(e) {
+									return react_this.ratio_table_changed(e, base_set[2]);
+								}, value: react_this.state.codon_ratio.get(base_set[2]) })
 						),
 						React.createElement(
 							"td",
@@ -128,7 +135,9 @@ requirejs([], function () {
 						React.createElement(
 							"td",
 							null,
-							React.createElement("input", { size: "5", value: codon_ratio.get(base_set[3]) })
+							React.createElement("input", { size: "5", onChange: function onChange(e) {
+									return react_this.ratio_table_changed(e, base_set[3]);
+								}, value: react_this.state.codon_ratio.get(base_set[3]) })
 						)
 					);
 				}
@@ -140,10 +149,17 @@ requirejs([], function () {
 						"tbody",
 						null,
 						base_combi_set.map(function (combi_set) {
-							return render_base_combi(combi_set, _this3.state.codon_ratio);
+							return render_base_combi(combi_set, _this3);
 						})
 					)
 				);
+			}
+		}, {
+			key: "ratio_table_changed",
+			value: function ratio_table_changed(e, codon) {
+				this.setState({
+					codon_ratio: this.state.codon_ratio.set(codon, e.target.value)
+				});
 			}
 		}, {
 			key: "render_codon_translation_select",
@@ -152,9 +168,14 @@ requirejs([], function () {
 
 				return React.createElement(
 					"select",
-					{ className: "form-control", defaultValue: this.state.codon_translation, onChange: function onChange(e) {
+					{ className: "form-control", defaultValue: this.state.codon_translation_organism, onChange: function onChange(e) {
 							return _this4.codon_translation_select_changed(e);
 						} },
+					React.createElement(
+						"option",
+						{ value: "standard" },
+						"standard"
+					),
 					React.createElement(
 						"option",
 						{ value: "standard" },
@@ -165,6 +186,8 @@ requirejs([], function () {
 		}, {
 			key: "render_codon_translation_table",
 			value: function render_codon_translation_table() {
+				var _this5 = this;
+
 				var base_set = ["U", "C", "A", "G"];
 				var base_combi = [];
 
@@ -182,7 +205,7 @@ requirejs([], function () {
 					base_combi_set.push(base_combi.splice(0, 4));
 				}
 
-				function render_base_combi(base_set) {
+				function render_base_combi(base_set, react_this) {
 					return React.createElement(
 						"tr",
 						null,
@@ -194,7 +217,9 @@ requirejs([], function () {
 						React.createElement(
 							"td",
 							null,
-							React.createElement("input", { size: "5" })
+							React.createElement("input", { size: "5", onChange: function onChange(e) {
+									return react_this.translation_table_changed(e, base_set[0]);
+								}, value: react_this.state.codon_translation.get(base_set[0]) })
 						),
 						React.createElement(
 							"td",
@@ -204,7 +229,9 @@ requirejs([], function () {
 						React.createElement(
 							"td",
 							null,
-							React.createElement("input", { size: "5" })
+							React.createElement("input", { size: "5", onChange: function onChange(e) {
+									return react_this.translation_table_changed(e, base_set[1]);
+								}, value: react_this.state.codon_translation.get(base_set[1]) })
 						),
 						React.createElement(
 							"td",
@@ -214,7 +241,9 @@ requirejs([], function () {
 						React.createElement(
 							"td",
 							null,
-							React.createElement("input", { size: "5" })
+							React.createElement("input", { size: "5", onChange: function onChange(e) {
+									return react_this.translation_table_changed(e, base_set[2]);
+								}, value: react_this.state.codon_translation.get(base_set[2]) })
 						),
 						React.createElement(
 							"td",
@@ -224,7 +253,9 @@ requirejs([], function () {
 						React.createElement(
 							"td",
 							null,
-							React.createElement("input", { size: "5" })
+							React.createElement("input", { size: "5", onChange: function onChange(e) {
+									return react_this.translation_table_changed(e, base_set[3]);
+								}, value: react_this.state.codon_translation.get(base_set[3]) })
 						)
 					);
 				}
@@ -236,28 +267,46 @@ requirejs([], function () {
 						"tbody",
 						null,
 						base_combi_set.map(function (combi_set) {
-							return render_base_combi(combi_set);
+							return render_base_combi(combi_set, _this5);
 						})
 					)
 				);
 			}
 		}, {
+			key: "translation_table_changed",
+			value: function translation_table_changed(e, codon) {
+				this.setState({
+					codon_translation: this.state.codon_translation.set(codon, e.target.value)
+				});
+			}
+		}, {
 			key: "codon_ratio_select_changed",
 			value: function codon_ratio_select_changed(e) {
-				$.get("/static/spsum/" + e.target.value + ".spsum", function (result) {
+				$.get("/static/spsum/" + e.target.value, function (result) {
 					var codon_label = ["CGA", "CGC", "CGG", "CGU", "AGA", "AGG", "CUA", "CUC", "CUG", "CUU", "UUA", "UUG", "UCA", "UCC", "UCG", "UCU", "AGC", "AGU", "ACA", "ACC", "ACG", "ACU", "CCA", "CCC", "CCG", "CCU", "GCA", "GCC", "GCG", "GCU", "GGA", "GGC", "GGG", "GGU", "GUA", "GUC", "GUG", "GUU", "AAA", "AAG", "AAC", "AAU", "CAA", "CAG", "CAC", "CAU", "GAA", "GAG", "GAC", "GAU", "UAC", "UAU", "UGC", "UGU", "UUC", "UUU", "AUA", "AUC", "AUU", "AUG", "UGG", "UAA", "UAG", "UGA"];
-					var spsum = result.trim().split(" ");
+					var spsum = result.trim().split(" ").map(function (d) {
+						return parseInt(d);
+					});
+					var codon_total = spsum.reduce(function (a, b) {
+						return a + b;
+					});
 					this.setState({
-						codon_ratio: new Map(d3.zip(codon_label, spsum))
+						codon_ratio: new Map(d3.zip(codon_label, spsum.map(function (d) {
+							return (1000 * d / codon_total).toFixed(3);
+						})))
 					});
 				}.bind(this));
 			}
 		}, {
 			key: "codon_translation_select_changed",
 			value: function codon_translation_select_changed(e) {
-				this.setState({
-					codon_translation: e.target.value
-				});
+				$.get("/static/codon_translation/" + e.target.value, function (result) {
+					var codon_label = ["CGA", "CGC", "CGG", "CGU", "AGA", "AGG", "CUA", "CUC", "CUG", "CUU", "UUA", "UUG", "UCA", "UCC", "UCG", "UCU", "AGC", "AGU", "ACA", "ACC", "ACG", "ACU", "CCA", "CCC", "CCG", "CCU", "GCA", "GCC", "GCG", "GCU", "GGA", "GGC", "GGG", "GGU", "GUA", "GUC", "GUG", "GUU", "AAA", "AAG", "AAC", "AAU", "CAA", "CAG", "CAC", "CAU", "GAA", "GAG", "GAC", "GAU", "UAC", "UAU", "UGC", "UGU", "UUC", "UUU", "AUA", "AUC", "AUU", "AUG", "UGG", "UAA", "UAG", "UGA"];
+					var amino = result.trim().split(" ");
+					this.setState({
+						codon_translation: new Map(d3.zip(codon_label, amino))
+					});
+				}.bind(this));
 			}
 		}, {
 			key: "render",
@@ -271,7 +320,7 @@ requirejs([], function () {
 						React.createElement(
 							"label",
 							{ className: "col-sm-3" },
-							"Codon Ratio Table"
+							"Codon Ratio Table (‰)"
 						),
 						React.createElement(
 							"div",

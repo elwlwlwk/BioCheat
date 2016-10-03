@@ -7,7 +7,8 @@ class CodonAnalyzer extends React.Component{
 			codon_ratio_organism: "custom",
 			codon_ratio_list: [],
 			codon_ratio: new Map(),
-			codon_translation: "standard",
+			codon_translation_organism: "standard",
+			codon_translation: new Map(),
 		}
 	}
 
@@ -48,24 +49,31 @@ class CodonAnalyzer extends React.Component{
 			base_combi_set.push(base_combi.splice(0, 4));
 		}
 
-		function render_base_combi(base_set, codon_ratio){
+		function render_base_combi(base_set, react_this){
 			return <tr>
-				<td>{base_set[0]}</td><td><input size="5" value={codon_ratio.get(base_set[0])}/></td>
-				<td>{base_set[1]}</td><td><input size="5" value={codon_ratio.get(base_set[1])}/></td>
-				<td>{base_set[2]}</td><td><input size="5" value={codon_ratio.get(base_set[2])}/></td>
-				<td>{base_set[3]}</td><td><input size="5" value={codon_ratio.get(base_set[3])}/></td>
+				<td>{base_set[0]}</td><td><input size="5" onChange={ (e) => react_this.ratio_table_changed(e, base_set[0]) } value={react_this.state.codon_ratio.get(base_set[0])}/></td>
+				<td>{base_set[1]}</td><td><input size="5" onChange={ (e) => react_this.ratio_table_changed(e, base_set[1]) } value={react_this.state.codon_ratio.get(base_set[1])}/></td>
+				<td>{base_set[2]}</td><td><input size="5" onChange={ (e) => react_this.ratio_table_changed(e, base_set[2]) } value={react_this.state.codon_ratio.get(base_set[2])}/></td>
+				<td>{base_set[3]}</td><td><input size="5" onChange={ (e) => react_this.ratio_table_changed(e, base_set[3]) } value={react_this.state.codon_ratio.get(base_set[3])}/></td>
 			</tr>;
 		}
 
 		return <table className="table table-bordered table-hover">
 			<tbody>
-				{base_combi_set.map( (combi_set) => render_base_combi(combi_set, this.state.codon_ratio) )}
+				{base_combi_set.map( (combi_set) => render_base_combi(combi_set, this) )}
 			</tbody>
 		</table>
 	}
 
+	ratio_table_changed(e, codon){
+		this.setState({
+			codon_ratio: this.state.codon_ratio.set(codon, e.target.value),
+		})
+	}
+
 	render_codon_translation_select(){
-		return <select className="form-control" defaultValue={this.state.codon_translation} onChange={ (e) => this.codon_translation_select_changed(e) }>
+		return <select className="form-control" defaultValue={this.state.codon_translation_organism} onChange={ (e) => this.codon_translation_select_changed(e) }>
+			<option value="standard">standard</option>
 			<option value="standard">standard</option>
 		</select>
 	}
@@ -88,42 +96,53 @@ class CodonAnalyzer extends React.Component{
 			base_combi_set.push(base_combi.splice(0, 4));
 		}
 
-		function render_base_combi(base_set){
+		function render_base_combi(base_set, react_this){
 			return <tr>
-				<td>{base_set[0]}</td><td><input size="5"/></td>
-				<td>{base_set[1]}</td><td><input size="5"/></td>
-				<td>{base_set[2]}</td><td><input size="5"/></td>
-				<td>{base_set[3]}</td><td><input size="5"/></td>
+				<td>{base_set[0]}</td><td><input size="5" onChange={ (e) => react_this.translation_table_changed(e, base_set[0]) } value={react_this.state.codon_translation.get(base_set[0])}/></td>
+				<td>{base_set[1]}</td><td><input size="5" onChange={ (e) => react_this.translation_table_changed(e, base_set[1]) } value={react_this.state.codon_translation.get(base_set[1])}/></td>
+				<td>{base_set[2]}</td><td><input size="5" onChange={ (e) => react_this.translation_table_changed(e, base_set[2]) } value={react_this.state.codon_translation.get(base_set[2])}/></td>
+				<td>{base_set[3]}</td><td><input size="5" onChange={ (e) => react_this.translation_table_changed(e, base_set[3]) } value={react_this.state.codon_translation.get(base_set[3])}/></td>
 			</tr>;
 		}
 
 		return <table className="table table-bordered table-hover">
 			<tbody>
-				{base_combi_set.map( (combi_set) => render_base_combi(combi_set) )}
+				{base_combi_set.map( (combi_set) => render_base_combi(combi_set, this) )}
 			</tbody>
 		</table>
 	}
 
+	translation_table_changed(e, codon){
+		this.setState({
+			codon_translation: this.state.codon_translation.set(codon, e.target.value),
+		})
+	}
+
 	codon_ratio_select_changed(e){
-		$.get("/static/spsum/"+e.target.value+".spsum", function(result){
+		$.get("/static/spsum/"+e.target.value, function(result){
 			var codon_label= ["CGA", "CGC", "CGG", "CGU", "AGA", "AGG", "CUA", "CUC", "CUG", "CUU", "UUA", "UUG", "UCA", "UCC", "UCG", "UCU", "AGC", "AGU", "ACA", "ACC", "ACG", "ACU", "CCA", "CCC", "CCG", "CCU", "GCA", "GCC", "GCG", "GCU", "GGA", "GGC", "GGG", "GGU", "GUA", "GUC", "GUG", "GUU", "AAA", "AAG", "AAC", "AAU", "CAA", "CAG", "CAC", "CAU", "GAA", "GAG", "GAC", "GAU", "UAC", "UAU", "UGC", "UGU", "UUC", "UUU", "AUA", "AUC", "AUU", "AUG", "UGG", "UAA", "UAG", "UGA"];
-			var spsum= result.trim().split(" ");
+			var spsum= result.trim().split(" ").map( (d) => parseInt(d) );
+			var codon_total= spsum.reduce( (a,b) => a+b );
 			this.setState({
-				codon_ratio: new Map(d3.zip(codon_label, spsum)),
+				codon_ratio: new Map(d3.zip(codon_label, spsum.map( (d) => (1000*d/codon_total).toFixed(3) ))),
 			});
 		}.bind(this));
 	}
 
 	codon_translation_select_changed(e){
-		this.setState({
-			codon_translation: e.target.value,
-		})
+		$.get("/static/codon_translation/"+e.target.value, function(result){
+			var codon_label= ["CGA", "CGC", "CGG", "CGU", "AGA", "AGG", "CUA", "CUC", "CUG", "CUU", "UUA", "UUG", "UCA", "UCC", "UCG", "UCU", "AGC", "AGU", "ACA", "ACC", "ACG", "ACU", "CCA", "CCC", "CCG", "CCU", "GCA", "GCC", "GCG", "GCU", "GGA", "GGC", "GGG", "GGU", "GUA", "GUC", "GUG", "GUU", "AAA", "AAG", "AAC", "AAU", "CAA", "CAG", "CAC", "CAU", "GAA", "GAG", "GAC", "GAU", "UAC", "UAU", "UGC", "UGU", "UUC", "UUU", "AUA", "AUC", "AUU", "AUG", "UGG", "UAA", "UAG", "UGA"];
+			var amino= result.trim().split(" ");
+			this.setState({
+				codon_translation: new Map(d3.zip(codon_label, amino)),
+			});
+		}.bind(this))
 	}
 
 	render(){
 		return <div className="col-sm-12">
 			<div className="col-sm-12 form-group">
-				<label className="col-sm-3">Codon Ratio Table</label>
+				<label className="col-sm-3">Codon Ratio Table (‰)</label>
 				<div className="col-sm-4">
 					{this.render_codon_ratio_select()}
 				</div>
