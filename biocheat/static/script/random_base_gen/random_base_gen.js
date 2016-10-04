@@ -270,9 +270,90 @@ requirejs([], function () {
 				});
 			}
 		}, {
+			key: "render_base_ratio",
+			value: function render_base_ratio() {
+				var _this4 = this;
+
+				var padding = 30;
+				var width = 500;
+				var height = 120;
+				var xScale = d3.scaleLinear().domain([0, 100]).range([45, width - padding * 2]);
+				var yScale = d3.scaleLinear().domain([0, 3]).range([padding, height - padding]);
+
+				var ratio = [0, 0, 0, 0];
+
+				this.state.sequence.forEach(function (d) {
+					switch (d) {
+						case "A":
+							ratio[0]++;
+							break;
+						case "G":
+							ratio[1]++;
+							break;
+						case "T":
+						case "U":
+							ratio[2]++;
+							break;
+						case "C":
+							ratio[3]++;
+							break;
+					}
+				});
+
+				ratio = ratio.map(function (d) {
+					return (d / _this4.state.sequence.length * 100).toFixed(2);
+				});
+
+				function render_ratio_graph(d, idx) {
+					return React.createElement(
+						"g",
+						null,
+						React.createElement("rect", { width: xScale(d), height: 15, x: padding, y: yScale(idx), fill: "steelblue" }),
+						React.createElement(
+							"text",
+							{ x: xScale(d) - 10, y: yScale(idx) + 10, fontSize: "10px", fill: "white" },
+							d,
+							"%"
+						)
+					);
+				}
+
+				return React.createElement(
+					"svg",
+					{ width: width, height: height },
+					React.createElement(
+						"g",
+						null,
+						React.createElement(
+							"text",
+							{ x: "10", y: yScale(0) + 10, fontSize: "10" },
+							"A"
+						),
+						React.createElement(
+							"text",
+							{ x: "10", y: yScale(1) + 10, fontSize: "10" },
+							"G"
+						),
+						React.createElement(
+							"text",
+							{ x: "10", y: yScale(2) + 10, fontSize: "10" },
+							this.state.T2U ? "U" : "T"
+						),
+						React.createElement(
+							"text",
+							{ x: "10", y: yScale(3) + 10, fontSize: "10" },
+							"C"
+						)
+					),
+					this.state.sequence.length ? ratio.map(function (d, idx) {
+						return render_ratio_graph(d, idx);
+					}) : null
+				);
+			}
+		}, {
 			key: "render",
 			value: function render() {
-				var _this4 = this;
+				var _this5 = this;
 
 				return React.createElement(
 					"div",
@@ -292,7 +373,7 @@ requirejs([], function () {
 								"div",
 								{ className: "col-sm-8" },
 								React.createElement("input", { type: "text", className: "form-control", defaultValue: this.state.length, onChange: function onChange(e) {
-										return _this4.length_changed(e);
+										return _this5.length_changed(e);
 									} })
 							)
 						),
@@ -304,7 +385,7 @@ requirejs([], function () {
 								"label",
 								null,
 								React.createElement("input", { type: "checkbox", checked: this.state.T2U, onChange: function onChange(e) {
-										return _this4.T2U_changed(e);
+										return _this5.T2U_changed(e);
 									} }),
 								" Thymine to Uracil"
 							)
@@ -315,7 +396,7 @@ requirejs([], function () {
 							React.createElement(
 								"button",
 								{ className: "btn btn-primary", onClick: function onClick(e) {
-										return _this4.generate_sequence(e);
+										return _this5.generate_sequence(e);
 									} },
 								"generate"
 							)
@@ -329,11 +410,16 @@ requirejs([], function () {
 					React.createElement(
 						"div",
 						{ className: "col-sm-12" },
+						this.render_base_ratio()
+					),
+					React.createElement(
+						"div",
+						{ className: "col-sm-12" },
 						React.createElement(
 							"label",
 							null,
 							React.createElement("input", { type: "checkbox", checked: this.state.render_visual, onChange: function onChange(e) {
-									return _this4.render_visual_changed(e);
+									return _this5.render_visual_changed(e);
 								} }),
 							" Render Visual"
 						)
@@ -396,16 +482,16 @@ requirejs([], function () {
 		_createClass(Axis, [{
 			key: "componentDidMount",
 			value: function componentDidMount() {
-				this.renderRegressionAxis();
+				this.renderAxis();
 			}
 		}, {
 			key: "componentDidUpdate",
 			value: function componentDidUpdate() {
-				this.renderRegressionAxis();
+				this.renderAxis();
 			}
 		}, {
-			key: "renderRegressionAxis",
-			value: function renderRegressionAxis() {
+			key: "renderAxis",
+			value: function renderAxis() {
 				var node = this.refs.regression_axis;
 				var axis;
 				switch (this.props.orient) {

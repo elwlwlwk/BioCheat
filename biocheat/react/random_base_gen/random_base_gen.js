@@ -143,6 +143,53 @@ class RandomBaseGenerator extends React.Component{
 		})
 	}
 
+	render_base_ratio(){
+		var padding= 30;
+		var width= 500;
+		var height= 120;
+		var xScale= d3.scaleLinear().domain([0, 100]).range([45, width-padding*2]);
+		var yScale= d3.scaleLinear().domain([0, 3]).range([padding, height-padding]);
+
+		var ratio=[0,0,0,0];
+
+		this.state.sequence.forEach( (d) => {
+			switch(d){
+				case "A":
+					ratio[0]++;
+					break;
+				case "G":
+					ratio[1]++;
+					break;
+				case "T":
+				case "U":
+					ratio[2]++;
+					break;
+				case "C":
+					ratio[3]++;
+					break;
+			}
+		});
+
+		ratio= ratio.map( (d) => ((d/this.state.sequence.length)*100).toFixed(2) )
+
+		function render_ratio_graph(d, idx){
+			return <g>
+				<rect width={xScale(d)} height={15} x={padding} y={yScale(idx)} fill="steelblue" />
+				<text x= {xScale(d)- 10} y= {yScale(idx)+10} fontSize="10px" fill="white">{d}%</text>
+			</g>
+		}
+
+		return <svg width={width} height={height}>
+			<g>
+				<text x="10" y={yScale(0)+10} fontSize="10">A</text>
+				<text x="10" y={yScale(1)+10} fontSize="10">G</text>
+				<text x="10" y={yScale(2)+10} fontSize="10">{this.state.T2U?"U":"T"}</text>
+				<text x="10" y={yScale(3)+10} fontSize="10">C</text>
+			</g>
+			{this.state.sequence.length?ratio.map( (d, idx) => render_ratio_graph(d, idx) ):null}
+		</svg>;
+	}
+
 	render(){
 		return <div className="col-sm-12">
 			<div className="col-sm-6">
@@ -164,6 +211,9 @@ class RandomBaseGenerator extends React.Component{
 			</div>
 			<div className="col-sm-12">
 				<textarea className="form-control" rows="10" value={this.state.sequence? this.state.sequence.toString().replace(/\,/g,""): ""}></textarea>
+			</div>
+			<div className="col-sm-12">
+				{this.render_base_ratio()}
 			</div>
 			<div className="col-sm-12">
 				<label>
@@ -198,14 +248,14 @@ class XYAxis extends React.Component{
 
 class Axis extends React.Component{
 	componentDidMount(){
-		this.renderRegressionAxis();
+		this.renderAxis();
 	}
 
 	componentDidUpdate(){
-		this.renderRegressionAxis();
+		this.renderAxis();
 	}
 
-	renderRegressionAxis(){
+	renderAxis(){
 		var node= this.refs.regression_axis;
 		var axis;
 		switch(this.props.orient){
