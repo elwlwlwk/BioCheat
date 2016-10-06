@@ -1,4 +1,4 @@
-requirejs([], function(){
+requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/FileSaver.js"], function(){
 
 class CodonAnalyzer extends React.Component{
 	constructor(props){
@@ -9,6 +9,9 @@ class CodonAnalyzer extends React.Component{
 			codon_ratio: new Map(),
 			codon_translation_organism: "standard",
 			codon_translation: new Map(),
+			codon_input: [],
+			codon_seq: [],
+			amino_seq: [],
 		}
 	}
 
@@ -18,6 +21,14 @@ class CodonAnalyzer extends React.Component{
 				codon_ratio_list: JSON.parse(result),
 			})
 		}.bind(this));
+
+		$.get("/static/codon_translation/"+this.state.codon_translation_organism, function(result){
+			var codon_label= ["CGA", "CGC", "CGG", "CGU", "AGA", "AGG", "CUA", "CUC", "CUG", "CUU", "UUA", "UUG", "UCA", "UCC", "UCG", "UCU", "AGC", "AGU", "ACA", "ACC", "ACG", "ACU", "CCA", "CCC", "CCG", "CCU", "GCA", "GCC", "GCG", "GCU", "GGA", "GGC", "GGG", "GGU", "GUA", "GUC", "GUG", "GUU", "AAA", "AAG", "AAC", "AAU", "CAA", "CAG", "CAC", "CAU", "GAA", "GAG", "GAC", "GAU", "UAC", "UAU", "UGC", "UGU", "UUC", "UUU", "AUA", "AUC", "AUU", "AUG", "UGG", "UAA", "UAG", "UGA"];
+			var amino= result.trim().split(" ");
+			this.setState({
+				codon_translation: new Map(d3.zip(codon_label, amino)),
+			});
+		}.bind(this))
 	}
 
 	componentWillUnmount(){
@@ -73,7 +84,6 @@ class CodonAnalyzer extends React.Component{
 
 	render_codon_translation_select(){
 		return <select className="form-control" defaultValue={this.state.codon_translation_organism} onChange={ (e) => this.codon_translation_select_changed(e) }>
-			<option value="standard">standard</option>
 			<option value="standard">standard</option>
 		</select>
 	}
@@ -139,6 +149,21 @@ class CodonAnalyzer extends React.Component{
 		}.bind(this))
 	}
 
+	codon_textarea_changed(e){
+		var codon_input= e.target.value.trim().toUpperCase().replace(/T/g, "U").split("").filter( (d) => ["A","G","U","C"].includes(d) );
+		var codon_input_temp= codon_input.slice(0);
+		var codon_seq=[];
+		while(codon_input_temp.length){
+			codon_seq.push(codon_input_temp.splice(0,3));
+		}
+		var amino_seq= codon_seq.map( (codon) => this.state.codon_translation.get(codon.reduce( (a, b) => a+b )) )
+		this.setState({
+			codon_input: codon_input,
+			codon_seq: codon_seq,
+			amino_seq: amino_seq
+		})
+	}
+
 	render(){
 		return <div className="col-sm-12">
 			<div className="col-sm-12 form-group">
@@ -164,6 +189,12 @@ class CodonAnalyzer extends React.Component{
 				<div className="col-sm-12">
 					<button type="button" className="btn btn-primary" data-toggle="collapse" data-target="#codon_translation_div">Show Codon Translation Table</button>
 				</div>
+			</div>
+			<div className="col-sm-12">
+				<textarea className="form-control" rows="10" onChange={(e) => this.codon_textarea_changed(e)}></textarea>
+			</div>
+			<div className="col-sm-12">
+				<CodonTranslation {...this.state}/>
 			</div>
 		</div>
 	}

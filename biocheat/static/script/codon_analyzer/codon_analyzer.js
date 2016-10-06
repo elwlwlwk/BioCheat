@@ -8,7 +8,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-requirejs([], function () {
+requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/FileSaver.js"], function () {
 	var CodonAnalyzer = function (_React$Component) {
 		_inherits(CodonAnalyzer, _React$Component);
 
@@ -22,7 +22,10 @@ requirejs([], function () {
 				codon_ratio_list: [],
 				codon_ratio: new Map(),
 				codon_translation_organism: "standard",
-				codon_translation: new Map()
+				codon_translation: new Map(),
+				codon_input: [],
+				codon_seq: [],
+				amino_seq: []
 			};
 			return _this;
 		}
@@ -33,6 +36,14 @@ requirejs([], function () {
 				this.serverRequest = $.get("/static/spsum/list", function (result) {
 					this.setState({
 						codon_ratio_list: JSON.parse(result)
+					});
+				}.bind(this));
+
+				$.get("/static/codon_translation/" + this.state.codon_translation_organism, function (result) {
+					var codon_label = ["CGA", "CGC", "CGG", "CGU", "AGA", "AGG", "CUA", "CUC", "CUG", "CUU", "UUA", "UUG", "UCA", "UCC", "UCG", "UCU", "AGC", "AGU", "ACA", "ACC", "ACG", "ACU", "CCA", "CCC", "CCG", "CCU", "GCA", "GCC", "GCG", "GCU", "GGA", "GGC", "GGG", "GGU", "GUA", "GUC", "GUG", "GUU", "AAA", "AAG", "AAC", "AAU", "CAA", "CAG", "CAC", "CAU", "GAA", "GAG", "GAC", "GAU", "UAC", "UAU", "UGC", "UGU", "UUC", "UUU", "AUA", "AUC", "AUU", "AUG", "UGG", "UAA", "UAG", "UGA"];
+					var amino = result.trim().split(" ");
+					this.setState({
+						codon_translation: new Map(d3.zip(codon_label, amino))
 					});
 				}.bind(this));
 			}
@@ -175,11 +186,6 @@ requirejs([], function () {
 						"option",
 						{ value: "standard" },
 						"standard"
-					),
-					React.createElement(
-						"option",
-						{ value: "standard" },
-						"standard"
 					)
 				);
 			}
@@ -309,8 +315,34 @@ requirejs([], function () {
 				}.bind(this));
 			}
 		}, {
+			key: "codon_textarea_changed",
+			value: function codon_textarea_changed(e) {
+				var _this6 = this;
+
+				var codon_input = e.target.value.trim().toUpperCase().replace(/T/g, "U").split("").filter(function (d) {
+					return ["A", "G", "U", "C"].includes(d);
+				});
+				var codon_input_temp = codon_input.slice(0);
+				var codon_seq = [];
+				while (codon_input_temp.length) {
+					codon_seq.push(codon_input_temp.splice(0, 3));
+				}
+				var amino_seq = codon_seq.map(function (codon) {
+					return _this6.state.codon_translation.get(codon.reduce(function (a, b) {
+						return a + b;
+					}));
+				});
+				this.setState({
+					codon_input: codon_input,
+					codon_seq: codon_seq,
+					amino_seq: amino_seq
+				});
+			}
+		}, {
 			key: "render",
 			value: function render() {
+				var _this7 = this;
+
 				return React.createElement(
 					"div",
 					{ className: "col-sm-12" },
@@ -369,6 +401,18 @@ requirejs([], function () {
 								"Show Codon Translation Table"
 							)
 						)
+					),
+					React.createElement(
+						"div",
+						{ className: "col-sm-12" },
+						React.createElement("textarea", { className: "form-control", rows: "10", onChange: function onChange(e) {
+								return _this7.codon_textarea_changed(e);
+							} })
+					),
+					React.createElement(
+						"div",
+						{ className: "col-sm-12" },
+						React.createElement(CodonTranslation, this.state)
 					)
 				);
 			}
