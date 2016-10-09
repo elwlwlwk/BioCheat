@@ -5,23 +5,17 @@ class CodonAnalyzer extends React.Component{
 		super(props);
 		this.state={
 			codon_ratio_organism: "custom",
-			codon_ratio_list: [],
 			codon_ratio: new Map(),
 			codon_translation_organism: "standard",
 			codon_translation: new Map(),
 			codon_input: [],
 			codon_seq: [],
 			amino_seq: [],
+			suggest_ratio_list: [],
 		}
 	}
 
 	componentDidMount(){
-		this.serverRequest= $.get("/static/spsum/list", function(result) {
-			this.setState({
-				codon_ratio_list: JSON.parse(result),
-			})
-		}.bind(this));
-
 		$.get("/static/codon_translation/"+this.state.codon_translation_organism, function(result){
 			var codon_label= ["CGA", "CGC", "CGG", "CGU", "AGA", "AGG", "CUA", "CUC", "CUG", "CUU", "UUA", "UUG", "UCA", "UCC", "UCG", "UCU", "AGC", "AGU", "ACA", "ACC", "ACG", "ACU", "CCA", "CCC", "CCG", "CCU", "GCA", "GCC", "GCG", "GCU", "GGA", "GGC", "GGG", "GGU", "GUA", "GUC", "GUG", "GUU", "AAA", "AAG", "AAC", "AAU", "CAA", "CAG", "CAC", "CAU", "GAA", "GAG", "GAC", "GAU", "UAC", "UAU", "UGC", "UGU", "UUC", "UUU", "AUA", "AUC", "AUU", "AUG", "UGG", "UAA", "UAG", "UGA"];
 			var amino= result.trim().split(" ");
@@ -36,10 +30,14 @@ class CodonAnalyzer extends React.Component{
 	}
 
 	render_codon_ratio_select(){
-		return <select className="form-control" defaultValue={this.state.codon_ratio_organism} onChange={ (e) => this.codon_ratio_select_changed(e) }>
-			<option value="custom">custom</option>
-			{ this.state.codon_ratio_list.map( (elem) => <option value={elem}>{elem}</option> )}
-		</select>
+		return <div>
+			<input className="form-control" placeholder="Input Organism" onChange={ (e) => this.codon_ratio_select_changed(e) } list="suggest_ratio_list" />
+			<datalist id="suggest_ratio_list">
+				{this.state.suggest_ratio_list.map( (elem) => {
+					return <option value={elem} />
+				})}
+			</datalist>
+		</div>
 	}
 
 	render_codon_ratio_table(){
@@ -129,9 +127,18 @@ class CodonAnalyzer extends React.Component{
 	}
 
 	codon_ratio_select_changed(e){
-		$.get("/static/spsum/"+e.target.value, function(result){
+		if(e.target.value.length<3) return;
+		$.get("/spsum_list?organism="+e.target.value, function(result){
+			var suggest_ratio_list= JSON.parse(result)
+			this.setState({
+				suggest_ratio_list: suggest_ratio_list,
+			})
+		}.bind(this))
+
+		$.get("/spsum?organism="+e.target.value, function(result){
+			if(!result) return;
 			var codon_label= ["CGA", "CGC", "CGG", "CGU", "AGA", "AGG", "CUA", "CUC", "CUG", "CUU", "UUA", "UUG", "UCA", "UCC", "UCG", "UCU", "AGC", "AGU", "ACA", "ACC", "ACG", "ACU", "CCA", "CCC", "CCG", "CCU", "GCA", "GCC", "GCG", "GCU", "GGA", "GGC", "GGG", "GGU", "GUA", "GUC", "GUG", "GUU", "AAA", "AAG", "AAC", "AAU", "CAA", "CAG", "CAC", "CAU", "GAA", "GAG", "GAC", "GAU", "UAC", "UAU", "UGC", "UGU", "UUC", "UUU", "AUA", "AUC", "AUU", "AUG", "UGG", "UAA", "UAG", "UGA"];
-			var spsum= result.trim().split(" ").map( (d) => parseInt(d) );
+			var spsum= JSON.parse(result)["spsum"].trim().split(" ").map( (d) => parseInt(d) );
 			var codon_total= spsum.reduce( (a,b) => a+b );
 			this.setState({
 				codon_ratio: new Map(d3.zip(codon_label, spsum.map( (d) => (1000*d/codon_total).toFixed(3) ))),

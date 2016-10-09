@@ -19,13 +19,13 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/Fi
 
 			_this.state = {
 				codon_ratio_organism: "custom",
-				codon_ratio_list: [],
 				codon_ratio: new Map(),
 				codon_translation_organism: "standard",
 				codon_translation: new Map(),
 				codon_input: [],
 				codon_seq: [],
-				amino_seq: []
+				amino_seq: [],
+				suggest_ratio_list: []
 			};
 			return _this;
 		}
@@ -33,12 +33,6 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/Fi
 		_createClass(CodonAnalyzer, [{
 			key: "componentDidMount",
 			value: function componentDidMount() {
-				this.serverRequest = $.get("/static/spsum/list", function (result) {
-					this.setState({
-						codon_ratio_list: JSON.parse(result)
-					});
-				}.bind(this));
-
 				$.get("/static/codon_translation/" + this.state.codon_translation_organism, function (result) {
 					var codon_label = ["CGA", "CGC", "CGG", "CGU", "AGA", "AGG", "CUA", "CUC", "CUG", "CUU", "UUA", "UUG", "UCA", "UCC", "UCG", "UCU", "AGC", "AGU", "ACA", "ACC", "ACG", "ACU", "CCA", "CCC", "CCG", "CCU", "GCA", "GCC", "GCG", "GCU", "GGA", "GGC", "GGG", "GGU", "GUA", "GUC", "GUG", "GUU", "AAA", "AAG", "AAC", "AAU", "CAA", "CAG", "CAC", "CAU", "GAA", "GAG", "GAC", "GAU", "UAC", "UAU", "UGC", "UGU", "UUC", "UUU", "AUA", "AUC", "AUU", "AUG", "UGG", "UAA", "UAG", "UGA"];
 					var amino = result.trim().split(" ");
@@ -58,22 +52,18 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/Fi
 				var _this2 = this;
 
 				return React.createElement(
-					"select",
-					{ className: "form-control", defaultValue: this.state.codon_ratio_organism, onChange: function onChange(e) {
+					"div",
+					null,
+					React.createElement("input", { className: "form-control", placeholder: "Input Organism", onChange: function onChange(e) {
 							return _this2.codon_ratio_select_changed(e);
-						} },
+						}, list: "suggest_ratio_list" }),
 					React.createElement(
-						"option",
-						{ value: "custom" },
-						"custom"
-					),
-					this.state.codon_ratio_list.map(function (elem) {
-						return React.createElement(
-							"option",
-							{ value: elem },
-							elem
-						);
-					})
+						"datalist",
+						{ id: "suggest_ratio_list" },
+						this.state.suggest_ratio_list.map(function (elem) {
+							return React.createElement("option", { value: elem });
+						})
+					)
 				);
 			}
 		}, {
@@ -288,9 +278,18 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/Fi
 		}, {
 			key: "codon_ratio_select_changed",
 			value: function codon_ratio_select_changed(e) {
-				$.get("/static/spsum/" + e.target.value, function (result) {
+				if (e.target.value.length < 3) return;
+				$.get("/spsum_list?organism=" + e.target.value, function (result) {
+					var suggest_ratio_list = JSON.parse(result);
+					this.setState({
+						suggest_ratio_list: suggest_ratio_list
+					});
+				}.bind(this));
+
+				$.get("/spsum?organism=" + e.target.value, function (result) {
+					if (!result) return;
 					var codon_label = ["CGA", "CGC", "CGG", "CGU", "AGA", "AGG", "CUA", "CUC", "CUG", "CUU", "UUA", "UUG", "UCA", "UCC", "UCG", "UCU", "AGC", "AGU", "ACA", "ACC", "ACG", "ACU", "CCA", "CCC", "CCG", "CCU", "GCA", "GCC", "GCG", "GCU", "GGA", "GGC", "GGG", "GGU", "GUA", "GUC", "GUG", "GUU", "AAA", "AAG", "AAC", "AAU", "CAA", "CAG", "CAC", "CAU", "GAA", "GAG", "GAC", "GAU", "UAC", "UAU", "UGC", "UGU", "UUC", "UUU", "AUA", "AUC", "AUU", "AUG", "UGG", "UAA", "UAG", "UGA"];
-					var spsum = result.trim().split(" ").map(function (d) {
+					var spsum = JSON.parse(result)["spsum"].trim().split(" ").map(function (d) {
 						return parseInt(d);
 					});
 					var codon_total = spsum.reduce(function (a, b) {
@@ -352,7 +351,7 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/Fi
 						React.createElement(
 							"label",
 							{ className: "col-sm-3" },
-							"Codon Ratio Table (‰)"
+							"Codon Ratio Table (\u2030)"
 						),
 						React.createElement(
 							"div",

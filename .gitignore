@@ -1,3 +1,5 @@
 *.swp
 .babelrc
 node_modules
+biocheat/config.py
+biocheat/__pycache__/
