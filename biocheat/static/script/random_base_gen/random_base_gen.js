@@ -23,7 +23,7 @@ requirejs([], function () {
 
 			_this.state = {
 				length: 1000,
-				GC_ratio: 50,
+				GC_content: 50,
 				T2U: false,
 				sequence: [],
 				base_color: { "A": "#B24848", "G": "#B09A47", "T": "#476FAD", "U": "#476FAD", "C": "#599562" },
@@ -43,20 +43,20 @@ requirejs([], function () {
 					React.createElement(
 						"label",
 						{ className: "col-sm-4 control-label" },
-						"GC Ratio:"
+						"GC Content:"
 					),
 					React.createElement(
 						"div",
 						{ className: "col-sm-5" },
-						React.createElement("input", { type: "range", step: "any", min: "0", max: "100", value: this.state.GC_ratio ? parseFloat(this.state.GC_ratio) : 0, onChange: function onChange(e) {
-								return _this2.GC_ratio_changed(e);
+						React.createElement("input", { type: "range", step: "any", min: "0", max: "100", value: this.state.GC_content ? parseFloat(this.state.GC_content) : 0, onChange: function onChange(e) {
+								return _this2.GC_content_changed(e);
 							} })
 					),
 					React.createElement(
 						"div",
 						{ className: "col-sm-3" },
-						React.createElement("input", { type: "text", className: "form-control", value: this.state.GC_ratio, onChange: function onChange(e) {
-								return _this2.GC_ratio_changed(e);
+						React.createElement("input", { type: "text", className: "form-control", value: this.state.GC_content, onChange: function onChange(e) {
+								return _this2.GC_content_changed(e);
 							} })
 					)
 				);
@@ -64,7 +64,7 @@ requirejs([], function () {
 		}, {
 			key: "generate_sequence",
 			value: function generate_sequence(e) {
-				var GC_count = Math.round(this.state.length * this.state.GC_ratio / 100);
+				var GC_count = Math.round(this.state.length * this.state.GC_content / 100);
 				var sequence = [];
 				for (var i = 0; i < GC_count; i++) {
 					sequence.push(Math.random() > 0.5 ? "G" : "C");
@@ -84,10 +84,10 @@ requirejs([], function () {
 				});
 			}
 		}, {
-			key: "GC_ratio_changed",
-			value: function GC_ratio_changed(e) {
+			key: "GC_content_changed",
+			value: function GC_content_changed(e) {
 				this.setState({
-					GC_ratio: e.target.value
+					GC_content: e.target.value
 				});
 			}
 		}, {

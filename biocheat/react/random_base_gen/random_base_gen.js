@@ -6,7 +6,7 @@ class RandomBaseGenerator extends React.Component{
 
 		this.state={
 			length: 1000,
-			GC_ratio: 50,
+			GC_content: 50,
 			T2U: false,
 			sequence: [],
 			base_color: {"A":"#B24848", "G":"#B09A47","T":"#476FAD","U":"#476FAD","C":"#599562"},
@@ -16,18 +16,18 @@ class RandomBaseGenerator extends React.Component{
 
 	render_ratio_controller(){
 		return <div className="form_group">
-			<label className="col-sm-4 control-label">GC Ratio:</label>
+			<label className="col-sm-4 control-label">GC Content:</label>
 			<div className="col-sm-5">
-				<input type="range" step="any" min="0" max="100" value={this.state.GC_ratio? parseFloat(this.state.GC_ratio):0} onChange={ (e) => this.GC_ratio_changed(e)}/>
+				<input type="range" step="any" min="0" max="100" value={this.state.GC_content? parseFloat(this.state.GC_content):0} onChange={ (e) => this.GC_content_changed(e)}/>
 			</div>
 			<div className="col-sm-3">
-				<input type="text" className="form-control" value={this.state.GC_ratio} onChange= { (e) => this.GC_ratio_changed(e) }></input>
+				<input type="text" className="form-control" value={this.state.GC_content} onChange= { (e) => this.GC_content_changed(e) }></input>
 			</div>
 		</div>
 	}
 
 	generate_sequence(e){
-		var GC_count= Math.round(this.state.length* this.state.GC_ratio/ 100);
+		var GC_count= Math.round(this.state.length* this.state.GC_content/ 100);
 		var sequence=[];
 		for( let i=0; i< GC_count; i++){
 			sequence.push(Math.random()>0.5? "G": "C");
@@ -45,9 +45,9 @@ class RandomBaseGenerator extends React.Component{
 		})
 	}
 
-	GC_ratio_changed(e){
+	GC_content_changed(e){
 		this.setState({
-			GC_ratio: e.target.value,
+			GC_content: e.target.value,
 		})
 	}
 
