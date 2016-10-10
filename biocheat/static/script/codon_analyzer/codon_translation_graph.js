@@ -80,7 +80,7 @@ var CodonTranslation = function (_React$Component) {
 			var _this2 = this;
 
 			var amino_seq_FASTA = this.props.amino_seq.map(function (amino) {
-				return _this2.state.amino_FASTA_map[amino] ? _this2.state.amino_FASTA_map[amino] : "";
+				return _this2.state.amino_FASTA_map[amino.toLowerCase()] ? _this2.state.amino_FASTA_map[amino.toLowerCase()] : "";
 			}).reduce(function (a, b) {
 				return a + b;
 			});

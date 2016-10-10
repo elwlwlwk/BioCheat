@@ -18,10 +18,11 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/Fi
 			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(CodonAnalyzer).call(this, props));
 
 			_this.state = {
-				codon_ratio_organism: "custom",
+				codon_ratio_organism: "",
 				codon_ratio: new Map(),
-				codon_translation_organism: "standard",
+				codon_translation_organism: "Standard",
 				codon_translation: new Map(),
+				codon_translation_list: [],
 				codon_input: [],
 				codon_seq: [],
 				amino_seq: [],
@@ -33,11 +34,15 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/Fi
 		_createClass(CodonAnalyzer, [{
 			key: "componentDidMount",
 			value: function componentDidMount() {
-				$.get("/static/codon_translation/" + this.state.codon_translation_organism, function (result) {
-					var codon_label = ["CGA", "CGC", "CGG", "CGU", "AGA", "AGG", "CUA", "CUC", "CUG", "CUU", "UUA", "UUG", "UCA", "UCC", "UCG", "UCU", "AGC", "AGU", "ACA", "ACC", "ACG", "ACU", "CCA", "CCC", "CCG", "CCU", "GCA", "GCC", "GCG", "GCU", "GGA", "GGC", "GGG", "GGU", "GUA", "GUC", "GUG", "GUU", "AAA", "AAG", "AAC", "AAU", "CAA", "CAG", "CAC", "CAU", "GAA", "GAG", "GAC", "GAU", "UAC", "UAU", "UGC", "UGU", "UUC", "UUU", "AUA", "AUC", "AUU", "AUG", "UGG", "UAA", "UAG", "UGA"];
-					var amino = result.trim().split(" ");
+				$.get("/codon_translation_list", function (result) {
 					this.setState({
-						codon_translation: new Map(d3.zip(codon_label, amino))
+						codon_translation_list: JSON.parse(result)
+					});
+				}.bind(this));
+
+				$.get("/codon_translation?organism=" + this.state.codon_translation_organism, function (result) {
+					this.setState({
+						codon_translation: JSON.parse(result)
 					});
 				}.bind(this));
 			}
@@ -172,11 +177,13 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/Fi
 					{ className: "form-control", defaultValue: this.state.codon_translation_organism, onChange: function onChange(e) {
 							return _this4.codon_translation_select_changed(e);
 						} },
-					React.createElement(
-						"option",
-						{ value: "standard" },
-						"standard"
-					)
+					this.state.codon_translation_list.map(function (org) {
+						return React.createElement(
+							"option",
+							{ value: org },
+							org
+						);
+					})
 				);
 			}
 		}, {
@@ -215,7 +222,7 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/Fi
 							null,
 							React.createElement("input", { size: "5", onChange: function onChange(e) {
 									return react_this.translation_table_changed(e, base_set[0]);
-								}, value: react_this.state.codon_translation.get(base_set[0]) })
+								}, value: react_this.state.codon_translation[base_set[0]] })
 						),
 						React.createElement(
 							"td",
@@ -227,7 +234,7 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/Fi
 							null,
 							React.createElement("input", { size: "5", onChange: function onChange(e) {
 									return react_this.translation_table_changed(e, base_set[1]);
-								}, value: react_this.state.codon_translation.get(base_set[1]) })
+								}, value: react_this.state.codon_translation[base_set[1]] })
 						),
 						React.createElement(
 							"td",
@@ -239,7 +246,7 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/Fi
 							null,
 							React.createElement("input", { size: "5", onChange: function onChange(e) {
 									return react_this.translation_table_changed(e, base_set[2]);
-								}, value: react_this.state.codon_translation.get(base_set[2]) })
+								}, value: react_this.state.codon_translation[base_set[2]] })
 						),
 						React.createElement(
 							"td",
@@ -251,7 +258,7 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/Fi
 							null,
 							React.createElement("input", { size: "5", onChange: function onChange(e) {
 									return react_this.translation_table_changed(e, base_set[3]);
-								}, value: react_this.state.codon_translation.get(base_set[3]) })
+								}, value: react_this.state.codon_translation[base_set[3]] })
 						)
 					);
 				}
@@ -271,8 +278,10 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/Fi
 		}, {
 			key: "translation_table_changed",
 			value: function translation_table_changed(e, codon) {
+				var codon_translation = this.state.codon_translation;
+				codon_translation[codon] = e.target.value;
 				this.setState({
-					codon_translation: this.state.codon_translation.set(codon, e.target.value)
+					codon_translation: codon_translation
 				});
 			}
 		}, {
@@ -305,13 +314,14 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/Fi
 		}, {
 			key: "codon_translation_select_changed",
 			value: function codon_translation_select_changed(e) {
-				$.get("/static/codon_translation/" + e.target.value, function (result) {
-					var codon_label = ["CGA", "CGC", "CGG", "CGU", "AGA", "AGG", "CUA", "CUC", "CUG", "CUU", "UUA", "UUG", "UCA", "UCC", "UCG", "UCU", "AGC", "AGU", "ACA", "ACC", "ACG", "ACU", "CCA", "CCC", "CCG", "CCU", "GCA", "GCC", "GCG", "GCU", "GGA", "GGC", "GGG", "GGU", "GUA", "GUC", "GUG", "GUU", "AAA", "AAG", "AAC", "AAU", "CAA", "CAG", "CAC", "CAU", "GAA", "GAG", "GAC", "GAU", "UAC", "UAU", "UGC", "UGU", "UUC", "UUU", "AUA", "AUC", "AUU", "AUG", "UGG", "UAA", "UAG", "UGA"];
-					var amino = result.trim().split(" ");
+				$.get("/codon_translation?organism=" + e.target.value, function (result) {
 					this.setState({
-						codon_translation: new Map(d3.zip(codon_label, amino))
+						codon_translation: JSON.parse(result)
 					});
 				}.bind(this));
+				this.setState({
+					codon_translation_organism: e.target.value
+				});
 			}
 		}, {
 			key: "codon_textarea_changed",

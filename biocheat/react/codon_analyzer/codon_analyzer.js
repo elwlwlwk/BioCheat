@@ -4,10 +4,11 @@ class CodonAnalyzer extends React.Component{
 	constructor(props){
 		super(props);
 		this.state={
-			codon_ratio_organism: "custom",
+			codon_ratio_organism: "",
 			codon_ratio: new Map(),
-			codon_translation_organism: "standard",
+			codon_translation_organism: "Standard",
 			codon_translation: new Map(),
+			codon_translation_list: [],
 			codon_input: [],
 			codon_seq: [],
 			amino_seq: [],
@@ -16,11 +17,15 @@ class CodonAnalyzer extends React.Component{
 	}
 
 	componentDidMount(){
-		$.get("/static/codon_translation/"+this.state.codon_translation_organism, function(result){
-			var codon_label= ["CGA", "CGC", "CGG", "CGU", "AGA", "AGG", "CUA", "CUC", "CUG", "CUU", "UUA", "UUG", "UCA", "UCC", "UCG", "UCU", "AGC", "AGU", "ACA", "ACC", "ACG", "ACU", "CCA", "CCC", "CCG", "CCU", "GCA", "GCC", "GCG", "GCU", "GGA", "GGC", "GGG", "GGU", "GUA", "GUC", "GUG", "GUU", "AAA", "AAG", "AAC", "AAU", "CAA", "CAG", "CAC", "CAU", "GAA", "GAG", "GAC", "GAU", "UAC", "UAU", "UGC", "UGU", "UUC", "UUU", "AUA", "AUC", "AUU", "AUG", "UGG", "UAA", "UAG", "UGA"];
-			var amino= result.trim().split(" ");
+		$.get("/codon_translation_list", function(result){
 			this.setState({
-				codon_translation: new Map(d3.zip(codon_label, amino)),
+				codon_translation_list: JSON.parse(result),
+			})
+		}.bind(this))
+
+		$.get("/codon_translation?organism="+this.state.codon_translation_organism, function(result){
+			this.setState({
+				codon_translation: JSON.parse(result),
 			});
 		}.bind(this))
 	}
@@ -82,7 +87,9 @@ class CodonAnalyzer extends React.Component{
 
 	render_codon_translation_select(){
 		return <select className="form-control" defaultValue={this.state.codon_translation_organism} onChange={ (e) => this.codon_translation_select_changed(e) }>
-			<option value="standard">standard</option>
+			{this.state.codon_translation_list.map( (org) => {
+				return <option value={org}>{org}</option>;
+			} )}
 		</select>
 	}
 
@@ -106,10 +113,10 @@ class CodonAnalyzer extends React.Component{
 
 		function render_base_combi(base_set, react_this){
 			return <tr>
-				<td>{base_set[0]}</td><td><input size="5" onChange={ (e) => react_this.translation_table_changed(e, base_set[0]) } value={react_this.state.codon_translation.get(base_set[0])}/></td>
-				<td>{base_set[1]}</td><td><input size="5" onChange={ (e) => react_this.translation_table_changed(e, base_set[1]) } value={react_this.state.codon_translation.get(base_set[1])}/></td>
-				<td>{base_set[2]}</td><td><input size="5" onChange={ (e) => react_this.translation_table_changed(e, base_set[2]) } value={react_this.state.codon_translation.get(base_set[2])}/></td>
-				<td>{base_set[3]}</td><td><input size="5" onChange={ (e) => react_this.translation_table_changed(e, base_set[3]) } value={react_this.state.codon_translation.get(base_set[3])}/></td>
+				<td>{base_set[0]}</td><td><input size="5" onChange={ (e) => react_this.translation_table_changed(e, base_set[0]) } value={react_this.state.codon_translation[base_set[0]]}/></td>
+				<td>{base_set[1]}</td><td><input size="5" onChange={ (e) => react_this.translation_table_changed(e, base_set[1]) } value={react_this.state.codon_translation[base_set[1]]}/></td>
+				<td>{base_set[2]}</td><td><input size="5" onChange={ (e) => react_this.translation_table_changed(e, base_set[2]) } value={react_this.state.codon_translation[base_set[2]]}/></td>
+				<td>{base_set[3]}</td><td><input size="5" onChange={ (e) => react_this.translation_table_changed(e, base_set[3]) } value={react_this.state.codon_translation[base_set[3]]}/></td>
 			</tr>;
 		}
 
@@ -121,8 +128,10 @@ class CodonAnalyzer extends React.Component{
 	}
 
 	translation_table_changed(e, codon){
+		var codon_translation= this.state.codon_translation;
+		codon_translation[codon]= e.target.value;
 		this.setState({
-			codon_translation: this.state.codon_translation.set(codon, e.target.value),
+			codon_translation: codon_translation,
 		})
 	}
 
@@ -147,13 +156,14 @@ class CodonAnalyzer extends React.Component{
 	}
 
 	codon_translation_select_changed(e){
-		$.get("/static/codon_translation/"+e.target.value, function(result){
-			var codon_label= ["CGA", "CGC", "CGG", "CGU", "AGA", "AGG", "CUA", "CUC", "CUG", "CUU", "UUA", "UUG", "UCA", "UCC", "UCG", "UCU", "AGC", "AGU", "ACA", "ACC", "ACG", "ACU", "CCA", "CCC", "CCG", "CCU", "GCA", "GCC", "GCG", "GCU", "GGA", "GGC", "GGG", "GGU", "GUA", "GUC", "GUG", "GUU", "AAA", "AAG", "AAC", "AAU", "CAA", "CAG", "CAC", "CAU", "GAA", "GAG", "GAC", "GAU", "UAC", "UAU", "UGC", "UGU", "UUC", "UUU", "AUA", "AUC", "AUU", "AUG", "UGG", "UAA", "UAG", "UGA"];
-			var amino= result.trim().split(" ");
+		$.get("/codon_translation?organism="+e.target.value, function(result){
 			this.setState({
-				codon_translation: new Map(d3.zip(codon_label, amino)),
+				codon_translation: JSON.parse(result),
 			});
 		}.bind(this))
+		this.setState({
+			codon_translation_organism: e.target.value,
+		})
 	}
 
 	codon_textarea_changed(e){

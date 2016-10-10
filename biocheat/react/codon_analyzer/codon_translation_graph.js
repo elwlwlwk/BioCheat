@@ -30,7 +30,7 @@ ter: "Z",
 	}
 
 	translated_FASTA_download(e){
-		var amino_seq_FASTA= this.props.amino_seq.map( (amino) => this.state.amino_FASTA_map[amino]? this.state.amino_FASTA_map[amino]:"" ).reduce( (a,b) => a+b );
+		var amino_seq_FASTA= this.props.amino_seq.map( (amino) => this.state.amino_FASTA_map[amino.toLowerCase()]? this.state.amino_FASTA_map[amino.toLowerCase()]:"" ).reduce( (a,b) => a+b );
 		var file= new File([">"+this.props.codon_translation_organism+" translation table\n", amino_seq_FASTA], "codon_translation.txt", {type:"text/plain"});
 		saveAs(file);
 	}
