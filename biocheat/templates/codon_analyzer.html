@@ -10,5 +10,23 @@
 {% block body %}
 <h1>Codon Analyzer</h1>
 <hr />
+<p>
+It will translate your codon sequence and display codon ratio graph. You can get affinity between your codon sequence and selected organism.
+</p>
+<h3>How to use</h3>
+<p>
+	Search organism to compare. <b>You need to input least 3 characters to search organism in our database</b> (datasets are from ftp.kazusa.or.jp/pub/codon/current/). Select translation table. You can change values clicking show button. 
+</p>
+<p>
+	Input your base sequence. Characters except A, G, T, U, C will be ignored (not case sensitive). All T will be replace to U.
+</p>
+<p>
+	In translation result, codon encodes terminate will be shown as 'Ter'.
+</p>
+<p>
+	In codon ratio graph, steelblue bars are ratio from codon sequence you entered and black bars are ratio from organism you selected.
+</p>
+<br />
+
 <script src="{{ url_for('static', filename='script/codon_analyzer/codon_analyzer.js') }}"></script>
 {% endblock %}
