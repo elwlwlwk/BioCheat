@@ -1,4 +1,4 @@
-requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/FileSaver.js"], function(){
+requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/script/codon_analyzer/codon_ratio_graph.js", "static/FileSaver.js"], function(){
 
 class CodonAnalyzer extends React.Component{
 	constructor(props){
@@ -157,8 +157,11 @@ class CodonAnalyzer extends React.Component{
 
 	codon_translation_select_changed(e){
 		$.get("/codon_translation?organism="+e.target.value, function(result){
+			var codon_translation= JSON.parse(result);
+			var amino_seq= this.state.codon_seq.map( (codon) => codon_translation[codon.reduce( (a, b) => a+b )] );
 			this.setState({
 				codon_translation: JSON.parse(result),
+				amino_seq: amino_seq[amino_seq.length-1]? amino_seq: amino_seq.slice(0,-1),
 			});
 		}.bind(this))
 		this.setState({
@@ -173,11 +176,11 @@ class CodonAnalyzer extends React.Component{
 		while(codon_input_temp.length){
 			codon_seq.push(codon_input_temp.splice(0,3));
 		}
-		var amino_seq= codon_seq.map( (codon) => this.state.codon_translation.get(codon.reduce( (a, b) => a+b )) )
+		var amino_seq= codon_seq.map( (codon) => this.state.codon_translation[codon.reduce( (a, b) => a+b )] );
 		this.setState({
 			codon_input: codon_input,
 			codon_seq: codon_seq,
-			amino_seq: amino_seq
+			amino_seq: amino_seq[amino_seq.length-1]? amino_seq: amino_seq.slice(0,-1),
 		})
 	}
 
@@ -212,6 +215,9 @@ class CodonAnalyzer extends React.Component{
 			</div>
 			<div className="col-sm-12">
 				<CodonTranslation {...this.state}/>
+			</div>
+			<div className="col-sm-12">
+				<CodonRatio {...this.state}/>
 			</div>
 		</div>
 	}

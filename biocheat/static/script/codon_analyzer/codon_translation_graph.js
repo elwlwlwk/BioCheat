@@ -32,14 +32,14 @@ var CodonTranslation = function (_React$Component) {
 			function codon_renderer(codon, idx) {
 				return React.createElement(
 					"text",
-					{ fontSize: "10", x: xScale(idx % col), y: yScale(Math.floor(idx / col)), fontFamily: "monospace" },
+					{ fontSize: "10", x: xScale(idx % col), y: yScale(Math.floor(idx / col)), fontFamily: "Courier New, Courier, monospace" },
 					codon
 				);
 			}
 			function amino_renderer(amino, idx) {
 				return React.createElement(
 					"text",
-					{ fontSize: "10", x: xScale(idx % col), y: yScale(Math.floor(idx / col)) + 10, fontFamily: "monospace" },
+					{ fontSize: "10", x: xScale(idx % col), y: yScale(Math.floor(idx / col)) + 10, fontFamily: "Courier New, Courier, monospace" },
 					amino
 				);
 			}
@@ -81,9 +81,7 @@ var CodonTranslation = function (_React$Component) {
 
 			var amino_seq_FASTA = this.props.amino_seq.map(function (amino) {
 				return _this2.state.amino_FASTA_map[amino.toLowerCase()] ? _this2.state.amino_FASTA_map[amino.toLowerCase()] : "";
-			}).reduce(function (a, b) {
-				return a + b;
-			});
+			}).join("");
 			var file = new File([">" + this.props.codon_translation_organism + " translation table\n", amino_seq_FASTA], "codon_translation.txt", { type: "text/plain" });
 			saveAs(file);
 		}
@@ -93,7 +91,7 @@ var CodonTranslation = function (_React$Component) {
 			var _this3 = this;
 
 			var col = 25;
-			var col_size = 20;
+			var col_size = 25;
 			var padding = 30;
 			var width = col * col_size + padding * 2;
 			var height = Math.floor((this.props.codon_seq.length - 1) / col) * 30 + padding * 2;

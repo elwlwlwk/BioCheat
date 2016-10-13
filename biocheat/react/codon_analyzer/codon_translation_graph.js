@@ -12,10 +12,10 @@ ter: "Z",
 
 	render_codon_translation(xScale, yScale, col){
 		function codon_renderer(codon, idx){
-			return <text fontSize="10" x={xScale(idx%col)} y={yScale(Math.floor(idx/col))} fontFamily="monospace">{codon}</text>
+			return <text fontSize="10" x={xScale(idx%col)} y={yScale(Math.floor(idx/col))} fontFamily="Courier New, Courier, monospace">{codon}</text>
 		}
 		function amino_renderer(amino, idx){
-			return <text fontSize="10" x={xScale(idx%col)} y={yScale(Math.floor(idx/col))+10} fontFamily="monospace">{amino}</text>
+			return <text fontSize="10" x={xScale(idx%col)} y={yScale(Math.floor(idx/col))+10} fontFamily="Courier New, Courier, monospace">{amino}</text>
 		}
 		function axis_renderer(x){
 			return <text x={xScale(x)-10} y="10" fontSize="10" fontFamily="monospace">{x}</text>
@@ -30,14 +30,14 @@ ter: "Z",
 	}
 
 	translated_FASTA_download(e){
-		var amino_seq_FASTA= this.props.amino_seq.map( (amino) => this.state.amino_FASTA_map[amino.toLowerCase()]? this.state.amino_FASTA_map[amino.toLowerCase()]:"" ).reduce( (a,b) => a+b );
+		var amino_seq_FASTA= this.props.amino_seq.map( (amino) => this.state.amino_FASTA_map[amino.toLowerCase()]? this.state.amino_FASTA_map[amino.toLowerCase()]:"" ).join("");
 		var file= new File([">"+this.props.codon_translation_organism+" translation table\n", amino_seq_FASTA], "codon_translation.txt", {type:"text/plain"});
 		saveAs(file);
 	}
 
 	render(){
 		var col= 25;
-		var col_size= 20;
+		var col_size= 25;
 		var padding= 30;
 		var width= col*col_size+padding*2;
 		var height= Math.floor((this.props.codon_seq.length-1)/col)*30+ padding*2;
