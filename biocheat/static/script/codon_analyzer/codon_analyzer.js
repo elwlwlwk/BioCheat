@@ -8,7 +8,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/script/codon_analyzer/codon_ratio_graph.js", "static/FileSaver.js"], function () {
+requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/script/codon_analyzer/codon_ratio_graph.js", "static/script/codon_analyzer/codon_adaptation_graph.js", "static/FileSaver.js"], function () {
 	var CodonAnalyzer = function (_React$Component) {
 		_inherits(CodonAnalyzer, _React$Component);
 
@@ -434,6 +434,11 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/sc
 						"div",
 						{ className: "col-sm-12" },
 						React.createElement(CodonRatio, this.state)
+					),
+					React.createElement(
+						"div",
+						{ className: "col-sm-12" },
+						React.createElement(CodonAdaptation, this.state)
 					)
 				);
 			}

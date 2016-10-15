@@ -1,4 +1,4 @@
-requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/script/codon_analyzer/codon_ratio_graph.js", "static/FileSaver.js"], function(){
+requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/script/codon_analyzer/codon_ratio_graph.js", "static/script/codon_analyzer/codon_adaptation_graph.js", "static/FileSaver.js"], function(){
 
 class CodonAnalyzer extends React.Component{
 	constructor(props){
@@ -218,6 +218,9 @@ class CodonAnalyzer extends React.Component{
 			</div>
 			<div className="col-sm-12">
 				<CodonRatio {...this.state}/>
+			</div>
+			<div className="col-sm-12">
+				<CodonAdaptation {...this.state} />
 			</div>
 		</div>
 	}
