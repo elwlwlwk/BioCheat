@@ -1,5 +1,5 @@
 from flask import Flask, render_template, redirect, request
-from dao import DB_CONN
+from dao import get_cursor
 import json
 app = Flask(__name__)
 
@@ -25,25 +25,25 @@ def codon_analyzer():
 
 @app.route('/spsum_list')
 def spsum_list():
-	cursor= DB_CONN.cursor()
+	cursor= get_cursor()
 	cursor.execute('select organism from spsum where organism like %s order by organism', (request.args.get('organism')+'%'))
 	return json.dumps(list(map(lambda x: x['organism'], cursor.fetchall())))
 
 @app.route('/spsum')
 def spsum():
-	cursor= DB_CONN.cursor()
+	cursor= get_cursor()
 	cursor.execute('select organism, spsum from spsum where organism= %s', (request.args.get('organism')))
 	return json.dumps(cursor.fetchone())
 
 @app.route('/codon_translation_list')
 def codon_translation_list():
-	cursor= DB_CONN.cursor()
+	cursor= get_cursor()
 	cursor.execute('select organism from codon_translation')
 	return json.dumps(list(map(lambda x: x['organism'], cursor.fetchall())))
 
 @app.route('/codon_translation')
 def codon_translation():
-	cursor= DB_CONN.cursor()
+	cursor= get_cursor()
 	cursor.execute('select translation_map from codon_translation where organism=%s', (request.args.get('organism')))
 	return cursor.fetchone()['translation_map']
 
