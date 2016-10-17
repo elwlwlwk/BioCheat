@@ -47,6 +47,10 @@ def codon_translation():
 	cursor.execute('select translation_map from codon_translation where organism=%s', (request.args.get('organism')))
 	return cursor.fetchone()['translation_map']
 
+@app.route('/amino_seq_to_codon')
+def amino_seq_to_codon():
+	return render_template('amino_seq_to_codon.html')
+
 if __name__ == '__main__':
 	app.debug= True
 	app.run(host='0.0.0.0', port=80)

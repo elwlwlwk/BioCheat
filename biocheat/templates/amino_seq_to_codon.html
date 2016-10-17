@@ -1,0 +1,15 @@
+{% extends "application.html" %}
+
+{% block title %}
+<title>Amino Acid Sequence to Codon Sequence Converter</title>
+{% endblock %}
+
+{% block imports %}
+{% endblock %}
+
+{% block body %}
+<h1>Amino Acid Sequence to Codon Sequence Converter</h1>
+<hr />
+
+<script src="{{ url_for('static', filename='script/amino_seq_to_codon/amino_seq_to_codon.js') }}"></script>
+{% endblock %}
