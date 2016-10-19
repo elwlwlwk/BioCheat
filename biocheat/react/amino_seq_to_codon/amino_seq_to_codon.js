@@ -9,7 +9,6 @@ class AminoToCodon extends React.Component{
 			codon_translation_organism: "Standard",
 			codon_translation: new Map(),
 			codon_translation_list: [],
-			codon_input: [],
 			codon_seq: [],
 			amino_seq: [],
 			suggest_ratio_list: [],
@@ -161,7 +160,6 @@ class AminoToCodon extends React.Component{
 			var amino_seq= this.state.codon_seq.map( (codon) => codon_translation[codon.reduce( (a, b) => a+b )] );
 			this.setState({
 				codon_translation: JSON.parse(result),
-				amino_seq: amino_seq[amino_seq.length-1]? amino_seq: amino_seq.slice(0,-1),
 			});
 		}.bind(this))
 		this.setState({
@@ -169,18 +167,10 @@ class AminoToCodon extends React.Component{
 		})
 	}
 
-	codon_textarea_changed(e){
-		var codon_input= e.target.value.trim().toUpperCase().replace(/T/g, "U").split("").filter( (d) => ["A","G","U","C"].includes(d) );
-		var codon_input_temp= codon_input.slice(0);
-		var codon_seq=[];
-		while(codon_input_temp.length){
-			codon_seq.push(codon_input_temp.splice(0,3));
-		}
-		var amino_seq= codon_seq.map( (codon) => this.state.codon_translation[codon.reduce( (a, b) => a+b )] );
+	amino_seq_textarea_changed(e){
+		var amino_seq= e.target.value.trim().toUpperCase().replace(/[^A-Z]/g,"").match(/.{1,3}/g).map( (amino) => amino[0]+amino.slice(1,3).toLowerCase());
 		this.setState({
-			codon_input: codon_input,
-			codon_seq: codon_seq,
-			amino_seq: amino_seq[amino_seq.length-1]? amino_seq: amino_seq.slice(0,-1),
+			amino_seq: amino_seq,
 		})
 	}
 
@@ -211,10 +201,10 @@ class AminoToCodon extends React.Component{
 				</div>
 			</div>
 			<div className="col-sm-12">
-				<textarea className="form-control" rows="10" onChange={(e) => this.codon_textarea_changed(e)}></textarea>
+				<textarea className="form-control" rows="10" onChange={(e) => this.amino_seq_textarea_changed(e)}></textarea>
 			</div>
-			<div>
-				<CodonSequence />
+			<div className="col-sm-12">
+				<CodonSequence {...this.state}/>
 			</div>
 		</div>
 	}

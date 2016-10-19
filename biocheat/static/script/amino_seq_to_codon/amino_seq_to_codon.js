@@ -23,7 +23,6 @@ requirejs(["static/script/amino_seq_to_codon/codon_sequence_graph.js"], function
 				codon_translation_organism: "Standard",
 				codon_translation: new Map(),
 				codon_translation_list: [],
-				codon_input: [],
 				codon_seq: [],
 				amino_seq: [],
 				suggest_ratio_list: []
@@ -322,8 +321,7 @@ requirejs(["static/script/amino_seq_to_codon/codon_sequence_graph.js"], function
 						})];
 					});
 					this.setState({
-						codon_translation: JSON.parse(result),
-						amino_seq: amino_seq[amino_seq.length - 1] ? amino_seq : amino_seq.slice(0, -1)
+						codon_translation: JSON.parse(result)
 					});
 				}.bind(this));
 				this.setState({
@@ -331,33 +329,19 @@ requirejs(["static/script/amino_seq_to_codon/codon_sequence_graph.js"], function
 				});
 			}
 		}, {
-			key: "codon_textarea_changed",
-			value: function codon_textarea_changed(e) {
-				var _this6 = this;
-
-				var codon_input = e.target.value.trim().toUpperCase().replace(/T/g, "U").split("").filter(function (d) {
-					return ["A", "G", "U", "C"].includes(d);
-				});
-				var codon_input_temp = codon_input.slice(0);
-				var codon_seq = [];
-				while (codon_input_temp.length) {
-					codon_seq.push(codon_input_temp.splice(0, 3));
-				}
-				var amino_seq = codon_seq.map(function (codon) {
-					return _this6.state.codon_translation[codon.reduce(function (a, b) {
-						return a + b;
-					})];
+			key: "amino_seq_textarea_changed",
+			value: function amino_seq_textarea_changed(e) {
+				var amino_seq = e.target.value.trim().toUpperCase().replace(/[^A-Z]/g, "").match(/.{1,3}/g).map(function (amino) {
+					return amino[0] + amino.slice(1, 3).toLowerCase();
 				});
 				this.setState({
-					codon_input: codon_input,
-					codon_seq: codon_seq,
-					amino_seq: amino_seq[amino_seq.length - 1] ? amino_seq : amino_seq.slice(0, -1)
+					amino_seq: amino_seq
 				});
 			}
 		}, {
 			key: "render",
 			value: function render() {
-				var _this7 = this;
+				var _this6 = this;
 
 				return React.createElement(
 					"div",
@@ -422,13 +406,13 @@ requirejs(["static/script/amino_seq_to_codon/codon_sequence_graph.js"], function
 						"div",
 						{ className: "col-sm-12" },
 						React.createElement("textarea", { className: "form-control", rows: "10", onChange: function onChange(e) {
-								return _this7.codon_textarea_changed(e);
+								return _this6.amino_seq_textarea_changed(e);
 							} })
 					),
 					React.createElement(
 						"div",
-						null,
-						React.createElement(CodonSequence, null)
+						{ className: "col-sm-12" },
+						React.createElement(CodonSequence, this.state)
 					)
 				);
 			}
