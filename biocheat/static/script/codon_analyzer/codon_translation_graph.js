@@ -82,7 +82,7 @@ var CodonTranslation = function (_React$Component) {
 			var amino_seq_FASTA = this.props.amino_seq.map(function (amino) {
 				return _this2.state.amino_FASTA_map[amino.toLowerCase()] ? _this2.state.amino_FASTA_map[amino.toLowerCase()] : "";
 			}).join("");
-			var file = new File([">" + this.props.codon_translation_organism + " translation table\n", amino_seq_FASTA], "codon_translation.txt", { type: "text/plain" });
+			var file = new File([">" + this.props.codon_translation_organism + " translation table\n", amino_seq_FASTA], "codon_translation.faa", { type: "text/plain" });
 			saveAs(file);
 		}
 	}, {

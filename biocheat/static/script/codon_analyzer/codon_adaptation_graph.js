@@ -70,12 +70,12 @@ var CodonAdaptation = function (_React$Component) {
 							null,
 							React.createElement(
 								"text",
-								{ x: xScale(idx) - 11, y: yScale(y_pos), fontSize: "10" },
+								{ x: xScale(idx) - 11, y: yScale(y_pos) + max_bar_height - barScale(input_adaptation_index[codon]), fontSize: "10" },
 								input_adaptation_index[codon]
 							),
 							React.createElement(
 								"text",
-								{ x: xScale(idx) + 11, y: yScale(y_pos), fontSize: "10" },
+								{ x: xScale(idx) + 11, y: yScale(y_pos) + max_bar_height - barScale(selected_adaptation_index[codon]), fontSize: "10" },
 								selected_adaptation_index[codon]
 							),
 							React.createElement("rect", { x: xScale(idx) - 3, y: yScale(y_pos) + max_bar_height - barScale(input_adaptation_index[codon]) + 5, width: "10", height: barScale(input_adaptation_index[codon]), fill: "steelblue" }),
