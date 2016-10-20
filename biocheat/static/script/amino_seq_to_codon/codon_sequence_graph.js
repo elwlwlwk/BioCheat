@@ -22,7 +22,8 @@ var CodonSequence = function (_React$Component) {
 			col_size: 45,
 			col: 20,
 			padding: 30,
-			top_padding: 50
+			top_padding: 50,
+			render_probability: true
 		};
 		return _this;
 	}
@@ -54,11 +55,18 @@ var CodonSequence = function (_React$Component) {
 						React.createElement(
 							"text",
 							{ x: xScale(idx % _this2.state.col) + 20, y: yScale(Math.floor(idx / _this2.state.col)) + (codon_idx + 1) * 15, fontSize: "8", fontFamily: "Courier, monospace" },
-							parseInt(selected_adaptation_index[codon]) ? parseInt(selected_adaptation_index[codon]) + "%" : null
+							parseInt(selected_adaptation_index[codon]) && _this2.state.render_probability ? parseInt(selected_adaptation_index[codon]) + "%" : null
 						)
 					);
 				}) : null
 			);
+		}
+	}, {
+		key: "render_probability_changed",
+		value: function render_probability_changed(e) {
+			this.setState({
+				render_probability: e.target.checked
+			});
 		}
 	}, {
 		key: "render",
@@ -125,14 +133,26 @@ var CodonSequence = function (_React$Component) {
 			}.bind(this);
 
 			return React.createElement(
-				"svg",
-				{ width: width, height: height },
-				[5, 10, 15, 20].map(function (x) {
-					return axis_renderer(x);
-				}),
-				this.props.amino_seq.map(function (amino, idx) {
-					return _this3.render_amino_seq(amino, idx, xScale, yScale, usage_table, selected_adaptation_index);
-				})
+				"div",
+				null,
+				React.createElement(
+					"div",
+					{ className: "form-group" },
+					React.createElement("input", { type: "checkbox", onChange: function onChange(e) {
+							return _this3.render_probability_changed(e);
+						}, checked: this.state.render_probability }),
+					"Render Probability"
+				),
+				React.createElement(
+					"svg",
+					{ width: width, height: height },
+					[5, 10, 15, 20].map(function (x) {
+						return axis_renderer(x);
+					}),
+					this.props.amino_seq.map(function (amino, idx) {
+						return _this3.render_amino_seq(amino, idx, xScale, yScale, usage_table, selected_adaptation_index);
+					})
+				)
 			);
 		}
 	}]);

@@ -12,6 +12,7 @@ class AminoToCodon extends React.Component{
 			codon_seq: [],
 			amino_seq: [],
 			suggest_ratio_list: [],
+			amino_input_format: "3_letter",
 		}
 	}
 
@@ -168,10 +169,47 @@ class AminoToCodon extends React.Component{
 	}
 
 	amino_seq_textarea_changed(e){
-		var amino_seq= e.target.value.trim().toUpperCase().replace(/[^A-Z]/g,"").match(/.{1,3}/g).map( (amino) => amino[0]+amino.slice(1,3).toLowerCase());
+		var amino_seq;
+		if(this.state.amino_input_format== "1_letter"){
+			var FASTA_amino_map= {"A":"Ala","C":"Cys","D":"Asp","E":"Glu","F":"Phe","G":"Gly","H":"His","I":"Ile","K":"Lys","L":"Leu","M":"Met","N":"Asn","P":"Pro","Q":"Gln","R":"Arg","S":"Ser","T":"Thr","V":"Val","W":"Trp","Y":"Tyr","Z":"Ter"}
+			amino_seq= e.target.value.trim().toUpperCase().replace(/[^A-Z]/g,"").split("").map( (letter) => FASTA_amino_map[letter]?FASTA_amino_map[letter]:letter );
+		}
+		else{
+			amino_seq= e.target.value.trim().toUpperCase().replace(/[^A-Z]/g,"").match(/.{1,3}/g).map( (amino) => amino[0]+amino.slice(1,3).toLowerCase());
+		}
 		this.setState({
 			amino_seq: amino_seq,
+			amino_seq_input: e.target.value,
 		})
+	}
+
+	amino_input_format_changed(e){
+		var amino_seq;
+		if(e.target.value== "1_letter"){
+			var FASTA_amino_map= {"A":"Ala","C":"Cys","D":"Asp","E":"Glu","F":"Phe","G":"Gly","H":"His","I":"Ile","K":"Lys","L":"Leu","M":"Met","N":"Asn","P":"Pro","Q":"Gln","R":"Arg","S":"Ser","T":"Thr","V":"Val","W":"Trp","Y":"Tyr","Z":"Ter"}
+			amino_seq= this.state.amino_seq_input.trim().toUpperCase().replace(/[^A-Z]/g,"").split("").map( (letter) => FASTA_amino_map[letter]?FASTA_amino_map[letter]:letter );
+		}
+		else{
+			amino_seq= this.state.amino_seq_input.trim().toUpperCase().replace(/[^A-Z]/g,"").match(/.{1,3}/g).map( (amino) => amino[0]+amino.slice(1,3).toLowerCase());
+		}
+		this.setState({
+			amino_seq: amino_seq,
+			amino_input_format: e.target.value,
+		})
+	}
+
+	FASTA_file_changed(e){
+		var reader= new FileReader();
+		reader.onload= function (e){
+			var FASTA_amino_map= {"A":"Ala","C":"Cys","D":"Asp","E":"Glu","F":"Phe","G":"Gly","H":"His","I":"Ile","K":"Lys","L":"Leu","M":"Met","N":"Asn","P":"Pro","Q":"Gln","R":"Arg","S":"Ser","T":"Thr","V":"Val","W":"Trp","Y":"Tyr","Z":"Ter"}
+			this.setState({
+				amino_seq_input: e.target.result.replace(/^>.+\n/,"").trim(),
+				amino_seq: e.target.result.replace(/^>.+\n/,"").trim().toUpperCase().replace(/[^A-Z]/g,"").split("").map( (letter) => FASTA_amino_map[letter]?FASTA_amino_map[letter]:letter ),
+				amino_input_format: "1_letter",
+			})
+
+		}.bind(this);
+		reader.readAsText(e.target.files[0]);
 	}
 
 	render(){
@@ -201,7 +239,17 @@ class AminoToCodon extends React.Component{
 				</div>
 			</div>
 			<div className="col-sm-12">
-				<textarea className="form-control" rows="10" onChange={(e) => this.amino_seq_textarea_changed(e)}></textarea>
+				<div className="col-sm-3">
+					<select className="form-control" value={this.state.amino_input_format} onChange={ (e) => this.amino_input_format_changed(e) }>
+						<option value="3_letter"> 3 letter format </option>
+						<option value="1_letter"> 1 letter format </option>
+					</select>
+				</div>
+				<textarea className="form-control" rows="10" onChange={(e) => this.amino_seq_textarea_changed(e)} value={this.state.amino_seq_input}></textarea>
+				<div className="form_group">
+					<label>Upload FASTA file</label>
+					<input type="file" onChange={ (e) => this.FASTA_file_changed(e) } />
+				</div>
 			</div>
 			<div className="col-sm-12">
 				<CodonSequence {...this.state}/>

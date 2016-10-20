@@ -8,6 +8,7 @@ class CodonSequence extends React.Component{
 			col: 20,
 			padding: 30,
 			top_padding: 50,
+			render_probability: true,
 		}
 	}
 
@@ -22,11 +23,17 @@ class CodonSequence extends React.Component{
 						{codon}
 					</text>
 					<text x={xScale(idx%this.state.col)+20} y={yScale(Math.floor(idx/this.state.col))+ (codon_idx+1)*15} fontSize="8" fontFamily="Courier, monospace">
-						{parseInt(selected_adaptation_index[codon])? parseInt(selected_adaptation_index[codon])+"%":null}
+						{parseInt(selected_adaptation_index[codon])&&this.state.render_probability? parseInt(selected_adaptation_index[codon])+"%":null}
 					</text>
 				</g>
 			}): null}
 		</g>
+	}
+
+	render_probability_changed(e){
+		this.setState({
+			render_probability: e.target.checked,
+		})
 	}
 
 	render(){
@@ -77,9 +84,14 @@ class CodonSequence extends React.Component{
 			return <text x={xScale(x)-30} y={this.state.top_padding-15} fontSize="10" fontFamily="monospace">{x}</text>
 		}.bind(this)
 
-		return <svg width={width} height={height}>
-			{[5,10,15,20].map( (x) => axis_renderer(x) )}
-			{this.props.amino_seq.map( (amino, idx) => this.render_amino_seq(amino, idx, xScale, yScale, usage_table, selected_adaptation_index) )}
-		</svg>
+		return <div>
+			<div className="form-group">
+				<input type="checkbox" onChange={(e) => this.render_probability_changed(e)} checked={this.state.render_probability}/>Render Probability
+			</div>
+			<svg width={width} height={height}>
+				{[5,10,15,20].map( (x) => axis_renderer(x) )}
+				{this.props.amino_seq.map( (amino, idx) => this.render_amino_seq(amino, idx, xScale, yScale, usage_table, selected_adaptation_index) )}
+			</svg>
+		</div>
 	}
 }
