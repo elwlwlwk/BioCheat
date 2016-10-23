@@ -13,6 +13,7 @@ class AminoToCodon extends React.Component{
 			amino_seq: [],
 			suggest_ratio_list: [],
 			amino_input_format: "3_letter",
+			render_manner: "consider",
 		}
 	}
 
@@ -212,6 +213,12 @@ class AminoToCodon extends React.Component{
 		reader.readAsText(e.target.files[0]);
 	}
 
+	render_manner_changed(e){
+		this.setState({
+			render_manner: e.target.value,
+		})
+	}
+
 	render(){
 		return <div className="col-sm-12">
 			<div className="col-sm-12 form-group">
@@ -249,6 +256,16 @@ class AminoToCodon extends React.Component{
 				<div className="form_group">
 					<label>Upload FASTA file</label>
 					<input type="file" onChange={ (e) => this.FASTA_file_changed(e) } />
+				</div>
+			</div>
+			<div className="col-sm-12">
+				<label className="col-sm-3">Convert Manner</label>
+				<div className="col-sm-3">
+					<select className="form-control" value={this.state.render_manner} onChange={ (e) => this.render_manner_changed(e) }>
+						<option value="consider"> Consider Adaption Index </option>
+						<option value="highest"> Highest Adaption Index only </option>
+						<option value="show_all"> Show All Probability </option>
+					</select>
 				</div>
 			</div>
 			<div className="col-sm-12">

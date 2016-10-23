@@ -26,7 +26,8 @@ requirejs(["static/script/amino_seq_to_codon/codon_sequence_graph.js"], function
 				codon_seq: [],
 				amino_seq: [],
 				suggest_ratio_list: [],
-				amino_input_format: "3_letter"
+				amino_input_format: "3_letter",
+				render_manner: "consider"
 			};
 			return _this;
 		}
@@ -384,6 +385,13 @@ requirejs(["static/script/amino_seq_to_codon/codon_sequence_graph.js"], function
 				reader.readAsText(e.target.files[0]);
 			}
 		}, {
+			key: "render_manner_changed",
+			value: function render_manner_changed(e) {
+				this.setState({
+					render_manner: e.target.value
+				});
+			}
+		}, {
 			key: "render",
 			value: function render() {
 				var _this6 = this;
@@ -484,6 +492,40 @@ requirejs(["static/script/amino_seq_to_codon/codon_sequence_graph.js"], function
 							React.createElement("input", { type: "file", onChange: function onChange(e) {
 									return _this6.FASTA_file_changed(e);
 								} })
+						)
+					),
+					React.createElement(
+						"div",
+						{ className: "col-sm-12" },
+						React.createElement(
+							"label",
+							{ className: "col-sm-3" },
+							"Convert Manner"
+						),
+						React.createElement(
+							"div",
+							{ className: "col-sm-3" },
+							React.createElement(
+								"select",
+								{ className: "form-control", value: this.state.render_manner, onChange: function onChange(e) {
+										return _this6.render_manner_changed(e);
+									} },
+								React.createElement(
+									"option",
+									{ value: "consider" },
+									" Consider Adaption Index "
+								),
+								React.createElement(
+									"option",
+									{ value: "highest" },
+									" Highest Adaption Index only "
+								),
+								React.createElement(
+									"option",
+									{ value: "show_all" },
+									" Show All Probability "
+								)
+							)
 						)
 					),
 					React.createElement(

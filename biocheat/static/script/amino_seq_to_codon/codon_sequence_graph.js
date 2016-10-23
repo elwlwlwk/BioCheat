@@ -22,8 +22,7 @@ var CodonSequence = function (_React$Component) {
 			col_size: 45,
 			col: 20,
 			padding: 30,
-			top_padding: 50,
-			render_probability: true
+			top_padding: 50
 		};
 		return _this;
 	}
@@ -31,8 +30,80 @@ var CodonSequence = function (_React$Component) {
 	_createClass(CodonSequence, [{
 		key: "render_amino_seq",
 		value: function render_amino_seq(amino, idx, xScale, yScale, usage_table, selected_adaptation_index) {
-			var _this2 = this;
+			var render_codons = function () {
+				var _this2 = this;
 
+				switch (this.props.render_manner) {
+					case "show_all":
+						return usage_table[amino] ? usage_table[amino].sort(function (a, b) {
+							return parseFloat(selected_adaptation_index[b]) - parseFloat(selected_adaptation_index[a]);
+						}).map(function (codon, codon_idx) {
+							return React.createElement(
+								"g",
+								null,
+								React.createElement(
+									"text",
+									{ x: xScale(idx % _this2.state.col), y: yScale(Math.floor(idx / _this2.state.col)) + (codon_idx + 1) * 15, fontSize: "10", fontFamily: "Courier, monospace" },
+									codon
+								),
+								React.createElement(
+									"text",
+									{ x: xScale(idx % _this2.state.col) + 20, y: yScale(Math.floor(idx / _this2.state.col)) + (codon_idx + 1) * 15, fontSize: "8", fontFamily: "Courier, monospace" },
+									parseInt(selected_adaptation_index[codon]) && _this2.state.render_probability ? parseInt(selected_adaptation_index[codon]) + "%" : null
+								)
+							);
+						}) : null;
+					case "highest":
+						return usage_table[amino] ? usage_table[amino].sort(function (a, b) {
+							return parseFloat(selected_adaptation_index[b]) - parseFloat(selected_adaptation_index[a]);
+						}).slice(0, 1).map(function (codon, codon_idx) {
+							return React.createElement(
+								"g",
+								null,
+								React.createElement(
+									"text",
+									{ x: xScale(idx % _this2.state.col), y: yScale(Math.floor(idx / _this2.state.col)) + (codon_idx + 1) * 15, fontSize: "10", fontFamily: "Courier, monospace" },
+									codon
+								),
+								React.createElement(
+									"text",
+									{ x: xScale(idx % _this2.state.col) + 20, y: yScale(Math.floor(idx / _this2.state.col)) + (codon_idx + 1) * 15, fontSize: "8", fontFamily: "Courier, monospace" },
+									parseInt(selected_adaptation_index[codon]) && _this2.state.render_probability ? parseInt(selected_adaptation_index[codon]) + "%" : null
+								)
+							);
+						}) : null;
+					case "consider":
+						var select_codon = function select_codon(codons) {
+							var random = Math.random() * 100;
+							var cursor = 0;
+							var selected = "";
+							for (var i = 0; i < codons.length; i++) {
+								cursor += parseFloat(selected_adaptation_index[codons[i]]);
+								selected = codons[i];
+								if (random < cursor) {
+									break;
+								}
+							}
+							return [selected];
+						};
+						return usage_table[amino] ? select_codon(usage_table[amino]).map(function (codon, codon_idx) {
+							return React.createElement(
+								"g",
+								null,
+								React.createElement(
+									"text",
+									{ x: xScale(idx % _this2.state.col), y: yScale(Math.floor(idx / _this2.state.col)) + (codon_idx + 1) * 15, fontSize: "10", fontFamily: "Courier, monospace" },
+									codon
+								),
+								React.createElement(
+									"text",
+									{ x: xScale(idx % _this2.state.col) + 20, y: yScale(Math.floor(idx / _this2.state.col)) + (codon_idx + 1) * 15, fontSize: "8", fontFamily: "Courier, monospace" },
+									parseInt(selected_adaptation_index[codon]) && _this2.state.render_probability ? parseInt(selected_adaptation_index[codon]) + "%" : null
+								)
+							);
+						}) : null;
+				}
+			}.bind(this);
 			return React.createElement(
 				"g",
 				null,
@@ -41,24 +112,7 @@ var CodonSequence = function (_React$Component) {
 					{ x: xScale(idx % this.state.col), y: yScale(Math.floor(idx / this.state.col)), fontSize: "10", fontFamily: "Courier, monospace" },
 					amino
 				),
-				usage_table[amino] ? usage_table[amino].sort(function (a, b) {
-					return parseFloat(selected_adaptation_index[b]) - parseFloat(selected_adaptation_index[a]);
-				}).map(function (codon, codon_idx) {
-					return React.createElement(
-						"g",
-						null,
-						React.createElement(
-							"text",
-							{ x: xScale(idx % _this2.state.col), y: yScale(Math.floor(idx / _this2.state.col)) + (codon_idx + 1) * 15, fontSize: "10", fontFamily: "Courier, monospace" },
-							codon
-						),
-						React.createElement(
-							"text",
-							{ x: xScale(idx % _this2.state.col) + 20, y: yScale(Math.floor(idx / _this2.state.col)) + (codon_idx + 1) * 15, fontSize: "8", fontFamily: "Courier, monospace" },
-							parseInt(selected_adaptation_index[codon]) && _this2.state.render_probability ? parseInt(selected_adaptation_index[codon]) + "%" : null
-						)
-					);
-				}) : null
+				render_codons()
 			);
 		}
 	}, {
@@ -117,9 +171,13 @@ var CodonSequence = function (_React$Component) {
 
 			var width = this.state.col_size * this.state.col + this.state.padding * 2;
 			var row_cnt = this.props.amino_seq.length ? Math.floor((this.props.amino_seq.length - 1) / this.state.col) + 1 : 0;
-			var height = row_cnt * (this.state.row_size + d3.max(Object.keys(usage_table).map(function (key) {
-				return usage_table[key].length;
-			})) * this.state.codon_row_size) + this.state.padding + this.state.top_padding;
+			if (this.props.render_manner == "show_all") {
+				var height = row_cnt * (this.state.row_size + d3.max(Object.keys(usage_table).map(function (key) {
+					return usage_table[key].length;
+				})) * this.state.codon_row_size) + this.state.padding + this.state.top_padding;
+			} else {
+				var height = row_cnt * this.state.row_size + this.state.padding + this.state.top_padding;
+			}
 
 			var xScale = d3.scaleLinear().domain([0, this.state.col]).range([this.state.padding, width - this.state.padding]);
 			var yScale = d3.scaleLinear().domain([0, row_cnt]).range([this.state.top_padding, height - this.state.padding]);

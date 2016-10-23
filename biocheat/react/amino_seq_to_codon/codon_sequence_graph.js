@@ -8,25 +8,65 @@ class CodonSequence extends React.Component{
 			col: 20,
 			padding: 30,
 			top_padding: 50,
-			render_probability: true,
 		}
 	}
 
 	render_amino_seq(amino, idx, xScale, yScale, usage_table, selected_adaptation_index){
+		var render_codons= function(){
+			switch(this.props.render_manner){
+				case "show_all":
+					return usage_table[amino]? usage_table[amino].sort( (a, b) => parseFloat(selected_adaptation_index[b])- parseFloat(selected_adaptation_index[a])).map( (codon, codon_idx) => {
+						return <g>
+							<text x={xScale(idx%this.state.col)} y={yScale(Math.floor(idx/this.state.col))+ (codon_idx+1)*15} fontSize="10" fontFamily="Courier, monospace">
+								{codon}
+							</text>
+							<text x={xScale(idx%this.state.col)+20} y={yScale(Math.floor(idx/this.state.col))+ (codon_idx+1)*15} fontSize="8" fontFamily="Courier, monospace">
+								{parseInt(selected_adaptation_index[codon])&&this.state.render_probability? parseInt(selected_adaptation_index[codon])+"%":null}
+							</text>
+						</g>
+					}): null
+				case "highest":
+					return usage_table[amino]? usage_table[amino].sort( (a, b) => parseFloat(selected_adaptation_index[b])- parseFloat(selected_adaptation_index[a])).slice(0,1).map( (codon, codon_idx) => {
+						return <g>
+							<text x={xScale(idx%this.state.col)} y={yScale(Math.floor(idx/this.state.col))+ (codon_idx+1)*15} fontSize="10" fontFamily="Courier, monospace">
+								{codon}
+							</text>
+							<text x={xScale(idx%this.state.col)+20} y={yScale(Math.floor(idx/this.state.col))+ (codon_idx+1)*15} fontSize="8" fontFamily="Courier, monospace">
+								{parseInt(selected_adaptation_index[codon])&&this.state.render_probability? parseInt(selected_adaptation_index[codon])+"%":null}
+							</text>
+						</g>
+					}): null
+				case "consider":
+					var select_codon= function(codons){
+						var random=Math.random()*100;
+						var cursor=0;
+						var selected="";
+						for(var i=0; i< codons.length; i++){
+							cursor+= parseFloat(selected_adaptation_index[codons[i]]);
+							selected=codons[i]
+							if(random<cursor){
+								break;
+							}
+						}
+						return [selected];
+					}
+					return usage_table[amino]? select_codon(usage_table[amino]).map( (codon, codon_idx) => {
+						return <g>
+							<text x={xScale(idx%this.state.col)} y={yScale(Math.floor(idx/this.state.col))+ (codon_idx+1)*15} fontSize="10" fontFamily="Courier, monospace">
+								{codon}
+							</text>
+							<text x={xScale(idx%this.state.col)+20} y={yScale(Math.floor(idx/this.state.col))+ (codon_idx+1)*15} fontSize="8" fontFamily="Courier, monospace">
+								{parseInt(selected_adaptation_index[codon])&&this.state.render_probability? parseInt(selected_adaptation_index[codon])+"%":null}
+							</text>
+						</g>
+					}): null
+			}
+		}.bind(this);
 		return <g>
 			<text x={xScale(idx%this.state.col)} y={yScale(Math.floor(idx/this.state.col))} fontSize="10" fontFamily="Courier, monospace">
 				{amino}
 			</text>
-			{usage_table[amino]? usage_table[amino].sort( (a, b) => parseFloat(selected_adaptation_index[b])- parseFloat(selected_adaptation_index[a])).map( (codon, codon_idx) => {
-				return <g>
-					<text x={xScale(idx%this.state.col)} y={yScale(Math.floor(idx/this.state.col))+ (codon_idx+1)*15} fontSize="10" fontFamily="Courier, monospace">
-						{codon}
-					</text>
-					<text x={xScale(idx%this.state.col)+20} y={yScale(Math.floor(idx/this.state.col))+ (codon_idx+1)*15} fontSize="8" fontFamily="Courier, monospace">
-						{parseInt(selected_adaptation_index[codon])&&this.state.render_probability? parseInt(selected_adaptation_index[codon])+"%":null}
-					</text>
-				</g>
-			}): null}
+			{render_codons()}
 		</g>
 	}
 
@@ -75,10 +115,16 @@ class CodonSequence extends React.Component{
 
 		var width= this.state.col_size* this.state.col+ this.state.padding*2;
 		var row_cnt= this.props.amino_seq.length? Math.floor((this.props.amino_seq.length-1)/this.state.col)+1: 0
-		var height= row_cnt*(this.state.row_size+ d3.max(Object.keys(usage_table).map( (key) => usage_table[key].length ))* this.state.codon_row_size)+ this.state.padding+ this.state.top_padding;
+		if(this.props.render_manner == "show_all"){
+			var height= row_cnt*(this.state.row_size+ d3.max(Object.keys(usage_table).map( (key) => usage_table[key].length ))* this.state.codon_row_size)+ this.state.padding+ this.state.top_padding;
+		}
+		else{
+			var height= row_cnt*(this.state.row_size)+ this.state.padding+ this.state.top_padding;
+		}
 
 		var xScale= d3.scaleLinear().domain([0, this.state.col]).range([this.state.padding, width- this.state.padding]);
 		var yScale= d3.scaleLinear().domain([0, row_cnt]).range([this.state.top_padding, height-this.state.padding]);
+
 
 		var axis_renderer= function (x){
 			return <text x={xScale(x)-30} y={this.state.top_padding-15} fontSize="10" fontFamily="monospace">{x}</text>
