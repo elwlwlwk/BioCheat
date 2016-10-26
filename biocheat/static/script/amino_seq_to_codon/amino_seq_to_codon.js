@@ -8,7 +8,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-requirejs(["static/script/amino_seq_to_codon/codon_sequence_graph.js"], function () {
+requirejs(["static/script/amino_seq_to_codon/codon_sequence_graph.js", "static/FileSaver.js"], function () {
 	var AminoToCodon = function (_React$Component) {
 		_inherits(AminoToCodon, _React$Component);
 
@@ -27,6 +27,7 @@ requirejs(["static/script/amino_seq_to_codon/codon_sequence_graph.js"], function
 				amino_seq: [],
 				suggest_ratio_list: [],
 				amino_input_format: "3_letter",
+				amino_seq_input: "",
 				render_manner: "consider"
 			};
 			return _this;
@@ -306,6 +307,7 @@ requirejs(["static/script/amino_seq_to_codon/codon_sequence_graph.js"], function
 						return a + b;
 					});
 					this.setState({
+						codon_ratio_organism: JSON.parse(result)["organism"],
 						codon_ratio: new Map(d3.zip(codon_label, spsum.map(function (d) {
 							return (1000 * d / codon_total).toFixed(3);
 						})))

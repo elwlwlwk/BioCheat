@@ -1,4 +1,4 @@
-requirejs(["static/script/amino_seq_to_codon/codon_sequence_graph.js"], function(){
+requirejs(["static/script/amino_seq_to_codon/codon_sequence_graph.js", "static/FileSaver.js"], function(){
 
 class AminoToCodon extends React.Component{
 	constructor(props){
@@ -13,6 +13,7 @@ class AminoToCodon extends React.Component{
 			amino_seq: [],
 			suggest_ratio_list: [],
 			amino_input_format: "3_letter",
+			amino_seq_input: "",
 			render_manner: "consider",
 		}
 	}
@@ -151,6 +152,7 @@ class AminoToCodon extends React.Component{
 			var spsum= JSON.parse(result)["spsum"].trim().split(" ").map( (d) => parseInt(d) );
 			var codon_total= spsum.reduce( (a,b) => a+b );
 			this.setState({
+				codon_ratio_organism: JSON.parse(result)["organism"],
 				codon_ratio: new Map(d3.zip(codon_label, spsum.map( (d) => (1000*d/codon_total).toFixed(3) ))),
 			});
 		}.bind(this));
