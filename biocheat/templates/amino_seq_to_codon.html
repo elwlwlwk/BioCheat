@@ -10,6 +10,31 @@
 {% block body %}
 <h1>Amino Acid Sequence to Codon Sequence Converter</h1>
 <hr />
+<p>
+It will convert your amino acid sequence to codon sequence according to organism's codon adaptation index you selected. You can select convert manner.
+</p>
+<h3>How to use</h3>
+<p>
+	Search organism to compare. <b>You need to input least 3 characters to search organism in our database</b> (datasets are from ftp.kazusa.or.jp/pub/codon/current/). Select translation table. You can change values clicking show button. 
+</p>
+<p>
+	Input your amino acid sequence. Character except alphabet will be ignored (not case sensitive). You can select 3 letter format (Ala for Alanine) or 1 letter format (A for Alanine). Or you can just upload your fasta file.
+</p>
+<p>
+	You can select convert manner. 'Consider Adation Index' will convert according to selected organism's Codon Ratio Table. 'Highest Adaption Index only' will choose highest adaption index if there's many candidates. 'Show All Probability' will show you all probability.
+	<br />
+	<h4>Example</h4>
+	If Alanine is translated by GCU and GCC. And each adaption indexes are 1 and 0.5
+	<pre>
+Consider Adaption Index:
+	Ala-Ala-Ala -> GCU-GCC-GCU
+Hieghest Adaption Index only:
+	Ala-Ala-Ala -> GCU-GCU-GCU</pre>
+</p>
+<p>
+	You can download resut as FASTA file.
+</p>
+<br />
 
 <script src="{{ url_for('static', filename='script/amino_seq_to_codon/amino_seq_to_codon.js') }}"></script>
 {% endblock %}
