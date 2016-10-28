@@ -40,8 +40,8 @@ class CodonAdaptation extends React.Component{
 			return <g>
 				{aminos.map( (amino) => usage_table[amino] ).reduce( (a, b) => a.concat(b) ).map( (codon, idx) => {
 					return <g>
-						<text x={xScale(idx)-11} y={yScale(y_pos)} fontSize="10">{input_adaptation_index[codon]}</text>
-						<text x={xScale(idx)+11} y={yScale(y_pos)} fontSize="10">{selected_adaptation_index[codon]}</text>
+						<text x={xScale(idx)-11} y={yScale(y_pos)+max_bar_height-barScale(input_adaptation_index[codon])} fontSize="10">{input_adaptation_index[codon]}</text>
+						<text x={xScale(idx)+11} y={yScale(y_pos)+max_bar_height-barScale(selected_adaptation_index[codon])} fontSize="10">{selected_adaptation_index[codon]}</text>
 						<rect x={xScale(idx)-3} y={yScale(y_pos)+max_bar_height-barScale(input_adaptation_index[codon])+5} width="10" height={barScale(input_adaptation_index[codon])} fill="steelblue"></rect>
 						<rect x={xScale(idx)+13} y={yScale(y_pos)+max_bar_height-barScale(selected_adaptation_index[codon])+5} width="10" height={barScale(selected_adaptation_index[codon])}>></rect>
 						<text x={xScale(idx)} y={yScale(y_pos)+ max_bar_height+15} fontSize="10">{codon}</text>
