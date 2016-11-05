@@ -15,10 +15,15 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var RestrictGraph = function (_React$Component) {
 	_inherits(RestrictGraph, _React$Component);
 
-	function RestrictGraph() {
+	function RestrictGraph(props) {
 		_classCallCheck(this, RestrictGraph);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(RestrictGraph).apply(this, arguments));
+		var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(RestrictGraph).call(this, props));
+
+		_this.state = {
+			bias: 0
+		};
+		return _this;
 	}
 
 	_createClass(RestrictGraph, [{
@@ -250,20 +255,50 @@ var RestrictGraph = function (_React$Component) {
 					return React.createElement(
 						"div",
 						null,
-						React.createElement(LinearRestrictMap, _extends({}, this.props, { restrict_map: restrict_map, fragScale: fragScale, padding: 30, label: label }))
+						React.createElement(LinearRestrictMap, _extends({}, this.props, this.state, { restrict_map: restrict_map, fragScale: fragScale, padding: 30, label: label }))
 					);
 				case "circular":
 					return React.createElement(
 						"div",
 						null,
-						React.createElement(CircularRestrictMap, _extends({}, this.props, { restrict_map: restrict_map, width: 250, height: 250, padding: 25, label: label }))
+						React.createElement(CircularRestrictMap, _extends({}, this.props, this.state, { restrict_map: restrict_map, width: 250, height: 250, padding: 25, label: label }))
+					);
+			}
+		}
+	}, {
+		key: "bias_changed",
+		value: function bias_changed(e) {
+			this.setState({
+				bias: e.target.value
+			});
+		}
+	}, {
+		key: "render_bias",
+		value: function render_bias() {
+			var _this3 = this;
+
+			switch (this.props.DNA_form) {
+				case "linear":
+					return React.createElement("div", null);
+				case "circular":
+					return React.createElement(
+						"div",
+						{ style: { width: "150px" } },
+						React.createElement(
+							"label",
+							null,
+							"Bias: "
+						),
+						React.createElement("input", { type: "range", step: "any", min: "0", max: Math.PI * 2, defaultValue: 0, onChange: function onChange(e) {
+								return _this3.bias_changed(e);
+							} })
 					);
 			}
 		}
 	}, {
 		key: "render",
 		value: function render() {
-			var _this3 = this;
+			var _this4 = this;
 
 			var col_length = [];
 			var cols = new Set(this.props.markers.map(function (marker) {
@@ -274,7 +309,7 @@ var RestrictGraph = function (_React$Component) {
 			}
 			var frag_padding = 25;
 			cols.forEach(function (col) {
-				return col_length.push(_this3.props.markers.filter(function (marker) {
+				return col_length.push(_this4.props.markers.filter(function (marker) {
 					return marker[0] == col;
 				}).map(function (marker) {
 					return Math.round(parseFloat(marker[2]));
@@ -285,7 +320,7 @@ var RestrictGraph = function (_React$Component) {
 
 			var height = this.props.row_padding * cols.size + this.props.padding * 2;
 			var fragScale = d3.scaleLinear().domain([0, d3.max(col_length)]).range([0, this.props.width - this.props.padding - this.props.label_padding - frag_padding * d3.max([].concat(_toConsumableArray(cols)).map(function (col) {
-				return _this3.props.markers.filter(function (marker) {
+				return _this4.props.markers.filter(function (marker) {
 					return marker[0] == col;
 				});
 			}), function (col) {
@@ -312,6 +347,11 @@ var RestrictGraph = function (_React$Component) {
 				React.createElement(
 					"div",
 					null,
+					this.render_bias()
+				),
+				React.createElement(
+					"div",
+					null,
 					this.render_restrict_map(restrict_maps[0], fragScale, "restrict_map")
 				),
 				React.createElement(
@@ -321,7 +361,7 @@ var RestrictGraph = function (_React$Component) {
 						"div",
 						{ id: "candidate_div", className: "collapse" },
 						restrict_maps.map(function (restrict_map, idx) {
-							return _this3.render_restrict_map(restrict_map, fragScale, idx + 1);
+							return _this4.render_restrict_map(restrict_map, fragScale, idx + 1);
 						})
 					),
 					React.createElement(
@@ -382,26 +422,26 @@ var FragmentGraph = function (_React$Component2) {
 	}, {
 		key: "render",
 		value: function render() {
-			var _this5 = this;
+			var _this6 = this;
 
 			var markers = this.props.markers.filter(function (marker) {
-				return _this5.props.cols.has(marker[0]);
+				return _this6.props.cols.has(marker[0]);
 			});
 			return React.createElement(
 				"g",
 				null,
 				this.props.marker_label.filter(function (label) {
-					return _this5.props.cols.has(label[0]);
+					return _this6.props.cols.has(label[0]);
 				}).map(function (label) {
-					return _this5.render_label(label);
+					return _this6.render_label(label);
 				}),
 				[].concat(_toConsumableArray(this.props.cols)).map(function (col) {
-					return _this5.props.markers.filter(function (marker) {
+					return _this6.props.markers.filter(function (marker) {
 						return marker[0] == col;
 					});
 				}).map(function (row) {
 					return row.map(function (marker, idx) {
-						return _this5.render_fragment(marker, idx, row);
+						return _this6.render_fragment(marker, idx, row);
 					});
 				})
 			);
@@ -414,10 +454,10 @@ var FragmentGraph = function (_React$Component2) {
 var LinearRestrictMap = function (_React$Component3) {
 	_inherits(LinearRestrictMap, _React$Component3);
 
-	function LinearRestrictMap() {
+	function LinearRestrictMap(props) {
 		_classCallCheck(this, LinearRestrictMap);
 
-		return _possibleConstructorReturn(this, Object.getPrototypeOf(LinearRestrictMap).apply(this, arguments));
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(LinearRestrictMap).call(this, props));
 	}
 
 	_createClass(LinearRestrictMap, [{
@@ -459,7 +499,7 @@ var LinearRestrictMap = function (_React$Component3) {
 	}, {
 		key: "render",
 		value: function render() {
-			var _this7 = this;
+			var _this8 = this;
 
 			return React.createElement(
 				"svg",
@@ -473,10 +513,10 @@ var LinearRestrictMap = function (_React$Component3) {
 						return a + b;
 					})), x: this.props.label_padding, y: 35, height: 2 }),
 				this.props.restrict_map[3].map(function (marker, idx) {
-					return _this7.render_len(marker, idx);
+					return _this8.render_len(marker, idx);
 				}),
 				this.props.restrict_map[3].slice(0, -1).map(function (marker, idx) {
-					return _this7.render_restrict_point(_this7.props.restrict_map, marker, idx);
+					return _this8.render_restrict_point(_this8.props.restrict_map, marker, idx);
 				})
 			);
 		}
@@ -491,12 +531,7 @@ var CircularRestrictMap = function (_React$Component4) {
 	function CircularRestrictMap(props) {
 		_classCallCheck(this, CircularRestrictMap);
 
-		var _this8 = _possibleConstructorReturn(this, Object.getPrototypeOf(CircularRestrictMap).call(this, props));
-
-		_this8.state = {
-			bias: 0
-		};
-		return _this8;
+		return _possibleConstructorReturn(this, Object.getPrototypeOf(CircularRestrictMap).call(this, props));
 	}
 
 	_createClass(CircularRestrictMap, [{
@@ -507,7 +542,7 @@ var CircularRestrictMap = function (_React$Component4) {
 			})]).range([0, Math.PI * 2]);
 			var start_angle = fragScale([0].concat(this.props.restrict_map[3].slice(0, idx)).reduce(function (a, b) {
 				return a + b;
-			})) + this.state.bias;
+			})) + parseFloat(this.props.bias);
 			var end_angle = start_angle + fragScale(fragment);
 			var arc = d3.arc().innerRadius(this.props.width / 2 - this.props.padding - 10).outerRadius(this.props.width / 2 - this.props.padding).startAngle(start_angle).endAngle(end_angle);
 
@@ -525,7 +560,7 @@ var CircularRestrictMap = function (_React$Component4) {
 			})]).range([0, Math.PI * 2]);
 			var start_angle = fragScale([0].concat(this.props.restrict_map[3].slice(0, idx)).reduce(function (a, b) {
 				return a + b;
-			})) + this.state.bias;
+			})) + parseFloat(this.props.bias);
 			var end_angle = start_angle + fragScale(fragment);
 			var arc = d3.arc().innerRadius(this.props.width / 2 - this.props.padding).outerRadius(this.props.width / 2 - this.props.padding).startAngle(start_angle).endAngle(end_angle);
 			var marker_label = this.props.restrict_map[4][idx].a > this.props.restrict_map[4][idx].b ? this.props.marker_label[1][1] : this.props.marker_label[2][1];
@@ -549,7 +584,7 @@ var CircularRestrictMap = function (_React$Component4) {
 			})]).range([0, Math.PI * 2]);
 			var start_angle = fragScale([0].concat(this.props.restrict_map[3].slice(0, idx)).reduce(function (a, b) {
 				return a + b;
-			})) + this.state.bias;
+			})) + parseFloat(this.props.bias);
 			var end_angle = start_angle + fragScale(fragment);
 			var arc = d3.arc().innerRadius(this.props.width / 2 - this.props.padding - 20).outerRadius(this.props.width / 2 - this.props.padding - 20).startAngle(start_angle).endAngle(end_angle);
 			var marker_label = this.props.restrict_map[4][idx].a > this.props.restrict_map[4][idx].b ? this.props.marker_label[1][1] : this.props.marker_label[2][1];
@@ -568,7 +603,7 @@ var CircularRestrictMap = function (_React$Component4) {
 	}, {
 		key: "render",
 		value: function render() {
-			var _this9 = this;
+			var _this10 = this;
 
 			var mask_arc = d3.arc().innerRadius(this.props.width / 2 - this.props.padding).outerRadius(this.props.width / 2 - this.props.padding).startAngle(0).endAngle(Math.PI * 2);
 			return React.createElement(
@@ -580,14 +615,14 @@ var CircularRestrictMap = function (_React$Component4) {
 					this.props.label
 				),
 				this.props.restrict_map[3].map(function (fragment, idx) {
-					return _this9.render_fragment(fragment, idx);
+					return _this10.render_fragment(fragment, idx);
 				}),
 				React.createElement("path", { d: mask_arc(), stroke: "white", strokeWidth: "4", fill: "none", transform: "translate(" + this.props.width / 2 + "," + this.props.width / 2 + ")" }),
 				this.props.restrict_map[3].map(function (fragment, idx) {
-					return _this9.render_label(fragment, idx);
+					return _this10.render_label(fragment, idx);
 				}),
 				this.props.restrict_map[3].map(function (fragment, idx) {
-					return _this9.render_length(fragment, idx);
+					return _this10.render_length(fragment, idx);
 				})
 			);
 		}

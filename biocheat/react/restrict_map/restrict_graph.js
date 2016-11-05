@@ -1,4 +1,10 @@
 class RestrictGraph extends React.Component{
+	constructor(props){
+		super(props);
+		this.state={
+			bias: 0,
+		}
+	}
 	expect_overlapped(markers){
 		return markers;
 	}
@@ -186,11 +192,30 @@ class RestrictGraph extends React.Component{
 			case "linear":
 				//var fragScale= d3.scaleLinear().domain([0, restrict_maps[0][3].reduce( (a, b) => a+b )]).range([0, this.props.width- this.props.padding*2])
 				return <div>
-					<LinearRestrictMap {...this.props} restrict_map={restrict_map} fragScale={fragScale} padding={30} label={label}/>
+					<LinearRestrictMap {...this.props} {...this.state} restrict_map={restrict_map} fragScale={fragScale} padding={30} label={label}/>
 				</div>
 			case "circular":
 				return <div>
-					<CircularRestrictMap {...this.props} restrict_map={restrict_map} width={250} height={250} padding={25} label={label}/>
+					<CircularRestrictMap {...this.props} {...this.state} restrict_map={restrict_map} width={250} height={250} padding={25} label={label}/>
+				</div>
+		}
+	}
+
+	bias_changed(e){
+		this.setState({
+			bias: e.target.value,
+		});
+	}
+
+	render_bias(){
+		switch(this.props.DNA_form){
+			case "linear":
+				return <div>
+				</div>
+			case "circular":
+				return <div style={{width:"150px"}}>
+					<label>Bias: </label>
+					<input type="range" step="any" min="0" max={Math.PI*2} defaultValue={0} onChange={ (e) => this.bias_changed(e) } />
 				</div>
 		}
 	}
@@ -217,6 +242,9 @@ class RestrictGraph extends React.Component{
 				<svg width={this.props.width} height={height}>
 					<FragmentGraph {...this.props} {...scale} cols={cols} frag_padding={frag_padding}/>
 				</svg>
+			</div>
+			<div>
+				{this.render_bias()}
 			</div>
 			<div>
 				{this.render_restrict_map(restrict_maps[0], fragScale, "restrict_map")}
@@ -257,6 +285,9 @@ class FragmentGraph extends React.Component{
 }
 
 class LinearRestrictMap extends React.Component{
+	constructor(props){
+		super(props);
+	}
 	render_len(marker, idx){
 		var x= this.props.fragScale([0].concat(this.props.restrict_map[3].slice(0, idx)).reduce( (a, b) => a+b ) )+ this.props.label_padding;
 		return <text x={x} y={50} fontSize="10px" key={idx}>{Math.round(marker)}</text>
@@ -291,13 +322,10 @@ class LinearRestrictMap extends React.Component{
 class CircularRestrictMap extends React.Component{
 	constructor(props){
 		super(props);
-		this.state={
-			bias: 0,
-		}
 	}
 	render_fragment(fragment, idx){
 		var fragScale= d3.scaleLinear().domain([0, this.props.restrict_map[3].reduce( (a, b) => a+b )]).range([0, Math.PI*2]);
-		var start_angle= fragScale( [0].concat(this.props.restrict_map[3].slice(0,idx)).reduce( (a,b) => a+b ) )+this.state.bias;
+		var start_angle= fragScale( [0].concat(this.props.restrict_map[3].slice(0,idx)).reduce( (a,b) => a+b ) )+parseFloat(this.props.bias);
 		var end_angle= start_angle+ fragScale(fragment);
 		var arc= d3.arc().innerRadius(this.props.width/2-this.props.padding-10).outerRadius(this.props.width/2-this.props.padding).startAngle(start_angle).endAngle(end_angle);
 
@@ -307,7 +335,7 @@ class CircularRestrictMap extends React.Component{
 	}
 	render_label(fragment, idx){
 		var fragScale= d3.scaleLinear().domain([0, this.props.restrict_map[3].reduce( (a, b) => a+b )]).range([0, Math.PI*2]);
-		var start_angle= fragScale( [0].concat(this.props.restrict_map[3].slice(0,idx)).reduce( (a,b) => a+b ) )+this.state.bias;
+		var start_angle= fragScale( [0].concat(this.props.restrict_map[3].slice(0,idx)).reduce( (a,b) => a+b ) )+parseFloat(this.props.bias);
 		var end_angle= start_angle+ fragScale(fragment);
 		var arc= d3.arc().innerRadius(this.props.width/2-this.props.padding).outerRadius(this.props.width/2- this.props.padding).startAngle(start_angle).endAngle(end_angle);
 		var marker_label= this.props.restrict_map[4][idx].a> this.props.restrict_map[4][idx].b? this.props.marker_label[1][1]: this.props.marker_label[2][1]
@@ -321,7 +349,7 @@ class CircularRestrictMap extends React.Component{
 	}
 	render_length(fragment, idx){
 		var fragScale= d3.scaleLinear().domain([0, this.props.restrict_map[3].reduce( (a, b) => a+b )]).range([0, Math.PI*2]);
-		var start_angle= fragScale( [0].concat(this.props.restrict_map[3].slice(0,idx)).reduce( (a,b) => a+b ) )+this.state.bias;
+		var start_angle= fragScale( [0].concat(this.props.restrict_map[3].slice(0,idx)).reduce( (a,b) => a+b ) )+parseFloat(this.props.bias);
 		var end_angle= start_angle+ fragScale(fragment);
 		var arc= d3.arc().innerRadius(this.props.width/2-this.props.padding-20).outerRadius(this.props.width/2- this.props.padding-20).startAngle(start_angle).endAngle(end_angle);
 		var marker_label= this.props.restrict_map[4][idx].a> this.props.restrict_map[4][idx].b? this.props.marker_label[1][1]: this.props.marker_label[2][1]
