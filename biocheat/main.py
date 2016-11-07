@@ -51,6 +51,10 @@ def codon_translation():
 def amino_seq_to_codon():
 	return render_template('amino_seq_to_codon.html')
 
+@app.route('/CpG_island')
+def CpG_island():
+	return render_template('CpG_island.html')
+
 if __name__ == '__main__':
 	app.debug= True
 	app.run(host='0.0.0.0', port=80)

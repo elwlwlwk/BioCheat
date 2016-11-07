@@ -1,0 +1,14 @@
+{% extends "application.html" %}
+
+{% block title %}
+<title>CpG Island Detector</title>
+{% endblock %}
+
+{% block imports %}
+{% endblock %}
+
+{% block body %}
+<h1>CpG Island Detector</h1>
+<hr />
+<script src="{{ url_for('static', filename='script/CpG_island/CpG_island.js') }}"></script>
+{% endblock %}
