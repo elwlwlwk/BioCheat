@@ -9,6 +9,7 @@ class CpGIsland extends React.Component{
 			obs_exp_threshold: 0.6,
 			GC_content_threshold: 0.5,
 			scanning_window_size: 200,
+			highlight_CpG: true,
 		}
 	}
 
@@ -108,10 +109,24 @@ class CpGIsland extends React.Component{
 			<ul className="list-unstyled">
 				{CpG_islands.map( (e)=> {
 					return <li>
-						CpG island at <b>{e[0]-scanning_window_size}</b> to <b>{e[0]}</b> (Obs/Exp={e[1]}, GC Content={e[2]})
+						CpG island at <b>{e[0]-scanning_window_size+2}</b> to <b>{e[0]+1}</b> (Obs/Exp={e[1]}, GC Content={e[2]})
 					</li>
 				})}
 			</ul>
+		</div>
+	}
+
+	render_CpG_island_graph(CpG_islands){
+		var col= 25;
+		var base_mat= function(base_seq){
+			var b_m=[];
+			var t_b= base_seq.slice(0);
+			while(t_b.length!= 0){
+				b_m.push(t_b.splice(0, col));
+			}
+			return b_m;
+		}(this.state.base_seq)
+		return <div>
 		</div>
 	}
 
@@ -150,6 +165,11 @@ class CpGIsland extends React.Component{
 					<button type="button" className="btn btn-primary" data-toggle="collapse" data-target="#CpG_island_list_div">Fold CpG Island List</button>
 				</div>
 				{this.render_CpG_islands(CpG_islands)}
+			</div>
+			<div className="col-sm-12">
+				<div>
+				</div>
+				{this.render_CpG_island_graph(CpG_islands)}
 			</div>
 		</div>
 	}

@@ -22,7 +22,8 @@ requirejs([], function () {
 				base_seq: [],
 				obs_exp_threshold: 0.6,
 				GC_content_threshold: 0.5,
-				scanning_window_size: 200
+				scanning_window_size: 200,
+				highlight_CpG: true
 			};
 			return _this;
 		}
@@ -142,13 +143,13 @@ requirejs([], function () {
 								React.createElement(
 									"b",
 									null,
-									e[0] - scanning_window_size
+									e[0] - scanning_window_size + 2
 								),
 								" to ",
 								React.createElement(
 									"b",
 									null,
-									e[0]
+									e[0] + 1
 								),
 								" (Obs/Exp=",
 								e[1],
@@ -159,6 +160,20 @@ requirejs([], function () {
 						})
 					)
 				);
+			}
+		}, {
+			key: "render_CpG_island_graph",
+			value: function render_CpG_island_graph(CpG_islands) {
+				var col = 25;
+				var base_mat = function (base_seq) {
+					var b_m = [];
+					var t_b = base_seq.slice(0);
+					while (t_b.length != 0) {
+						b_m.push(t_b.splice(0, col));
+					}
+					return b_m;
+				}(this.state.base_seq);
+				return React.createElement("div", null);
 			}
 		}, {
 			key: "render",
@@ -250,6 +265,12 @@ requirejs([], function () {
 							)
 						),
 						this.render_CpG_islands(CpG_islands)
+					),
+					React.createElement(
+						"div",
+						{ className: "col-sm-12" },
+						React.createElement("div", null),
+						this.render_CpG_island_graph(CpG_islands)
 					)
 				);
 			}

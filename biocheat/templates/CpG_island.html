@@ -10,5 +10,15 @@
 {% block body %}
 <h1>CpG Island Detector</h1>
 <hr />
+<p>
+	Input your base sequence or upload FASTA file. Character except A,T,G,C,U will be ignored.
+</p>
+<p>
+	Obs= number of CpGs
+</p>
+<p>
+	Exp= (number of C * number of G) / window size
+</p>
+<br/>
 <script src="{{ url_for('static', filename='script/CpG_island/CpG_island.js') }}"></script>
 {% endblock %}
