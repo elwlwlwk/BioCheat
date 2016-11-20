@@ -3,3 +3,4 @@
 node_modules
 biocheat/config.py
 biocheat/__pycache__/
+biocheat/scripts
