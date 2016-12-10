@@ -120,7 +120,7 @@ class CodonAdaptation extends React.Component{
 		var yScale= d3.scaleLinear().domain([0, d3.max(Object.keys(amino_y_pos_idx).map( (key) => amino_y_pos_idx[key] ))+1]).range([this.state.top_padding, height- this.state.padding]);
 
 		return <svg width={width} height={height}>
-			<text x={width/2-60} y={20}>Codon Adaptation Index</text>
+			<text x={width/2-60} y={20}>Relative Codon Usage</text>
 			{this.render_adaptation_graph(usage_table, amino_y_pos_idx, selected_adaptation_index, input_adaptation_index, xScale, yScale)}
 		</svg>
 	}

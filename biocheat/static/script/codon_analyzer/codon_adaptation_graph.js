@@ -191,7 +191,7 @@ var CodonAdaptation = function (_React$Component) {
 				React.createElement(
 					"text",
 					{ x: width / 2 - 60, y: 20 },
-					"Codon Adaptation Index"
+					"Relative Codon Usage"
 				),
 				this.render_adaptation_graph(usage_table, amino_y_pos_idx, selected_adaptation_index, input_adaptation_index, xScale, yScale)
 			);
