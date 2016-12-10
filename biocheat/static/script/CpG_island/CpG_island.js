@@ -108,21 +108,21 @@ requirejs([], function () {
 			key: "obs_exp_threshold_changed",
 			value: function obs_exp_threshold_changed(e) {
 				this.setState({
-					obs_exp_threshold: e.target.value
+					obs_exp_threshold: parseFloat(e.target.value)
 				});
 			}
 		}, {
 			key: "gc_content_threshold_changed",
 			value: function gc_content_threshold_changed(e) {
 				this.setState({
-					gc_content_threshold: e.target.value
+					GC_content_threshold: parseFloat(e.target.value)
 				});
 			}
 		}, {
 			key: "scanning_window_size_changed",
 			value: function scanning_window_size_changed(e) {
 				this.setState({
-					scanngin_window_size: e.target.value
+					scanning_window_size: parseInt(e.target.value)
 				});
 			}
 		}, {
@@ -164,21 +164,115 @@ requirejs([], function () {
 		}, {
 			key: "render_CpG_island_graph",
 			value: function render_CpG_island_graph(CpG_islands) {
-				var col = 25;
-				var base_mat = function (base_seq) {
-					var b_m = [];
-					var t_b = base_seq.slice(0);
-					while (t_b.length != 0) {
-						b_m.push(t_b.splice(0, col));
+				var _this3 = this;
+
+				var divStyle = {
+					fontFamily: "Courier, monospace"
+				};
+				var spanStyle = {
+					CpG_island: {
+						backgroundColor: 'yellow'
+					},
+					CpG_site: {
+						color: 'red'
+					},
+					CpG_site_in_island: {
+						color: 'red',
+						backgroundColor: 'yellow'
 					}
-					return b_m;
+				};
+				var island_site = CpG_islands.map(function (e) {
+					return e[0] - _this3.state.scanning_window_size + 1;
+				}).sort(function (a, b) {
+					return a - b;
+				});
+				var CpG_site = function (base_seq) {
+					var CpG_site = [];
+					for (var i = 0; i < base_seq.length - 1; i++) {
+						if (base_seq[i] == "C" && base_seq[i + 1] == "G") {
+							CpG_site.push(i);
+						}
+					}
+					return CpG_site.sort(function (a, b) {
+						return a - b;
+					});
 				}(this.state.base_seq);
-				return React.createElement("div", null);
+
+				var col_size = 50;
+				var base_mat = function (base_seq, island_site, CpG_site, scanning_window_size) {
+					var rows = [];
+					var base_seq = base_seq.slice(0).map(function (base, idx) {
+						var in_island = false;
+						var in_CpG = false;
+						for (var i = 0; i < island_site.length; i++) {
+							if (idx >= island_site[i] && idx < island_site[i] + scanning_window_size) {
+								in_island = true;
+								break;
+							}
+						}
+						for (var i = 0; i < CpG_site.length; i++) {
+							if (idx >= CpG_site[i] && idx < CpG_site[i] + 2) {
+								in_CpG = true;
+								break;
+							}
+						}
+						if (in_island && in_CpG) {
+							return ['island_CpG', base];
+						} else if (in_island) {
+							return ['island', base];
+						} else if (in_CpG) {
+							return ['CpG', base];
+						} else {
+							return ['normal', base];
+						}
+					});
+					var island_site = island_site.slice(0);
+
+					while (base_seq.length != 0) {
+						rows.push(base_seq.splice(0, col_size));
+					}
+					return rows;
+				}(this.state.base_seq, island_site, CpG_site, this.state.scanning_window_size);
+
+				return React.createElement(
+					"div",
+					{ style: divStyle },
+					base_mat.map(function (row) {
+						return React.createElement(
+							"p",
+							null,
+							row.map(function (col) {
+								switch (col[0]) {
+									case "normal":
+										return col[1];
+									case "island":
+										return React.createElement(
+											"span",
+											{ style: spanStyle['CpG_island'] },
+											col[1]
+										);
+									case 'CpG':
+										return React.createElement(
+											"span",
+											{ style: spanStyle['CpG_site'] },
+											col[1]
+										);
+									case 'island_CpG':
+										return React.createElement(
+											"span",
+											{ style: spanStyle['CpG_site_in_island'] },
+											col[1]
+										);
+								}
+							})
+						);
+					})
+				);
 			}
 		}, {
 			key: "render",
 			value: function render() {
-				var _this3 = this;
+				var _this4 = this;
 
 				var CpG_islands = this.detect_CpG_island();
 
@@ -197,7 +291,7 @@ requirejs([], function () {
 							"div",
 							{ className: "col-sm-4" },
 							React.createElement("input", { className: "form-control", onChange: function onChange(e) {
-									return _this3.obs_exp_threshold_changed(e);
+									return _this4.obs_exp_threshold_changed(e);
 								}, defaultValue: this.state.obs_exp_threshold })
 						)
 					),
@@ -213,7 +307,7 @@ requirejs([], function () {
 							"div",
 							{ className: "col-sm-4" },
 							React.createElement("input", { className: "form-control", onChange: function onChange(e) {
-									return _this3.gc_content_threshold_changed(e);
+									return _this4.gc_content_threshold_changed(e);
 								}, defaultValue: this.state.GC_content_threshold })
 						)
 					),
@@ -229,7 +323,7 @@ requirejs([], function () {
 							"div",
 							{ className: "col-sm-4" },
 							React.createElement("input", { className: "form-control", onChange: function onChange(e) {
-									return _this3.scanning_window_size_changed(e);
+									return _this4.scanning_window_size_changed(e);
 								}, defaultValue: this.state.scanning_window_size })
 						)
 					),
@@ -237,7 +331,7 @@ requirejs([], function () {
 						"div",
 						{ className: "col-sm-12" },
 						React.createElement("textarea", { className: "form-control", rows: "10", onChange: function onChange(e) {
-								return _this3.base_textarea_changed(e);
+								return _this4.base_textarea_changed(e);
 							}, value: this.state.base_input }),
 						React.createElement(
 							"div",
@@ -248,7 +342,7 @@ requirejs([], function () {
 								"Upload FASTA file"
 							),
 							React.createElement("input", { type: "file", onChange: function onChange(e) {
-									return _this3.FASTA_file_changed(e);
+									return _this4.FASTA_file_changed(e);
 								} })
 						)
 					),

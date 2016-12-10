@@ -87,19 +87,19 @@ class CpGIsland extends React.Component{
 
 	obs_exp_threshold_changed(e){
 		this.setState({
-			obs_exp_threshold: e.target.value,
+			obs_exp_threshold: parseFloat(e.target.value),
 		})
 	}
 
 	gc_content_threshold_changed(e){
 		this.setState({
-			gc_content_threshold: e.target.value,
+			GC_content_threshold: parseFloat(e.target.value),
 		})
 	}
 
 	scanning_window_size_changed(e){
 		this.setState({
-			scanngin_window_size: e.target.value,
+			scanning_window_size: parseInt(e.target.value),
 		})
 	}
 
@@ -117,16 +117,94 @@ class CpGIsland extends React.Component{
 	}
 
 	render_CpG_island_graph(CpG_islands){
-		var col= 25;
-		var base_mat= function(base_seq){
-			var b_m=[];
-			var t_b= base_seq.slice(0);
-			while(t_b.length!= 0){
-				b_m.push(t_b.splice(0, col));
+		const divStyle={
+			fontFamily: "Courier, monospace",
+		}
+		const spanStyle={
+			CpG_island: {
+				backgroundColor: 'yellow',
+			},
+			CpG_site: {
+				color: 'red',
+			},
+			CpG_site_in_island: {
+				color: 'red',
+				backgroundColor: 'yellow',
+			},
+		}
+		var island_site= CpG_islands.map( (e) => e[0]-this.state.scanning_window_size+1 ).sort( (a,b) => a-b );
+		var CpG_site=function(base_seq){
+			var CpG_site=[];
+			for(var i=0; i< base_seq.length-1; i++){
+				if(base_seq[i]=="C" && base_seq[i+1]=="G"){
+					CpG_site.push(i);
+				}
 			}
-			return b_m;
-		}(this.state.base_seq)
-		return <div>
+			return CpG_site.sort( (a,b) => a-b );
+		}(this.state.base_seq);
+
+		var col_size= 50;
+		var base_mat= function(base_seq, island_site, CpG_site, scanning_window_size){
+			var rows=[];
+			var base_seq= base_seq.slice(0).map( (base, idx) => {
+				var in_island= false;
+				var in_CpG= false
+				for(var i=0; i< island_site.length; i++){
+					if(idx>=island_site[i] && idx<island_site[i]+scanning_window_size){
+						in_island= true;
+						break;
+					}
+				}
+				for(var i=0; i< CpG_site.length; i++){
+					if(idx>=CpG_site[i] && idx<CpG_site[i]+2){
+						in_CpG= true;
+						break;
+					}
+				}
+				if(in_island && in_CpG){
+					return ['island_CpG', base];
+				}
+				else if(in_island){
+					return ['island', base];
+				}
+				else if(in_CpG){
+					return ['CpG', base];
+				}
+				else{
+					return ['normal', base];
+				}
+			} );
+			var island_site= island_site.slice(0);
+
+			while(base_seq.length!= 0){
+				rows.push(base_seq.splice(0, col_size));
+			}
+			return rows;
+		}(this.state.base_seq, island_site, CpG_site, this.state.scanning_window_size)
+
+		return <div style={divStyle}>
+			{ base_mat.map( (row) => {
+				return <p>
+					{ row.map( (col) => {
+						switch(col[0]){
+							case "normal":
+								return col[1]
+							case "island":
+								return <span style={spanStyle['CpG_island']}>
+									{col[1]}
+								</span>
+							case 'CpG':
+								return <span style={spanStyle['CpG_site']}>
+									{col[1]}
+								</span>
+							case 'island_CpG':
+								return <span style={spanStyle['CpG_site_in_island']}>
+									{col[1]}
+								</span>
+						}
+					} )}
+				</p>
+			} )}
 		</div>
 	}
 
