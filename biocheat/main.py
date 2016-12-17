@@ -55,6 +55,10 @@ def amino_seq_to_codon():
 def CpG_island():
 	return render_template('CpG_island.html')
 
+@app.route('/ori_finder')
+def ori_finder():
+	return render_template('ori_finder.html')
+
 if __name__ == '__main__':
 	app.debug= True
 	app.run(host='0.0.0.0', port=80)
