@@ -25,11 +25,12 @@ class CpGIsland extends React.Component{
 
 	FASTA_file_changed(e){
 		var reader= new FileReader();
-		var base_seq= e.target.result.replace(/^>.+\n/,"").toUpperCase().replace(/[^ATUCG]/g,"").trim().split("");
 
 		reader.onload= function (e){
+			var base_input=e.target.result.replace(/^>.+\n/,"");
+			var base_seq= base_input.toUpperCase().replace(/[^ATUCG]/g,"").trim().split("");
 			this.setState({
-				base_input: e.target.result.replace(/^>.+\n/,""),
+				base_input: base_input,
 				base_seq: base_seq,
 			})
 
