@@ -8,7 +8,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-requirejs([], function () {
+requirejs(["static/regression/regression_r"], function () {
 	var OriFinder = function (_React$Component) {
 		_inherits(OriFinder, _React$Component);
 
@@ -19,7 +19,9 @@ requirejs([], function () {
 
 			_this.state = {
 				base_input: "",
-				base_seq: []
+				base_seq: [],
+				num_ori: 1,
+				render_regression: true
 			};
 			return _this;
 		}
@@ -93,13 +95,13 @@ requirejs([], function () {
 			}
 		}, {
 			key: "draw_skew_graph",
-			value: function draw_skew_graph(gc_skew) {
+			value: function draw_skew_graph(gc_skew, regression_result) {
 				var height = 500;
 				var width = 720;
 				var padding = 30;
 
 				var xScale = d3.scaleLinear().domain([0, gc_skew.length]).range([padding, width - padding]);
-				var yScale = d3.scaleLinear().domain([d3.max(gc_skew), d3.min(gc_skew)]).range([padding, height - padding]);
+				var yScale = d3.scaleLinear().domain([d3.min(gc_skew), d3.max(gc_skew)]).range([height - padding, padding]);
 
 				var line_data = [];
 				for (var idx in gc_skew) {
@@ -113,11 +115,42 @@ requirejs([], function () {
 				});
 				var path_d = valueline(line_data);
 
+				var regress_x = [];
+				for (var i = 0; i < width; i++) {
+					regress_x.push(gc_skew.length / width * i);
+				}
+				var regress_data = regress_x.map(function (x) {
+					var equation = regression_result.equation;
+					var y = 0;
+					for (var _i = 0; _i < equation.length; _i++) {
+						y += equation[_i] * Math.pow(x, _i);
+					}
+					return { pos: xScale(x), skew: yScale(y) };
+				});
+				var regress_path_d = valueline(regress_data);
+
 				return React.createElement(
 					"svg",
 					{ height: height, width: width },
-					React.createElement("path", { d: path_d, stroke: "black", strokeWidth: 2, fill: "none" })
+					React.createElement("path", { d: path_d, stroke: "black", strokeWidth: 2, fill: "none" }),
+					function () {
+						if (this.state.render_regression) return React.createElement("path", { d: regress_path_d, stroke: "red", strokeWidth: 2, fill: "none" });
+					}.bind(this)()
 				);
+			}
+		}, {
+			key: "num_ori_changed",
+			value: function num_ori_changed(e) {
+				this.setState({
+					num_ori: parseInt(e.target.value)
+				});
+			}
+		}, {
+			key: "render_regression_changed",
+			value: function render_regression_changed(e) {
+				this.setState({
+					render_regression: e.target.checked
+				});
 			}
 		}, {
 			key: "render",
@@ -125,9 +158,28 @@ requirejs([], function () {
 				var _this2 = this;
 
 				var gc_skew = this.calc_gc_skew(this.state.base_seq);
+				var regression_result = regression('polynomial', gc_skew.map(function (d, idx) {
+					return [idx, d];
+				}), this.state.num_ori + 2);
 				return React.createElement(
 					"div",
 					{ className: "col-sm-12" },
+					React.createElement(
+						"div",
+						{ className: "col-sm-12 form-group" },
+						React.createElement(
+							"label",
+							{ className: "col-sm-3" },
+							"Number Of Origin Of Replication"
+						),
+						React.createElement(
+							"div",
+							{ className: "col-sm-4" },
+							React.createElement("input", { className: "form-control", onChange: function onChange(e) {
+									return _this2.num_ori_changed(e);
+								}, defaultValue: this.state.num_ori })
+						)
+					),
 					React.createElement(
 						"div",
 						{ className: "col-sm-12" },
@@ -149,8 +201,17 @@ requirejs([], function () {
 					),
 					React.createElement(
 						"div",
+						{ className: "col-sm-12 form-group" },
+						React.createElement("input", { type: "checkbox", onChange: function onChange(e) {
+								return _this2.render_regression_changed(e);
+							}, checked: this.state.render_regression }),
+						"render regression",
+						React.createElement("br", null)
+					),
+					React.createElement(
+						"div",
 						{ className: "col-sm-12" },
-						this.draw_skew_graph(gc_skew)
+						this.draw_skew_graph(gc_skew, regression_result)
 					)
 				);
 			}

@@ -1,4 +1,4 @@
-requirejs([], function(){
+requirejs(["static/regression/regression_r"], function(){
 
 class OriFinder extends React.Component{
 	constructor(props){
@@ -6,6 +6,8 @@ class OriFinder extends React.Component{
 		this.state={
 			base_input: "",
 			base_seq: [],
+			num_ori: 1,
+			render_regression: true,
 		}
 	}
 
@@ -52,13 +54,13 @@ class OriFinder extends React.Component{
 		return gc_skew;
 	}
 
-	draw_skew_graph(gc_skew){
+	draw_skew_graph(gc_skew, regression_result){
 		var height= 500;
 		var width= 720;
 		var padding= 30;
 
 		var xScale= d3.scaleLinear().domain([0, gc_skew.length]).range([padding, width-padding]);
-		var yScale= d3.scaleLinear().domain([d3.max(gc_skew), d3.min(gc_skew)]).range([padding, height-padding]);
+		var yScale= d3.scaleLinear().domain([d3.min(gc_skew), d3.max(gc_skew)]).range([height-padding, padding]);
 
 		var line_data=[];
 		for(let idx in gc_skew){
@@ -68,14 +70,51 @@ class OriFinder extends React.Component{
 		var valueline= d3.line().x((e)=>e.pos).y((e)=>e.skew);
 		var path_d= valueline(line_data);
 
+		var regress_x= [];
+		for(let i=0; i< width; i++){
+			regress_x.push((gc_skew.length/width)*i);
+		}
+		var regress_data= regress_x.map((x) =>{
+			var equation= regression_result.equation;
+			var y=0;
+			for(let i=0; i< equation.length; i++){
+				y+= equation[i]*Math.pow(x, i);
+			}
+			return {pos:xScale(x),skew:yScale(y)};
+		})
+		var regress_path_d= valueline(regress_data);
+
 		return <svg height={height} width={width}>
 			<path d={path_d} stroke="black" strokeWidth={2} fill="none"></path>
+			{(function(){
+				if(this.state.render_regression)
+					return <path d={regress_path_d} stroke="red" strokeWidth={2} fill="none"></path>
+			}.bind(this))()}
 		</svg>
+	}
+
+	num_ori_changed(e){
+		this.setState({
+			num_ori: parseInt(e.target.value),
+		})
+	}
+
+	render_regression_changed(e){
+		this.setState({
+			render_regression: e.target.checked,
+		})
 	}
 
 	render(){
 		var gc_skew= this.calc_gc_skew(this.state.base_seq);
+		var regression_result= regression('polynomial', gc_skew.map((d, idx) => [idx, d]), this.state.num_ori+2);
 		return <div className="col-sm-12">
+			<div className="col-sm-12 form-group">
+				<label className="col-sm-3">Number Of Origin Of Replication</label>
+				<div className="col-sm-4">
+					<input className="form-control" onChange={(e) => this.num_ori_changed(e)} defaultValue={this.state.num_ori} />
+				</div>
+			</div>
 			<div className="col-sm-12">
 				<textarea className="form-control" rows="10" onChange={(e) => this.base_textarea_changed(e)} value={this.state.base_input}></textarea>
 				<div className="form_group">
@@ -83,8 +122,11 @@ class OriFinder extends React.Component{
 					<input type="file" onChange={ (e) => this.FASTA_file_changed(e) } />
 				</div>
 			</div>
+			<div className="col-sm-12 form-group">
+				<input type="checkbox" onChange= { (e) => this.render_regression_changed(e) } checked={this.state.render_regression} />render regression<br/>
+			</div>
 			<div className="col-sm-12">
-				{this.draw_skew_graph(gc_skew)}
+				{this.draw_skew_graph(gc_skew, regression_result)}
 			</div>
 		</div>
 	}
