@@ -34,7 +34,6 @@ requirejs(["static/regression/regression_r"], function () {
 				this.setState({
 					base_input: e.target.value,
 					base_seq: base_seq
-
 				});
 			}
 		}, {
@@ -135,7 +134,8 @@ requirejs(["static/regression/regression_r"], function () {
 					React.createElement("path", { d: path_d, stroke: "black", strokeWidth: 2, fill: "none" }),
 					function () {
 						if (this.state.render_regression) return React.createElement("path", { d: regress_path_d, stroke: "red", strokeWidth: 2, fill: "none" });
-					}.bind(this)()
+					}.bind(this)(),
+					React.createElement(XYAxis, { height: height, padding: padding, width: width, xScale: xScale, yScale: yScale })
 				);
 			}
 		}, {
@@ -153,6 +153,28 @@ requirejs(["static/regression/regression_r"], function () {
 				});
 			}
 		}, {
+			key: "expected_ori",
+			value: function expected_ori(gc_skew) {
+				var min = d3.min(gc_skew);
+				var oris = gc_skew.map(function (d, idx) {
+					return [idx, d];
+				}).filter(function (d) {
+					return d[1] == min;
+				});
+				return React.createElement(
+					"p",
+					null,
+					"Expected Ori Positions: Around ",
+					React.createElement(
+						"b",
+						null,
+						oris.map(function (d) {
+							return d[0] + ", ";
+						})
+					)
+				);
+			}
+		}, {
 			key: "render",
 			value: function render() {
 				var _this2 = this;
@@ -164,22 +186,6 @@ requirejs(["static/regression/regression_r"], function () {
 				return React.createElement(
 					"div",
 					{ className: "col-sm-12" },
-					React.createElement(
-						"div",
-						{ className: "col-sm-12 form-group" },
-						React.createElement(
-							"label",
-							{ className: "col-sm-3" },
-							"Number Of Origin Of Replication"
-						),
-						React.createElement(
-							"div",
-							{ className: "col-sm-4" },
-							React.createElement("input", { className: "form-control", onChange: function onChange(e) {
-									return _this2.num_ori_changed(e);
-								}, defaultValue: this.state.num_ori })
-						)
-					),
 					React.createElement(
 						"div",
 						{ className: "col-sm-12" },
@@ -201,6 +207,11 @@ requirejs(["static/regression/regression_r"], function () {
 					),
 					React.createElement(
 						"div",
+						{ className: "col-sm-12" },
+						this.expected_ori(gc_skew)
+					),
+					React.createElement(
+						"div",
 						{ className: "col-sm-12 form-group" },
 						React.createElement("input", { type: "checkbox", onChange: function onChange(e) {
 								return _this2.render_regression_changed(e);
@@ -218,6 +229,84 @@ requirejs(["static/regression/regression_r"], function () {
 		}]);
 
 		return OriFinder;
+	}(React.Component);
+
+	var XYAxis = function (_React$Component2) {
+		_inherits(XYAxis, _React$Component2);
+
+		function XYAxis() {
+			_classCallCheck(this, XYAxis);
+
+			return _possibleConstructorReturn(this, Object.getPrototypeOf(XYAxis).apply(this, arguments));
+		}
+
+		_createClass(XYAxis, [{
+			key: "render",
+			value: function render() {
+				var xSettings = {
+					translate: "translate(0, " + (this.props.height - this.props.padding) + ")",
+					scale: this.props.xScale,
+					orient: 'bottom'
+				};
+				var ySettings = {
+					translate: "translate(" + this.props.padding + ", 0)",
+					scale: this.props.yScale,
+					orient: 'left'
+				};
+				return React.createElement(
+					"g",
+					{ className: "xy-axis" },
+					React.createElement(Axis, xSettings),
+					React.createElement(Axis, ySettings)
+				);
+			}
+		}]);
+
+		return XYAxis;
+	}(React.Component);
+
+	var Axis = function (_React$Component3) {
+		_inherits(Axis, _React$Component3);
+
+		function Axis() {
+			_classCallCheck(this, Axis);
+
+			return _possibleConstructorReturn(this, Object.getPrototypeOf(Axis).apply(this, arguments));
+		}
+
+		_createClass(Axis, [{
+			key: "componentDidMount",
+			value: function componentDidMount() {
+				this.renderAxis();
+			}
+		}, {
+			key: "componentDidUpdate",
+			value: function componentDidUpdate() {
+				this.renderAxis();
+			}
+		}, {
+			key: "renderAxis",
+			value: function renderAxis() {
+				var node = this.refs.axis;
+				var axis;
+				switch (this.props.orient) {
+					case "bottom":
+						axis = d3.axisBottom(this.props.scale);
+						break;
+					case "left":
+						axis = d3.axisLeft(this.props.scale);
+						break;
+				}
+				d3.select(node).call(axis);
+			}
+		}, {
+			key: "render",
+			value: function render() {
+				return React.createElement("g", { className: "axis", ref: "axis", transform: this.props.translate });
+			}
+		}]);
+
+		return Axis;
 	}(React.Component);
 
 	var mountingPoint = document.createElement('div');

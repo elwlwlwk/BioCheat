@@ -17,7 +17,6 @@ class OriFinder extends React.Component{
 		this.setState({
 			base_input: e.target.value,
 			base_seq: base_seq,
-
 		});
 	}
 
@@ -90,6 +89,7 @@ class OriFinder extends React.Component{
 				if(this.state.render_regression)
 					return <path d={regress_path_d} stroke="red" strokeWidth={2} fill="none"></path>
 			}.bind(this))()}
+			<XYAxis height={height} padding={padding} width={width} xScale={xScale} yScale={yScale}/>
 		</svg>
 	}
 
@@ -105,22 +105,27 @@ class OriFinder extends React.Component{
 		})
 	}
 
+	expected_ori(gc_skew){
+		var min= d3.min(gc_skew);
+		var oris= gc_skew.map((d, idx) => [idx, d]).filter( (d) => d[1]==min );
+		return <p>
+			Expected Ori Positions: Around <b>{oris.map( (d) => d[0]+", ")}</b>
+		</p>
+	}
+
 	render(){
 		var gc_skew= this.calc_gc_skew(this.state.base_seq);
 		var regression_result= regression('polynomial', gc_skew.map((d, idx) => [idx, d]), this.state.num_ori+2);
 		return <div className="col-sm-12">
-			<div className="col-sm-12 form-group">
-				<label className="col-sm-3">Number Of Origin Of Replication</label>
-				<div className="col-sm-4">
-					<input className="form-control" onChange={(e) => this.num_ori_changed(e)} defaultValue={this.state.num_ori} />
-				</div>
-			</div>
 			<div className="col-sm-12">
 				<textarea className="form-control" rows="10" onChange={(e) => this.base_textarea_changed(e)} value={this.state.base_input}></textarea>
 				<div className="form_group">
 					<label>Upload FASTA file</label>
 					<input type="file" onChange={ (e) => this.FASTA_file_changed(e) } />
 				</div>
+			</div>
+			<div className="col-sm-12">
+				{this.expected_ori(gc_skew)}
 			</div>
 			<div className="col-sm-12 form-group">
 				<input type="checkbox" onChange= { (e) => this.render_regression_changed(e) } checked={this.state.render_regression} />render regression<br/>
@@ -131,6 +136,55 @@ class OriFinder extends React.Component{
 		</div>
 	}
 }
+
+class XYAxis extends React.Component{
+        render(){
+                const xSettings = {
+                        translate: `translate(0, ${this.props.height - this.props.padding})`,
+                        scale: this.props.xScale,
+                        orient: 'bottom'
+                };
+                const ySettings = {
+                        translate: `translate(${this.props.padding}, 0)`,
+                        scale: this.props.yScale,
+                        orient: 'left'
+                };
+                return <g className="xy-axis">
+                        <Axis {...xSettings}/>
+                        <Axis {...ySettings}/>
+                </g>
+        }
+}
+
+class Axis extends React.Component{
+        componentDidMount(){
+                this.renderAxis();
+        }
+
+        componentDidUpdate(){
+                this.renderAxis();
+        }
+
+        renderAxis(){
+                var node= this.refs.axis;
+                var axis;
+                switch(this.props.orient){
+                        case "bottom":
+                                axis= d3.axisBottom(this.props.scale);
+                                break;
+                        case "left":
+                                axis= d3.axisLeft(this.props.scale);
+                                break;
+                }
+                d3.select(node).call(axis);
+        }
+
+        render(){
+                return <g className="axis" ref="axis" transform={this.props.translate}></g>
+        }
+}
+
+
 
 const mountingPoint= document.createElement('div');
 mountingPoint.className= 'react-app';
