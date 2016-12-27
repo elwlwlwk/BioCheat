@@ -89,29 +89,20 @@ requirejs([], function () {
 					if (g_cnt < 0 || c_cnt < 0) {
 						console.log("error");
 					}
-					if (g_cnt < c_cnt) {
-						console.log("minus");
-					}
 					gc_skew.push((g_cnt - c_cnt) / (g_cnt + c_cnt));
 				}
 				return gc_skew;
 			}
 		}, {
 			key: "draw_skew_graph",
-			value: function draw_skew_graph(gc_skew) {
+			value: function draw_skew_graph(gc_skew, gc_skew_cumul) {
 				var height = 500;
 				var width = 720;
 				var padding = 40;
 
-				var cumul_data = [0];
-				gc_skew.forEach(function (d, idx) {
-					cumul_data.push(cumul_data[idx] + d);
-				});
-				cumul_data = cumul_data.slice(1);
-
 				var xScale = d3.scaleLinear().domain([0, gc_skew.length]).range([padding, width - padding]);
 				var yScale = d3.scaleLinear().domain([d3.min(gc_skew), d3.max(gc_skew)]).range([height - padding, padding]);
-				var yCumulScale = d3.scaleLinear().domain([d3.min(cumul_data), d3.max(cumul_data)]).range([height - padding, padding]);
+				var yCumulScale = d3.scaleLinear().domain([d3.min(gc_skew_cumul), d3.max(gc_skew_cumul)]).range([height - padding, padding]);
 
 				var line_data = [];
 				for (var idx in gc_skew) {
@@ -119,8 +110,8 @@ requirejs([], function () {
 				}
 
 				var cumul_line_data = [];
-				for (var _idx in cumul_data) {
-					cumul_line_data.push({ pos: xScale(_idx), skew: yCumulScale(cumul_data[_idx]) });
+				for (var _idx in gc_skew_cumul) {
+					cumul_line_data.push({ pos: xScale(_idx), skew: yCumulScale(gc_skew_cumul[_idx]) });
 				}
 
 				var valueline = d3.line().x(function (e) {
@@ -134,6 +125,22 @@ requirejs([], function () {
 				return React.createElement(
 					"svg",
 					{ height: height, width: width },
+					React.createElement(
+						"text",
+						{ x: 10, y: 30, fontSize: "10" },
+						"GC skew normal"
+					),
+					React.createElement(
+						"text",
+						{ x: width - 120, y: 30, fontSize: "10", fill: "red" },
+						"GC skew cumulative "
+					),
+					React.createElement(
+						"text",
+						{ x: width / 2 - 30, y: 20, fontSize: "10" },
+						"window size: ",
+						Math.round(gc_skew.length / 2)
+					),
 					React.createElement("path", { d: path_d, stroke: "black", strokeWidth: 2, fill: "none" }),
 					React.createElement("path", { d: cumul_path_d, stroke: "red", strokeWidth: 2, fill: "none" }),
 					React.createElement(XYAxis, { height: height, padding: padding, width: width, xScale: xScale, yScale: yScale, yCumulScale: yCumulScale })
@@ -148,7 +155,7 @@ requirejs([], function () {
 			}
 		}, {
 			key: "expected_ori",
-			value: function expected_ori(gc_skew) {
+			value: function expected_ori(gc_skew, gc_skew_cumul) {
 				var min = d3.min(gc_skew);
 				var oris = gc_skew.map(function (d, idx) {
 					return [idx, d];
@@ -158,14 +165,15 @@ requirejs([], function () {
 				return React.createElement(
 					"p",
 					null,
-					"Expected Ori Positions: Around ",
+					"Expected ori positions using GC skew: ",
 					React.createElement(
 						"b",
 						null,
 						oris.map(function (d) {
 							return d[0] + ", ";
 						})
-					)
+					),
+					React.createElement("br", null)
 				);
 			}
 		}, {
@@ -174,6 +182,11 @@ requirejs([], function () {
 				var _this2 = this;
 
 				var gc_skew = this.calc_gc_skew(this.state.base_seq);
+				var gc_skew_cumul = [0];
+				gc_skew.forEach(function (d, idx) {
+					gc_skew_cumul.push(gc_skew_cumul[idx] + d);
+				});
+				gc_skew_cumul = gc_skew_cumul.slice(1);
 				return React.createElement(
 					"div",
 					{ className: "col-sm-12" },
@@ -199,12 +212,12 @@ requirejs([], function () {
 					React.createElement(
 						"div",
 						{ className: "col-sm-12" },
-						this.expected_ori(gc_skew)
+						this.expected_ori(gc_skew, gc_skew_cumul)
 					),
 					React.createElement(
 						"div",
 						{ className: "col-sm-12" },
-						this.draw_skew_graph(gc_skew)
+						this.draw_skew_graph(gc_skew, gc_skew_cumul)
 					)
 				);
 			}
