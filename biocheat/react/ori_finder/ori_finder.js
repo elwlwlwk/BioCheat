@@ -70,28 +70,19 @@ class OriFinder extends React.Component{
 			if(g_cnt<0 || c_cnt<0){
 				console.log("error");
 			}
-			if(g_cnt< c_cnt){
-				console.log("minus");
-			}
 			gc_skew.push((g_cnt-c_cnt)/(g_cnt+c_cnt));
 		}
 		return gc_skew;
 	}
 
-	draw_skew_graph(gc_skew){
+	draw_skew_graph(gc_skew, gc_skew_cumul){
 		var height= 500;
 		var width= 720;
 		var padding= 40;
 
-		var cumul_data=[0];
-		gc_skew.forEach( (d, idx)=>{
-			cumul_data.push(cumul_data[idx]+ d);
-		});
-		cumul_data= cumul_data.slice(1);
-
 		var xScale= d3.scaleLinear().domain([0, gc_skew.length]).range([padding, width-padding]);
 		var yScale= d3.scaleLinear().domain([d3.min(gc_skew), d3.max(gc_skew)]).range([height-padding, padding]);
-		var yCumulScale= d3.scaleLinear().domain([d3.min(cumul_data), d3.max(cumul_data)]).range([height-padding, padding]);
+		var yCumulScale= d3.scaleLinear().domain([d3.min(gc_skew_cumul), d3.max(gc_skew_cumul)]).range([height-padding, padding]);
 
 		var line_data=[];
 		for(let idx in gc_skew){
@@ -99,8 +90,8 @@ class OriFinder extends React.Component{
 		}
 
 		var cumul_line_data=[];
-		for(let idx in cumul_data){
-			cumul_line_data.push({pos:xScale(idx), skew:yCumulScale(cumul_data[idx])});
+		for(let idx in gc_skew_cumul){
+			cumul_line_data.push({pos:xScale(idx), skew:yCumulScale(gc_skew_cumul[idx])});
 		}
 
 		var valueline= d3.line().x((e)=>e.pos).y((e)=>e.skew);
@@ -108,6 +99,9 @@ class OriFinder extends React.Component{
 		var cumul_path_d= valueline(cumul_line_data);
 
 		return <svg height={height} width={width}>
+			<text x={10} y={30} fontSize="10">GC skew normal</text>
+			<text x={width-120} y={30} fontSize="10" fill="red">GC skew cumulative </text>
+			<text x={width/2-30} y={20} fontSize="10">window size: {Math.round(gc_skew.length/2)}</text>
 			<path d={path_d} stroke="black" strokeWidth={2} fill="none"></path>
 			<path d={cumul_path_d} stroke="red" strokeWidth={2} fill="none"></path>
 			<XYAxis height={height} padding={padding} width={width} xScale={xScale} yScale={yScale} yCumulScale={yCumulScale}/>
@@ -120,16 +114,21 @@ class OriFinder extends React.Component{
 		})
 	}
 
-	expected_ori(gc_skew){
+	expected_ori(gc_skew, gc_skew_cumul){
 		var min= d3.min(gc_skew);
-		var oris= gc_skew.map((d, idx) => [idx, d]).filter( (d) => d[1]==min );
+		var oris= gc_skew.map( (d, idx) => [idx, d] ).filter( (d) => d[1]==min );
 		return <p>
-			Expected Ori Positions: Around <b>{oris.map( (d) => d[0]+", ")}</b>
+			Expected ori positions using GC skew: <b>{oris.map( (d) => d[0]+", ")}</b><br/>
 		</p>
 	}
 
 	render(){
 		var gc_skew= this.calc_gc_skew(this.state.base_seq);
+		var gc_skew_cumul=[0];
+		gc_skew.forEach( (d, idx)=>{
+			gc_skew_cumul.push(gc_skew_cumul[idx]+ d);
+		});
+		gc_skew_cumul= gc_skew_cumul.slice(1);
 		return <div className="col-sm-12">
 			<div className="col-sm-12">
 				<textarea className="form-control" rows="10" onChange={(e) => this.base_textarea_changed(e)} value={this.state.base_input}></textarea>
@@ -139,10 +138,10 @@ class OriFinder extends React.Component{
 				</div>
 			</div>
 			<div className="col-sm-12">
-				{this.expected_ori(gc_skew)}
+				{this.expected_ori(gc_skew, gc_skew_cumul)}
 			</div>
 			<div className="col-sm-12">
-				{this.draw_skew_graph(gc_skew)}
+				{this.draw_skew_graph(gc_skew, gc_skew_cumul)}
 			</div>
 		</div>
 	}
