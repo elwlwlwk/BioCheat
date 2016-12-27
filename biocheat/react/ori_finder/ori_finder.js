@@ -1,4 +1,4 @@
-requirejs(["static/regression/regression_r"], function(){
+requirejs([], function(){
 
 class OriFinder extends React.Component{
 	constructor(props){
@@ -7,7 +7,6 @@ class OriFinder extends React.Component{
 			base_input: "",
 			base_seq: [],
 			num_ori: 1,
-			render_regression: true,
 		}
 	}
 
@@ -36,72 +35,88 @@ class OriFinder extends React.Component{
 	}
 
 	calc_gc_skew(base_seq){
-		var gc_skew=[0];
-		for(let base of base_seq){
-			switch(base){
+		var gc_skew=[];
+		var extended_base_seq= base_seq.concat(base_seq.slice(0, Math.ceil(base_seq.length/2)));
+		var window_size= Math.round(base_seq.length/2);
+		var g_cnt=0, c_cnt=0;
+		for(let i=0; i< window_size; i++){
+			switch(extended_base_seq[i]){
 				case "G":
-					gc_skew.push(gc_skew.slice(-1)[0]+1);
+					g_cnt++;
 					break;
 				case "C":
-					gc_skew.push(gc_skew.slice(-1)[0]-1);
-					break;
-				default:
-					gc_skew.push(gc_skew.slice(-1)[0]);
+					c_cnt++;
 					break;
 			}
+		}
+		gc_skew.push((g_cnt-c_cnt)/(g_cnt+c_cnt));
+		for(let i= window_size; i< extended_base_seq.length-1; i++){
+			switch(extended_base_seq[i]){
+				case 'G':
+					g_cnt++;
+					break;
+				case 'C':
+					c_cnt++;
+					break;
+			}
+			switch(extended_base_seq[i-window_size]){
+				case 'G':
+					g_cnt--;
+					break;
+				case 'C':
+					c_cnt--;
+					break;
+			}
+			if(g_cnt<0 || c_cnt<0){
+				console.log("error");
+			}
+			if(g_cnt< c_cnt){
+				console.log("minus");
+			}
+			gc_skew.push((g_cnt-c_cnt)/(g_cnt+c_cnt));
 		}
 		return gc_skew;
 	}
 
-	draw_skew_graph(gc_skew, regression_result){
+	draw_skew_graph(gc_skew){
 		var height= 500;
 		var width= 720;
-		var padding= 30;
+		var padding= 40;
+
+		var cumul_data=[0];
+		gc_skew.forEach( (d, idx)=>{
+			cumul_data.push(cumul_data[idx]+ d);
+		});
+		cumul_data= cumul_data.slice(1);
 
 		var xScale= d3.scaleLinear().domain([0, gc_skew.length]).range([padding, width-padding]);
 		var yScale= d3.scaleLinear().domain([d3.min(gc_skew), d3.max(gc_skew)]).range([height-padding, padding]);
+		var yCumulScale= d3.scaleLinear().domain([d3.min(cumul_data), d3.max(cumul_data)]).range([height-padding, padding]);
 
 		var line_data=[];
 		for(let idx in gc_skew){
 			line_data.push({pos:xScale(idx), skew:yScale(gc_skew[idx])});
 		}
 
+		var cumul_line_data=[];
+		for(let idx in cumul_data){
+			cumul_line_data.push({pos:xScale(idx), skew:yCumulScale(cumul_data[idx])});
+		}
+
 		var valueline= d3.line().x((e)=>e.pos).y((e)=>e.skew);
 		var path_d= valueline(line_data);
-
-		var regress_x= [];
-		for(let i=0; i< width; i++){
-			regress_x.push((gc_skew.length/width)*i);
-		}
-		var regress_data= regress_x.map((x) =>{
-			var equation= regression_result.equation;
-			var y=0;
-			for(let i=0; i< equation.length; i++){
-				y+= equation[i]*Math.pow(x, i);
-			}
-			return {pos:xScale(x),skew:yScale(y)};
-		})
-		var regress_path_d= valueline(regress_data);
+		var cumul_path_d= valueline(cumul_line_data);
 
 		return <svg height={height} width={width}>
 			<path d={path_d} stroke="black" strokeWidth={2} fill="none"></path>
-			{(function(){
-				if(this.state.render_regression)
-					return <path d={regress_path_d} stroke="red" strokeWidth={2} fill="none"></path>
-			}.bind(this))()}
-			<XYAxis height={height} padding={padding} width={width} xScale={xScale} yScale={yScale}/>
+			<path d={cumul_path_d} stroke="red" strokeWidth={2} fill="none"></path>
+			<XYAxis height={height} padding={padding} width={width} xScale={xScale} yScale={yScale} yCumulScale={yCumulScale}/>
 		</svg>
 	}
 
 	num_ori_changed(e){
 		this.setState({
 			num_ori: parseInt(e.target.value),
-		})
-	}
-
-	render_regression_changed(e){
-		this.setState({
-			render_regression: e.target.checked,
 		})
 	}
 
@@ -115,7 +130,6 @@ class OriFinder extends React.Component{
 
 	render(){
 		var gc_skew= this.calc_gc_skew(this.state.base_seq);
-		var regression_result= regression('polynomial', gc_skew.map((d, idx) => [idx, d]), this.state.num_ori+2);
 		return <div className="col-sm-12">
 			<div className="col-sm-12">
 				<textarea className="form-control" rows="10" onChange={(e) => this.base_textarea_changed(e)} value={this.state.base_input}></textarea>
@@ -127,61 +141,67 @@ class OriFinder extends React.Component{
 			<div className="col-sm-12">
 				{this.expected_ori(gc_skew)}
 			</div>
-			<div className="col-sm-12 form-group">
-				<input type="checkbox" onChange= { (e) => this.render_regression_changed(e) } checked={this.state.render_regression} />render regression<br/>
-			</div>
 			<div className="col-sm-12">
-				{this.draw_skew_graph(gc_skew, regression_result)}
+				{this.draw_skew_graph(gc_skew)}
 			</div>
 		</div>
 	}
 }
 
 class XYAxis extends React.Component{
-        render(){
-                const xSettings = {
-                        translate: `translate(0, ${this.props.height - this.props.padding})`,
-                        scale: this.props.xScale,
-                        orient: 'bottom'
-                };
-                const ySettings = {
-                        translate: `translate(${this.props.padding}, 0)`,
-                        scale: this.props.yScale,
-                        orient: 'left'
-                };
-                return <g className="xy-axis">
-                        <Axis {...xSettings}/>
-                        <Axis {...ySettings}/>
-                </g>
-        }
+	render(){
+		const xSettings = {
+			translate: `translate(0, ${this.props.height - this.props.padding})`,
+      scale: this.props.xScale,
+      orient: 'bottom'
+    };
+    const ySettings = {
+            translate: `translate(${this.props.padding}, 0)`,
+            scale: this.props.yScale,
+            orient: 'left'
+    };
+		const yCumulSettings = {
+            translate: `translate(${this.props.width - this.props.padding}, 0)`,
+            scale: this.props.yCumulScale,
+            orient: 'right'
+    };
+    return <g className="xy-axis">
+			<Axis {...xSettings}/>
+      <Axis {...ySettings}/>
+			<Axis {...yCumulSettings}/>
+		</g>
+  }
 }
 
 class Axis extends React.Component{
-        componentDidMount(){
-                this.renderAxis();
-        }
+	componentDidMount(){
+		this.renderAxis();
+	}
 
-        componentDidUpdate(){
-                this.renderAxis();
-        }
+	componentDidUpdate(){
+		this.renderAxis();
+	}
 
-        renderAxis(){
-                var node= this.refs.axis;
-                var axis;
-                switch(this.props.orient){
-                        case "bottom":
-                                axis= d3.axisBottom(this.props.scale);
-                                break;
-                        case "left":
-                                axis= d3.axisLeft(this.props.scale);
-                                break;
-                }
-                d3.select(node).call(axis);
-        }
+	renderAxis(){
+		var node= this.refs.axis;
+		var axis;
+		switch(this.props.orient){
+			case "bottom":
+			axis= d3.axisBottom(this.props.scale);
+			break;
+			case "left":
+			axis= d3.axisLeft(this.props.scale);
+			break;
+			case "right":
+			axis= d3.axisRight(this.props.scale);
+			break;
+		}
+		d3.select(node).call(axis);
+	}
 
-        render(){
-                return <g className="axis" ref="axis" transform={this.props.translate}></g>
-        }
+	render(){
+		return <g className="axis" ref="axis" transform={this.props.translate}></g>
+	}
 }
 
 

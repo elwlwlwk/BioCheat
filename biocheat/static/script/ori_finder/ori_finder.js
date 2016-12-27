@@ -8,7 +8,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-requirejs(["static/regression/regression_r"], function () {
+requirejs([], function () {
 	var OriFinder = function (_React$Component) {
 		_inherits(OriFinder, _React$Component);
 
@@ -20,8 +20,7 @@ requirejs(["static/regression/regression_r"], function () {
 			_this.state = {
 				base_input: "",
 				base_seq: [],
-				num_ori: 1,
-				render_regression: true
+				num_ori: 1
 			};
 			return _this;
 		}
@@ -54,57 +53,74 @@ requirejs(["static/regression/regression_r"], function () {
 		}, {
 			key: "calc_gc_skew",
 			value: function calc_gc_skew(base_seq) {
-				var gc_skew = [0];
-				var _iteratorNormalCompletion = true;
-				var _didIteratorError = false;
-				var _iteratorError = undefined;
-
-				try {
-					for (var _iterator = base_seq[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-						var base = _step.value;
-
-						switch (base) {
-							case "G":
-								gc_skew.push(gc_skew.slice(-1)[0] + 1);
-								break;
-							case "C":
-								gc_skew.push(gc_skew.slice(-1)[0] - 1);
-								break;
-							default:
-								gc_skew.push(gc_skew.slice(-1)[0]);
-								break;
-						}
-					}
-				} catch (err) {
-					_didIteratorError = true;
-					_iteratorError = err;
-				} finally {
-					try {
-						if (!_iteratorNormalCompletion && _iterator.return) {
-							_iterator.return();
-						}
-					} finally {
-						if (_didIteratorError) {
-							throw _iteratorError;
-						}
+				var gc_skew = [];
+				var extended_base_seq = base_seq.concat(base_seq.slice(0, Math.ceil(base_seq.length / 2)));
+				var window_size = Math.round(base_seq.length / 2);
+				var g_cnt = 0,
+				    c_cnt = 0;
+				for (var i = 0; i < window_size; i++) {
+					switch (extended_base_seq[i]) {
+						case "G":
+							g_cnt++;
+							break;
+						case "C":
+							c_cnt++;
+							break;
 					}
 				}
-
+				gc_skew.push((g_cnt - c_cnt) / (g_cnt + c_cnt));
+				for (var _i = window_size; _i < extended_base_seq.length - 1; _i++) {
+					switch (extended_base_seq[_i]) {
+						case 'G':
+							g_cnt++;
+							break;
+						case 'C':
+							c_cnt++;
+							break;
+					}
+					switch (extended_base_seq[_i - window_size]) {
+						case 'G':
+							g_cnt--;
+							break;
+						case 'C':
+							c_cnt--;
+							break;
+					}
+					if (g_cnt < 0 || c_cnt < 0) {
+						console.log("error");
+					}
+					if (g_cnt < c_cnt) {
+						console.log("minus");
+					}
+					gc_skew.push((g_cnt - c_cnt) / (g_cnt + c_cnt));
+				}
 				return gc_skew;
 			}
 		}, {
 			key: "draw_skew_graph",
-			value: function draw_skew_graph(gc_skew, regression_result) {
+			value: function draw_skew_graph(gc_skew) {
 				var height = 500;
 				var width = 720;
-				var padding = 30;
+				var padding = 40;
+
+				var cumul_data = [0];
+				gc_skew.forEach(function (d, idx) {
+					cumul_data.push(cumul_data[idx] + d);
+				});
+				cumul_data = cumul_data.slice(1);
 
 				var xScale = d3.scaleLinear().domain([0, gc_skew.length]).range([padding, width - padding]);
 				var yScale = d3.scaleLinear().domain([d3.min(gc_skew), d3.max(gc_skew)]).range([height - padding, padding]);
+				var yCumulScale = d3.scaleLinear().domain([d3.min(cumul_data), d3.max(cumul_data)]).range([height - padding, padding]);
 
 				var line_data = [];
 				for (var idx in gc_skew) {
 					line_data.push({ pos: xScale(idx), skew: yScale(gc_skew[idx]) });
+				}
+
+				var cumul_line_data = [];
+				for (var _idx in cumul_data) {
+					cumul_line_data.push({ pos: xScale(_idx), skew: yCumulScale(cumul_data[_idx]) });
 				}
 
 				var valueline = d3.line().x(function (e) {
@@ -113,29 +129,14 @@ requirejs(["static/regression/regression_r"], function () {
 					return e.skew;
 				});
 				var path_d = valueline(line_data);
-
-				var regress_x = [];
-				for (var i = 0; i < width; i++) {
-					regress_x.push(gc_skew.length / width * i);
-				}
-				var regress_data = regress_x.map(function (x) {
-					var equation = regression_result.equation;
-					var y = 0;
-					for (var _i = 0; _i < equation.length; _i++) {
-						y += equation[_i] * Math.pow(x, _i);
-					}
-					return { pos: xScale(x), skew: yScale(y) };
-				});
-				var regress_path_d = valueline(regress_data);
+				var cumul_path_d = valueline(cumul_line_data);
 
 				return React.createElement(
 					"svg",
 					{ height: height, width: width },
 					React.createElement("path", { d: path_d, stroke: "black", strokeWidth: 2, fill: "none" }),
-					function () {
-						if (this.state.render_regression) return React.createElement("path", { d: regress_path_d, stroke: "red", strokeWidth: 2, fill: "none" });
-					}.bind(this)(),
-					React.createElement(XYAxis, { height: height, padding: padding, width: width, xScale: xScale, yScale: yScale })
+					React.createElement("path", { d: cumul_path_d, stroke: "red", strokeWidth: 2, fill: "none" }),
+					React.createElement(XYAxis, { height: height, padding: padding, width: width, xScale: xScale, yScale: yScale, yCumulScale: yCumulScale })
 				);
 			}
 		}, {
@@ -143,13 +144,6 @@ requirejs(["static/regression/regression_r"], function () {
 			value: function num_ori_changed(e) {
 				this.setState({
 					num_ori: parseInt(e.target.value)
-				});
-			}
-		}, {
-			key: "render_regression_changed",
-			value: function render_regression_changed(e) {
-				this.setState({
-					render_regression: e.target.checked
 				});
 			}
 		}, {
@@ -180,9 +174,6 @@ requirejs(["static/regression/regression_r"], function () {
 				var _this2 = this;
 
 				var gc_skew = this.calc_gc_skew(this.state.base_seq);
-				var regression_result = regression('polynomial', gc_skew.map(function (d, idx) {
-					return [idx, d];
-				}), this.state.num_ori + 2);
 				return React.createElement(
 					"div",
 					{ className: "col-sm-12" },
@@ -212,17 +203,8 @@ requirejs(["static/regression/regression_r"], function () {
 					),
 					React.createElement(
 						"div",
-						{ className: "col-sm-12 form-group" },
-						React.createElement("input", { type: "checkbox", onChange: function onChange(e) {
-								return _this2.render_regression_changed(e);
-							}, checked: this.state.render_regression }),
-						"render regression",
-						React.createElement("br", null)
-					),
-					React.createElement(
-						"div",
 						{ className: "col-sm-12" },
-						this.draw_skew_graph(gc_skew, regression_result)
+						this.draw_skew_graph(gc_skew)
 					)
 				);
 			}
@@ -253,11 +235,17 @@ requirejs(["static/regression/regression_r"], function () {
 					scale: this.props.yScale,
 					orient: 'left'
 				};
+				var yCumulSettings = {
+					translate: "translate(" + (this.props.width - this.props.padding) + ", 0)",
+					scale: this.props.yCumulScale,
+					orient: 'right'
+				};
 				return React.createElement(
 					"g",
 					{ className: "xy-axis" },
 					React.createElement(Axis, xSettings),
-					React.createElement(Axis, ySettings)
+					React.createElement(Axis, ySettings),
+					React.createElement(Axis, yCumulSettings)
 				);
 			}
 		}]);
@@ -295,6 +283,9 @@ requirejs(["static/regression/regression_r"], function () {
 						break;
 					case "left":
 						axis = d3.axisLeft(this.props.scale);
+						break;
+					case "right":
+						axis = d3.axisRight(this.props.scale);
 						break;
 				}
 				d3.select(node).call(axis);
