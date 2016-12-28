@@ -1,0 +1,15 @@
+{% extends "application.html" %}
+
+{% block title %}
+<title>Base Skew Plotter</title>
+{% endblock %}
+
+{% block imports %}
+{% endblock %}
+
+{% block body %}
+<h1>Base Skew Plotter</h1>
+<hr />
+<br/>
+<script src="{{ url_for('static', filename='script/base_skew/base_skew.js') }}"></script>
+{% endblock %}

@@ -59,6 +59,10 @@ def CpG_island():
 def ori_finder():
 	return render_template('ori_finder.html')
 
+@app.route('/base_skew')
+def base_skew():
+	return render_template('base_skew.html')
+
 if __name__ == '__main__':
 	app.debug= True
 	app.run(host='0.0.0.0', port=80)
