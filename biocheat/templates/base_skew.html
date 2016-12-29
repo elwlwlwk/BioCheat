@@ -10,6 +10,36 @@
 {% block body %}
 <h1>Base Skew Plotter</h1>
 <hr />
+<h3>How to use</h3>
+<p>
+	Select two bases to calculate skew.
+</p>
+<p>
+	<h4>Skew</h4>
+	<blockquote>
+		<p>
+			skew = ([#base1 in window] - [#base2 in window]) / ([#base1 in window] + [#base2 in window]
+    </p>
+    <p>
+      if #base1 + #base2 is 0 : skew=0
+		</p>
+	</blockquote>
+</p>
+<p>
+  You can change window size and window pivot. Pivot moves scanning window backwards. If pivot is 1, scanning window starts 1 base backwards.
+</p>
+<pre>
+At Skew[0], ----:scanning window
+Window size: 4, Pivot: 0
+  ----
+  ATTGTACCTATC
+Window size: 4, Pivot: 1
+  ---        -
+  ATTGTACCTATC
+Window size: 5, Pivot: 3
+  --       ---
+  ATTGTACCTATC
+</pre>
 <br/>
 <script src="{{ url_for('static', filename='script/base_skew/base_skew.js') }}"></script>
 {% endblock %}

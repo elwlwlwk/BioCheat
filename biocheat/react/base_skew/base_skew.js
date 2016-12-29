@@ -37,73 +37,73 @@ class BaseSkew extends React.Component{
 		reader.readAsText(e.target.files[0]);
 	}
 
-	calc_gc_skew(base_seq){
-		var gc_skew=[];
+	calc_skew(base_seq){
+		var skew=[];
 		var window_size= this.state.window_size;
 		var rotated_base_seq= base_seq.slice(base_seq.length-this.state.window_pivot).concat(base_seq.slice(0, base_seq.length-this.state.window_pivot));
 		var extended_base_seq= rotated_base_seq.concat(rotated_base_seq.slice(0, window_size));
-		var g_cnt=0, c_cnt=0;
+		var base1_cnt=0, base2_cnt=0;
 		for(let i=0; i< window_size; i++){
 			switch(extended_base_seq[i]){
-				case "G":
-					g_cnt++;
+				case this.state.base1:
+					base1_cnt++;
 					break;
-				case "C":
-					c_cnt++;
+				case this.state.base2:
+					base2_cnt++;
 					break;
 			}
 		}
-		if(g_cnt+ c_cnt!= 0){
-			gc_skew.push((g_cnt-c_cnt)/(g_cnt+c_cnt));
+		if(base1_cnt+ base2_cnt!= 0){
+			skew.push((base1_cnt-base2_cnt)/(base1_cnt+base2_cnt));
 		}else{
-			gc_skew.push(0);
+			skew.push(0);
 		}
 		for(let i= window_size; i< extended_base_seq.length-1; i++){
 			switch(extended_base_seq[i]){
-				case 'G':
-					g_cnt++;
+				case this.state.base1:
+					base1_cnt++;
 					break;
-				case 'C':
-					c_cnt++;
+				case this.state.base2:
+					base2_cnt++;
 					break;
 			}
 			switch(extended_base_seq[i-window_size]){
-				case 'G':
-					g_cnt--;
+				case this.state.base1:
+					base1_cnt--;
 					break;
-				case 'C':
-					c_cnt--;
+				case this.state.base2:
+					base2_cnt--;
 					break;
 			}
-			if(g_cnt<0 || c_cnt<0){
+			if(base1_cnt<0 || base2_cnt<0){
 				console.log("error");
 			}
-			if(g_cnt+ c_cnt== 0){
-				gc_skew.push(0);
+			if(base1_cnt+ base2_cnt== 0){
+				skew.push(0);
 				continue;
 			}
-			gc_skew.push((g_cnt-c_cnt)/(g_cnt+c_cnt));
+			skew.push((base1_cnt-base2_cnt)/(base1_cnt+base2_cnt));
 		}
-		return gc_skew;
+		return skew;
 	}
 
-	draw_skew_graph(gc_skew, gc_skew_cumul){
+	draw_skew_graph(skew, skew_cumul){
 		var height= 500;
 		var width= 720;
 		var padding= 40;
 
-		var xScale= d3.scaleLinear().domain([0, gc_skew.length]).range([padding, width-padding]);
-		var yScale= d3.scaleLinear().domain([d3.min(gc_skew), d3.max(gc_skew)]).range([height-padding, padding]);
-		var yCumulScale= d3.scaleLinear().domain([d3.min(gc_skew_cumul), d3.max(gc_skew_cumul)]).range([height-padding, padding]);
+		var xScale= d3.scaleLinear().domain([0, skew.length]).range([padding, width-padding]);
+		var yScale= d3.scaleLinear().domain([d3.min(skew), d3.max(skew)]).range([height-padding, padding]);
+		var yCumulScale= d3.scaleLinear().domain([d3.min(skew_cumul), d3.max(skew_cumul)]).range([height-padding, padding]);
 
 		var line_data=[];
-		for(let idx in gc_skew){
-			line_data.push({pos:xScale(idx), skew:yScale(gc_skew[idx])});
+		for(let idx in skew){
+			line_data.push({pos:xScale(idx), skew:yScale(skew[idx])});
 		}
 
 		var cumul_line_data=[];
-		for(let idx in gc_skew_cumul){
-			cumul_line_data.push({pos:xScale(idx), skew:yCumulScale(gc_skew_cumul[idx])});
+		for(let idx in skew_cumul){
+			cumul_line_data.push({pos:xScale(idx), skew:yCumulScale(skew_cumul[idx])});
 		}
 
 		var valueline= d3.line().x((e)=>e.pos).y((e)=>e.skew);
@@ -111,8 +111,8 @@ class BaseSkew extends React.Component{
 		var cumul_path_d= valueline(cumul_line_data);
 
 		return <svg height={height} width={width}>
-			<text x={10} y={30} fontSize="10">GC skew normal</text>
-			<text x={width-120} y={30} fontSize="10" fill="red">GC skew cumulative </text>
+			<text x={10} y={30} fontSize="10">skew normal</text>
+			<text x={width-100} y={30} fontSize="10" fill="red">skew cumulative </text>
 			<text x={width/2-30} y={20} fontSize="10">window size: {this.state.window_size}</text>
 			<path d={path_d} stroke="black" strokeWidth={2} fill="none"></path>
 			<path d={cumul_path_d} stroke="red" strokeWidth={2} fill="none"></path>
@@ -132,22 +132,55 @@ class BaseSkew extends React.Component{
 		})
 	}
 
+	base_changed(idx, e){
+		if(idx== 1){
+			this.setState({
+				base1: e.target.value,
+			})
+		}
+		else if(idx== 2){
+			this.setState({
+				base2: e.target.value,
+			})
+		}
+	}
+
 	render(){
-		var gc_skew= this.calc_gc_skew(this.state.base_seq);
-		var gc_skew_cumul=[0];
-		gc_skew.forEach( (d, idx)=>{
-			gc_skew_cumul.push(gc_skew_cumul[idx]+ d);
+		var skew= this.calc_skew(this.state.base_seq);
+		var skew_cumul=[0];
+		skew.forEach( (d, idx)=>{
+			skew_cumul.push(skew_cumul[idx]+ d);
 		});
-		gc_skew_cumul= gc_skew_cumul.slice(1);
+		skew_cumul= skew_cumul.slice(1);
 		return <div className="col-sm-12">
 			<div className="col-sm-12 form-group">
-				<label className="col-sm-3">Scanning Window Size</label>
+				<label className="col-sm-2">Base 1</label>
+				<div className="col-sm-2">
+					<select className="form-control" onChange={( (e) => this.base_changed(1, e) )} defaultValue={this.state.base1}>
+						<option value="A">A</option>
+						<option value="C">C</option>
+						<option value="G">G</option>
+						<option value="T">T</option>
+					</select>
+				</div>
+				<label className="col-sm-2">Base 2</label>
+				<div className="col-sm-2">
+					<select className="form-control" onChange={( (e) => this.base_changed(2, e) )} defaultValue={this.state.base2}>
+						<option value="A">A</option>
+						<option value="C">C</option>
+						<option value="G">G</option>
+						<option value="T">T</option>
+					</select>
+				</div>
+			</div>
+			<div className="col-sm-12 form-group">
+				<label className="col-sm-4">Scanning Window Size</label>
 				<div className="col-sm-4">
 					<input className="form-control" onChange={(e) => this.window_size_changed(e)} defaultValue={this.state.window_size} />
 				</div>
 			</div>
 			<div className="col-sm-12 form-group">
-				<label className="col-sm-3">Scanning Window Pivot</label>
+				<label className="col-sm-4">Scanning Window Pivot</label>
 				<div className="col-sm-4">
 					<input className="form-control" onChange={(e) => this.window_pivot_changed(e)} defaultValue={this.state.window_pivot} />
 				</div>
@@ -160,7 +193,7 @@ class BaseSkew extends React.Component{
 				</div>
 			</div>
 			<div className="col-sm-12">
-				{this.draw_skew_graph(gc_skew, gc_skew_cumul)}
+				{this.draw_skew_graph(skew, skew_cumul)}
 			</div>
 		</div>
 	}
