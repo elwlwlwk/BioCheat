@@ -63,6 +63,10 @@ def ori_finder():
 def base_skew():
 	return render_template('base_skew.html')
 
+@app.route('/z_curve')
+def z_curve():
+	return render_template('z_curve.html')
+
 if __name__ == '__main__':
 	app.debug= True
 	app.run(host='0.0.0.0', port=80)

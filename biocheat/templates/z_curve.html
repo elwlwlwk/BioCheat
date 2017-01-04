@@ -1,0 +1,15 @@
+{% extends "application.html" %}
+
+{% block title %}
+<title>Z Curve Plotter</title>
+{% endblock %}
+
+{% block imports %}
+{% endblock %}
+
+{% block body %}
+<h1>Z Curve Plotter</h1>
+<hr />
+<br/>
+<script src="{{ url_for('static', filename='script/z_curve/z_curve.js') }}"></script>
+{% endblock %}
