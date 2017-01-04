@@ -1,4 +1,4 @@
-requirejs([], function(){
+requirejs(["static/plotly/plotly-1.21.2.min.js"], function(plotly){
 
 class ZCurve extends React.Component{
 	constructor(props){
@@ -59,6 +59,6 @@ class ZCurve extends React.Component{
 const mountingPoint= document.createElement('div');
 mountingPoint.className= 'react-app';
 document.getElementById("div_application").appendChild(mountingPoint);
-ReactDOM.render(<ZCurve/>, mountingPoint);
+ReactDOM.render(<ZCurve plotly={plotly}/>, mountingPoint);
 
 });

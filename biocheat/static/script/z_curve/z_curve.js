@@ -8,7 +8,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-requirejs([], function () {
+requirejs(["static/plotly/plotly-1.21.2.min.js"], function (plotly) {
 	var ZCurve = function (_React$Component) {
 		_inherits(ZCurve, _React$Component);
 
@@ -98,5 +98,5 @@ requirejs([], function () {
 	var mountingPoint = document.createElement('div');
 	mountingPoint.className = 'react-app';
 	document.getElementById("div_application").appendChild(mountingPoint);
-	ReactDOM.render(React.createElement(ZCurve, null), mountingPoint);
+	ReactDOM.render(React.createElement(ZCurve, { plotly: plotly }), mountingPoint);
 });
