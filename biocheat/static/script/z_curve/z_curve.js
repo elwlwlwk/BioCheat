@@ -51,10 +51,46 @@ requirejs(["static/plotly/plotly-1.21.2.min.js"], function (plotly) {
 			}
 		}, {
 			key: "calc_z_curve",
-			value: function calc_z_curve(base_seq) {}
+			value: function calc_z_curve(base_seq) {
+				var cnt = { A: 0, C: 0, G: 0, T: 0 };
+				var Xn = [],
+				    Yn = [],
+				    Zn = [];
+				var _iteratorNormalCompletion = true;
+				var _didIteratorError = false;
+				var _iteratorError = undefined;
+
+				try {
+					for (var _iterator = base_seq[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+						var base = _step.value;
+
+						cnt[base]++;
+						Xn.push(cnt.A + cnt.G - cnt.C - cnt.T);
+						Yn.push(cnt.A + cnt.C - cnt.G - cnt.T);
+						Zn.push(cnt.A + cnt.T - cnt.C - cnt.G);
+					}
+				} catch (err) {
+					_didIteratorError = true;
+					_iteratorError = err;
+				} finally {
+					try {
+						if (!_iteratorNormalCompletion && _iterator.return) {
+							_iterator.return();
+						}
+					} finally {
+						if (_didIteratorError) {
+							throw _iteratorError;
+						}
+					}
+				}
+
+				return [Xn, Yn, Zn];
+			}
 		}, {
 			key: "draw_z_curve_graph",
-			value: function draw_z_curve_graph(z_curve) {}
+			value: function draw_z_curve_graph(z_curve) {
+				return React.createElement(ZCurveGraph, { z_curve: z_curve, plotly: plotly });
+			}
 		}, {
 			key: "render",
 			value: function render() {
@@ -93,6 +129,104 @@ requirejs(["static/plotly/plotly-1.21.2.min.js"], function (plotly) {
 		}]);
 
 		return ZCurve;
+	}(React.Component);
+
+	var ZCurveGraph = function (_React$Component2) {
+		_inherits(ZCurveGraph, _React$Component2);
+
+		function ZCurveGraph(props) {
+			_classCallCheck(this, ZCurveGraph);
+
+			var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(ZCurveGraph).call(this, props));
+
+			_this3.state = {
+				hold_graph: false
+			};
+			return _this3;
+		}
+
+		_createClass(ZCurveGraph, [{
+			key: "componentDidMount",
+			value: function componentDidMount() {
+				this.plot_z_curve();
+			}
+		}, {
+			key: "componentDidUpdate",
+			value: function componentDidUpdate() {
+				this.plot_z_curve();
+			}
+		}, {
+			key: "plot_z_curve",
+			value: function plot_z_curve() {
+				var index = Array.from(Array(this.props.z_curve[0].length).keys()).map(function (idx) {
+					return "position: " + (idx + 1);
+				});
+				if (this.state.hold_graph) {
+					this.props.plotly.plot('plot', [{
+						type: 'scatter3d',
+						mode: 'lines',
+						x: this.props.z_curve[0],
+						y: this.props.z_curve[1],
+						z: this.props.z_curve[2],
+						text: index,
+						opacity: 1,
+						line: {
+							width: 6,
+							reversescale: false
+						}
+					}], {
+						height: 640,
+						width: 720
+					});
+				} else {
+					this.props.plotly.newPlot('plot', [{
+						type: 'scatter3d',
+						mode: 'lines',
+						x: this.props.z_curve[0],
+						y: this.props.z_curve[1],
+						z: this.props.z_curve[2],
+						text: index,
+						opacity: 1,
+						line: {
+							width: 6,
+							reversescale: false
+						}
+					}], {
+						height: 640,
+						width: 720
+					});
+				}
+			}
+		}, {
+			key: "hold_graph_changed",
+			value: function hold_graph_changed(e) {
+				this.setState({
+					hold_graph: e.target.checked
+				});
+			}
+		}, {
+			key: "render",
+			value: function render() {
+				var _this4 = this;
+
+				return React.createElement(
+					"div",
+					{ className: "col-sm-12" },
+					React.createElement(
+						"div",
+						{ className: "form-group" },
+						React.createElement("input", { type: "checkbox", onChange: function onChange(e) {
+								return _this4.hold_graph_changed(e);
+							} }),
+						"hold graph",
+						React.createElement("br", null)
+					),
+					React.createElement("div", { id: "plot", className: "col-sm-12" })
+				);
+			}
+		}]);
+
+		return ZCurveGraph;
 	}(React.Component);
 
 	var mountingPoint = document.createElement('div');

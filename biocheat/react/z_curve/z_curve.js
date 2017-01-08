@@ -34,9 +34,19 @@ class ZCurve extends React.Component{
 	}
 
 	calc_z_curve(base_seq){
+		var cnt={A:0, C:0, G:0, T:0};
+		var Xn=[], Yn=[], Zn=[];
+		for(let base of base_seq){
+			cnt[base]++;
+			Xn.push(cnt.A+cnt.G-cnt.C-cnt.T);
+			Yn.push(cnt.A+cnt.C-cnt.G-cnt.T);
+			Zn.push(cnt.A+cnt.T-cnt.C-cnt.G);
+		}
+		return [Xn, Yn, Zn];
 	}
 
 	draw_z_curve_graph(z_curve){
+		return <ZCurveGraph z_curve={z_curve} plotly={plotly} />
 	}
 
 	render(){
@@ -52,6 +62,73 @@ class ZCurve extends React.Component{
 			<div className="col-sm-12">
 				{this.draw_z_curve_graph(z_curve)}
 			</div>
+		</div>
+	}
+}
+
+class ZCurveGraph extends React.Component{
+	constructor(props){
+		super(props);
+		this.state={
+			hold_graph: false,
+		}
+	}
+	componentDidMount(){
+		this.plot_z_curve()
+	}
+	componentDidUpdate(){
+		this.plot_z_curve()
+	}
+	plot_z_curve(){
+		var index= Array.from(Array(this.props.z_curve[0].length).keys()).map((idx) => "position: "+(idx+1));
+		if(this.state.hold_graph){
+			this.props.plotly.plot('plot', [{
+			  type: 'scatter3d',
+			  mode: 'lines',
+			  x: this.props.z_curve[0],
+			  y: this.props.z_curve[1],
+			  z: this.props.z_curve[2],
+				text: index,
+			  opacity: 1,
+			  line: {
+			    width: 6,
+			    reversescale: false
+			  }
+			}], {
+			  height: 640,
+				width: 720
+			});
+		}
+		else{
+			this.props.plotly.newPlot('plot', [{
+			  type: 'scatter3d',
+			  mode: 'lines',
+			  x: this.props.z_curve[0],
+			  y: this.props.z_curve[1],
+			  z: this.props.z_curve[2],
+				text: index,
+			  opacity: 1,
+			  line: {
+			    width: 6,
+			    reversescale: false
+			  }
+			}], {
+			  height: 640,
+				width: 720
+			});
+		}
+	}
+	hold_graph_changed(e){
+		this.setState({
+			hold_graph: e.target.checked,
+		})
+	}
+	render(){
+		return <div className="col-sm-12">
+			<div className="form-group">
+				<input type="checkbox" onChange={ (e) => this.hold_graph_changed(e) } />hold graph<br/>
+			</div>
+			<div id="plot" className="col-sm-12"></div>
 		</div>
 	}
 }
