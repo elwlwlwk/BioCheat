@@ -1,0 +1,14 @@
+{% extends "application.html" %}
+
+{% block title %}
+<title>Exon Intron Finder</title>
+{% endblock %}
+
+{% block imports %}
+{% endblock %}
+
+{% block body %}
+<h1>Exon Intron Finder</h1>
+<hr />
+<script src="{{ url_for('static', filename='script/exon_intron/exon_intron.js') }}"></script>
+{% endblock %}

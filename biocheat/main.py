@@ -63,6 +63,10 @@ def ori_finder():
 def base_skew():
 	return render_template('base_skew.html')
 
+@app.route('/exon_intron')
+def exon_intron():
+	return render_template('exon_intron.html')
+
 @app.route('/z_curve')
 def z_curve():
 	return render_template('z_curve.html')
