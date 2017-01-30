@@ -26,7 +26,7 @@ class BaseSkew extends React.Component{
 		var reader= new FileReader();
 
 		reader.onload= function (e){
-			var base_input=e.target.result.replace(/^>.+\n/,"");
+			var base_input=e.target.result.replace(/^>.+/,"");
 			var base_seq= base_input.toUpperCase().replace(/[^ATUCG]/g,"").trim().split("");
 			this.setState({
 				base_input: base_input,
