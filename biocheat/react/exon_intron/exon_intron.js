@@ -6,8 +6,8 @@ class ExonIntron extends React.Component{
 		this.state={
 			base_input: "",
 			base_seq: [],
-			window_size: 100,
-			step_size: 100,
+			window_size: 1000,
+			step_size: 1000,
 		}
 	}
 
@@ -145,14 +145,15 @@ class ExonIntronGraph extends React.Component{
 		super(props);
 		this.state={
 			exon_prob_threshold_bar: 50,
-			exon_prob_threshold: -1,
 		}
 	}
 
-	draw_exon_prob_graph(exon_prob, threshold){
+	draw_exon_prob_graph(exon_prob_threshold){
 		var height= 500;
 		var width= 720;
 		var padding= 40;
+
+		var exon_prob= this.props.exon_probs;
 
 		var xScale= d3.scaleLinear().domain([0, exon_prob.length*this.props.step_size]).range([padding, width-padding]);
 		var yScale= d3.scaleLinear().domain([d3.min(exon_prob), d3.max(exon_prob)]).range([height-padding, padding]);
@@ -164,13 +165,6 @@ class ExonIntronGraph extends React.Component{
 
 		var valueline= d3.line().x((e)=>e.pos).y((e)=>e.prob);
 		var path_d= valueline(line_data);
-		var exon_prob_threshold=0;
-		if(this.state.exon_prob_threshold== -1){
-			let threshold_scale= d3.scaleLinear().domain([0, 100]).range([d3.min(this.props.exon_probs), d3.max(this.props.exon_probs)]);
-			exon_prob_threshold= threshold_scale(50);
-		}else{
-			exon_prob_threshold= this.state.exon_prob_threshold;
-		}
 
 		var threshold_line= valueline([{pos:xScale(0), prob:yScale(exon_prob_threshold)}, {pos:xScale(exon_prob.length*this.props.step_size), prob:yScale(exon_prob_threshold)}]);
 
@@ -185,13 +179,39 @@ class ExonIntronGraph extends React.Component{
 	exon_prob_threshold_changed(e){
 		var threshold_scale= d3.scaleLinear().domain([0, 100]).range([d3.min(this.props.exon_probs), d3.max(this.props.exon_probs)]);
 		this.setState({
-			exon_prob_threshold: threshold_scale(parseInt(e.target.value)),
 			exon_prob_threshold_bar: parseInt(e.target.value),
 		})
 	}
 
+	draw_exon_intron_graph(exon_prob_threshold){
+		var height= 150;
+		var width= 720;
+		var padding= 30;
+
+		var xScale= d3.scaleLinear().domain([0, this.props.base_seq.length]).range([padding, width-padding]);
+		var widthScale= d3.scaleLinear().domain([0, this.props.base_seq.length]).range([0, width-padding*2]);
+
+		var draw_exon_intron= function (exon_prob, idx){
+			var rect_width= widthScale(this.props.window_size);
+			if(idx== this.props.exon_probs.length-1){
+				rect_width= widthScale(this.props.base_seq.length- (idx* this.props.step_size));
+			}
+			if(exon_prob< exon_prob_threshold){
+				return <rect x={xScale(idx* this.props.step_size)} y={(height/2)-2} width={rect_width} height="4"></rect>
+			}else{
+				return <rect x={xScale(idx* this.props.step_size)} y={(height/2)-5} width={rect_width} height="10"></rect>
+			}
+		}.bind(this)
+
+		return <svg height={height} width={width}>
+			{this.props.exon_probs.map( (exon_prob, idx) => draw_exon_intron(exon_prob, idx) )}
+			<ExonIntronXYAxis height={height} padding={padding} width={width} xScale={xScale}/>
+		</svg>
+	}
+
 	render(){
 		var color_scale= d3.scaleLinear().range(["#2c7bb6", "#00a6ca","#00ccbc","#90eb9d","#ffff8c","#f9d057","#f29e2e","#e76818","#d7191c"])
+		var threshold_scale= d3.scaleLinear().domain([0, 100]).range([d3.min(this.props.exon_probs), d3.max(this.props.exon_probs)]);
 		return <div class="col-sm-12">
 			<div class="col-sm-12">
 				<label className="col-sm-4 control-label">Exon Intensity Threshold:</label>
@@ -200,7 +220,10 @@ class ExonIntronGraph extends React.Component{
 				</div>
 			</div>
 			<div class="col-sm-12">
-				{this.draw_exon_prob_graph(this.props.exon_probs)}
+				{this.draw_exon_intron_graph(threshold_scale(this.state.exon_prob_threshold_bar))}
+			</div>
+			<div class="col-sm-12">
+				{this.draw_exon_prob_graph(threshold_scale(this.state.exon_prob_threshold_bar))}
 			</div>
 		</div>
 	}
@@ -225,6 +248,18 @@ class XYAxis extends React.Component{
 	}
 }
 
+class ExonIntronXYAxis extends React.Component{
+	render(){
+		const xSettings = {
+			translate: `translate(0, ${this.props.height - this.props.padding})`,
+			scale: this.props.xScale,
+			orient: 'bottom'
+		};
+	    return <g className="xy-axis">
+			<Axis {...xSettings}/>
+		</g>
+	}
+}
 class Axis extends React.Component{
 	componentDidMount(){
 		this.renderAxis();

@@ -22,8 +22,8 @@ requirejs(['/static/dct.js'], function () {
 			_this.state = {
 				base_input: "",
 				base_seq: [],
-				window_size: 100,
-				step_size: 100
+				window_size: 1000,
+				step_size: 1000
 			};
 			return _this;
 		}
@@ -215,18 +215,19 @@ requirejs(['/static/dct.js'], function () {
 			var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(ExonIntronGraph).call(this, props));
 
 			_this3.state = {
-				exon_prob_threshold_bar: 50,
-				exon_prob_threshold: -1
+				exon_prob_threshold_bar: 50
 			};
 			return _this3;
 		}
 
 		_createClass(ExonIntronGraph, [{
 			key: "draw_exon_prob_graph",
-			value: function draw_exon_prob_graph(exon_prob, threshold) {
+			value: function draw_exon_prob_graph(exon_prob_threshold) {
 				var height = 500;
 				var width = 720;
 				var padding = 40;
+
+				var exon_prob = this.props.exon_probs;
 
 				var xScale = d3.scaleLinear().domain([0, exon_prob.length * this.props.step_size]).range([padding, width - padding]);
 				var yScale = d3.scaleLinear().domain([d3.min(exon_prob), d3.max(exon_prob)]).range([height - padding, padding]);
@@ -242,13 +243,6 @@ requirejs(['/static/dct.js'], function () {
 					return e.prob;
 				});
 				var path_d = valueline(line_data);
-				var exon_prob_threshold = 0;
-				if (this.state.exon_prob_threshold == -1) {
-					var threshold_scale = d3.scaleLinear().domain([0, 100]).range([d3.min(this.props.exon_probs), d3.max(this.props.exon_probs)]);
-					exon_prob_threshold = threshold_scale(50);
-				} else {
-					exon_prob_threshold = this.state.exon_prob_threshold;
-				}
 
 				var threshold_line = valueline([{ pos: xScale(0), prob: yScale(exon_prob_threshold) }, { pos: xScale(exon_prob.length * this.props.step_size), prob: yScale(exon_prob_threshold) }]);
 
@@ -270,9 +264,39 @@ requirejs(['/static/dct.js'], function () {
 			value: function exon_prob_threshold_changed(e) {
 				var threshold_scale = d3.scaleLinear().domain([0, 100]).range([d3.min(this.props.exon_probs), d3.max(this.props.exon_probs)]);
 				this.setState({
-					exon_prob_threshold: threshold_scale(parseInt(e.target.value)),
 					exon_prob_threshold_bar: parseInt(e.target.value)
 				});
+			}
+		}, {
+			key: "draw_exon_intron_graph",
+			value: function draw_exon_intron_graph(exon_prob_threshold) {
+				var height = 150;
+				var width = 720;
+				var padding = 30;
+
+				var xScale = d3.scaleLinear().domain([0, this.props.base_seq.length]).range([padding, width - padding]);
+				var widthScale = d3.scaleLinear().domain([0, this.props.base_seq.length]).range([0, width - padding * 2]);
+
+				var draw_exon_intron = function (exon_prob, idx) {
+					var rect_width = widthScale(this.props.window_size);
+					if (idx == this.props.exon_probs.length - 1) {
+						rect_width = widthScale(this.props.base_seq.length - idx * this.props.step_size);
+					}
+					if (exon_prob < exon_prob_threshold) {
+						return React.createElement("rect", { x: xScale(idx * this.props.step_size), y: height / 2 - 2, width: rect_width, height: "4" });
+					} else {
+						return React.createElement("rect", { x: xScale(idx * this.props.step_size), y: height / 2 - 5, width: rect_width, height: "10" });
+					}
+				}.bind(this);
+
+				return React.createElement(
+					"svg",
+					{ height: height, width: width },
+					this.props.exon_probs.map(function (exon_prob, idx) {
+						return draw_exon_intron(exon_prob, idx);
+					}),
+					React.createElement(ExonIntronXYAxis, { height: height, padding: padding, width: width, xScale: xScale })
+				);
 			}
 		}, {
 			key: "render",
@@ -280,6 +304,7 @@ requirejs(['/static/dct.js'], function () {
 				var _this4 = this;
 
 				var color_scale = d3.scaleLinear().range(["#2c7bb6", "#00a6ca", "#00ccbc", "#90eb9d", "#ffff8c", "#f9d057", "#f29e2e", "#e76818", "#d7191c"]);
+				var threshold_scale = d3.scaleLinear().domain([0, 100]).range([d3.min(this.props.exon_probs), d3.max(this.props.exon_probs)]);
 				return React.createElement(
 					"div",
 					{ "class": "col-sm-12" },
@@ -302,7 +327,12 @@ requirejs(['/static/dct.js'], function () {
 					React.createElement(
 						"div",
 						{ "class": "col-sm-12" },
-						this.draw_exon_prob_graph(this.props.exon_probs)
+						this.draw_exon_intron_graph(threshold_scale(this.state.exon_prob_threshold_bar))
+					),
+					React.createElement(
+						"div",
+						{ "class": "col-sm-12" },
+						this.draw_exon_prob_graph(threshold_scale(this.state.exon_prob_threshold_bar))
 					)
 				);
 			}
@@ -345,8 +375,36 @@ requirejs(['/static/dct.js'], function () {
 		return XYAxis;
 	}(React.Component);
 
-	var Axis = function (_React$Component4) {
-		_inherits(Axis, _React$Component4);
+	var ExonIntronXYAxis = function (_React$Component4) {
+		_inherits(ExonIntronXYAxis, _React$Component4);
+
+		function ExonIntronXYAxis() {
+			_classCallCheck(this, ExonIntronXYAxis);
+
+			return _possibleConstructorReturn(this, Object.getPrototypeOf(ExonIntronXYAxis).apply(this, arguments));
+		}
+
+		_createClass(ExonIntronXYAxis, [{
+			key: "render",
+			value: function render() {
+				var xSettings = {
+					translate: "translate(0, " + (this.props.height - this.props.padding) + ")",
+					scale: this.props.xScale,
+					orient: 'bottom'
+				};
+				return React.createElement(
+					"g",
+					{ className: "xy-axis" },
+					React.createElement(Axis, xSettings)
+				);
+			}
+		}]);
+
+		return ExonIntronXYAxis;
+	}(React.Component);
+
+	var Axis = function (_React$Component5) {
+		_inherits(Axis, _React$Component5);
 
 		function Axis() {
 			_classCallCheck(this, Axis);
