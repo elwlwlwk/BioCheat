@@ -206,8 +206,8 @@ class AminoToCodon extends React.Component{
 		reader.onload= function (e){
 			var FASTA_amino_map= {"A":"Ala","C":"Cys","D":"Asp","E":"Glu","F":"Phe","G":"Gly","H":"His","I":"Ile","K":"Lys","L":"Leu","M":"Met","N":"Asn","P":"Pro","Q":"Gln","R":"Arg","S":"Ser","T":"Thr","V":"Val","W":"Trp","Y":"Tyr","Z":"Ter"}
 			this.setState({
-				amino_seq_input: e.target.result.replace(/^>.+\n/,"").trim(),
-				amino_seq: e.target.result.replace(/^>.+\n/,"").trim().toUpperCase().replace(/[^A-Z]/g,"").split("").map( (letter) => FASTA_amino_map[letter]?FASTA_amino_map[letter]:letter ),
+				amino_seq_input: e.target.result.replace(/^>.+/,"").trim(),
+				amino_seq: e.target.result.replace(/^>.+/,"").trim().toUpperCase().replace(/[^A-Z]/g,"").split("").map( (letter) => FASTA_amino_map[letter]?FASTA_amino_map[letter]:letter ),
 				amino_input_format: "1_letter",
 			})
 
