@@ -10,5 +10,17 @@
 {% block body %}
 <h1>Exon Intron Finder</h1>
 <hr />
+<h3>Description</h3>
+<p>
+	Exons and Introns have different spectral property. Exons have peak at (2/3)π when Fourier transformed. This tool finds exons using this property. 
+</p>
+<h3>How to use</h3>
+<p>
+	Input scanning window size and step size. (Recommand window size &gt; 1000) <b>Step size have to be equal or smaller than window size.</b> If not, there's missing subsequence. You can adjust exon detection threshold using slider.
+</p>
+<p>
+	Can be slow cause DCT requires lot of computing power.
+</p>
+<br />
 <script src="{{ url_for('static', filename='script/exon_intron/exon_intron.js') }}"></script>
 {% endblock %}
