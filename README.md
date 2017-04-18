@@ -11,6 +11,7 @@ You can use without db but database is needed to full feature.
 
 To use db, download database dump above and set database.
 You have to create config.py at /biocheat/, same level with dao.py.
+
 config.py sould
 ```
 DB_USER= <user>
