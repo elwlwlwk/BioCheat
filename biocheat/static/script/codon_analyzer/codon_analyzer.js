@@ -296,7 +296,7 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/sc
 				var _this7 = this;
 
 				if (e.target.value.length < 3) return;
-				fetch('http://wisewolf.org/api/spsum_list?organism=' + e.target.value).then(function (r) {
+				fetch('http://home.wisewolf.org/api/spsum_list?organism=' + e.target.value).then(function (r) {
 					return r.json();
 				}).then(function (r) {
 					_this7.setState({
@@ -304,7 +304,7 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/sc
 					});
 				});
 
-				fetch('http://wisewolf.org/api/spsum?organism=' + e.target.value).then(function (r) {
+				fetch('http://home.wisewolf.org/api/spsum?organism=' + e.target.value).then(function (r) {
 					return r.json();
 				}).then(function (r) {
 					if (!r) return;

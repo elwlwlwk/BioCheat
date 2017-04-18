@@ -141,7 +141,7 @@ class CodonAnalyzer extends React.Component{
 
 	codon_ratio_select_changed(e){
 		if(e.target.value.length<3) return;
-		fetch('http://wisewolf.org/api/spsum_list?organism='+e.target.value)
+		fetch('http://home.wisewolf.org/api/spsum_list?organism='+e.target.value)
 		.then( (r) => r.json() )
 		.then( (r) => {
 			this.setState({
@@ -149,7 +149,7 @@ class CodonAnalyzer extends React.Component{
 			})
 		})
 
-		fetch('http://wisewolf.org/api/spsum?organism='+e.target.value)
+		fetch('http://home.wisewolf.org/api/spsum?organism='+e.target.value)
 		.then( (r) => r.json() )
 		.then( (r) => {
 			if(!r) return;
