@@ -17,7 +17,7 @@ class CodonAnalyzer extends React.Component{
 	}
 
 	componentDidMount(){
-		fetch('http://home.wisewolf.org/api/codon_translation_list', {mode: 'no-cors'})
+		fetch('/api/codon_translation_list')
 		.then( (r) => r.json())
 		.then( (r) => {
 			this.setState({
@@ -25,7 +25,7 @@ class CodonAnalyzer extends React.Component{
 			})
 		});
 
-		fetch('http://home.wisewolf.org/api/codon_translation?organism='+this.state.codon_translation_organism, {mode: 'no-cors'})
+		fetch('/api/codon_translation?organism='+this.state.codon_translation_organism)
 		.then( (r) => r.json())
 		.then( (r) => {
 			this.setState({
@@ -141,7 +141,7 @@ class CodonAnalyzer extends React.Component{
 
 	codon_ratio_select_changed(e){
 		if(e.target.value.length<3) return;
-		fetch('http://home.wisewolf.org/api/spsum_list?organism='+e.target.value, {mode: 'no-cors'})
+		fetch('/api/spsum_list?organism='+e.target.value)
 		.then( (r) => r.json() )
 		.then( (r) => {
 			this.setState({
@@ -149,7 +149,7 @@ class CodonAnalyzer extends React.Component{
 			})
 		})
 
-		fetch('http://home.wisewolf.org/api/spsum?organism='+e.target.value, {mode: 'no-cors'})
+		fetch('/api/spsum?organism='+e.target.value)
 		.then( (r) => r.json() )
 		.then( (r) => {
 			if(!r) return;
@@ -163,7 +163,7 @@ class CodonAnalyzer extends React.Component{
 	}
 
 	codon_translation_select_changed(e){
-		fetch('http://home.wisewolf.org/api/codon_translation?organism='+e.target.value, {mode: 'no-cors'})
+		fetch('/api/codon_translation?organism='+e.target.value)
 		.then( (r) => r.json() )
 		.then( (r) => {
 			var codon_translation= r;
