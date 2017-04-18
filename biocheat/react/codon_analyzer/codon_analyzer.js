@@ -17,17 +17,21 @@ class CodonAnalyzer extends React.Component{
 	}
 
 	componentDidMount(){
-		$.get("/codon_translation_list", function(result){
+		fetch('http://home.wisewolf.org/api/codon_translation_list')
+		.then( (r) => r.json())
+		.then( (r) => {
 			this.setState({
-				codon_translation_list: JSON.parse(result),
+				codon_translation_list: r,
 			})
-		}.bind(this))
+		});
 
-		$.get("/codon_translation?organism="+this.state.codon_translation_organism, function(result){
+		fetch('http://home.wisewolf.org/api/codon_translation?organism='+this.state.codon_translation_organism)
+		.then( (r) => r.json())
+		.then( (r) => {
 			this.setState({
-				codon_translation: JSON.parse(result),
-			});
-		}.bind(this))
+				codon_translation: r,
+			})
+		});
 	}
 
 	componentWillUnmount(){
@@ -137,33 +141,39 @@ class CodonAnalyzer extends React.Component{
 
 	codon_ratio_select_changed(e){
 		if(e.target.value.length<3) return;
-		$.get("/spsum_list?organism="+e.target.value, function(result){
-			var suggest_ratio_list= JSON.parse(result)
+		fetch('http://home.wisewolf.org/api/spsum_list?organism='+e.target.value)
+		.then( (r) => r.json() )
+		.then( (r) => {
 			this.setState({
-				suggest_ratio_list: suggest_ratio_list,
+				suggest_ratio_list: r,
 			})
-		}.bind(this))
+		})
 
-		$.get("/spsum?organism="+e.target.value, function(result){
-			if(!result) return;
+		fetch('http://home.wisewolf.org/api/spsum?organism='+e.target.value)
+		.then( (r) => r.json() )
+		.then( (r) => {
+			if(!r) return;
 			var codon_label= ["CGA", "CGC", "CGG", "CGU", "AGA", "AGG", "CUA", "CUC", "CUG", "CUU", "UUA", "UUG", "UCA", "UCC", "UCG", "UCU", "AGC", "AGU", "ACA", "ACC", "ACG", "ACU", "CCA", "CCC", "CCG", "CCU", "GCA", "GCC", "GCG", "GCU", "GGA", "GGC", "GGG", "GGU", "GUA", "GUC", "GUG", "GUU", "AAA", "AAG", "AAC", "AAU", "CAA", "CAG", "CAC", "CAU", "GAA", "GAG", "GAC", "GAU", "UAC", "UAU", "UGC", "UGU", "UUC", "UUU", "AUA", "AUC", "AUU", "AUG", "UGG", "UAA", "UAG", "UGA"];
-			var spsum= JSON.parse(result)["spsum"].trim().split(" ").map( (d) => parseInt(d) );
+			var spsum= r["spsum"].trim().split(" ").map( (d) => parseInt(d) );
 			var codon_total= spsum.reduce( (a,b) => a+b );
 			this.setState({
 				codon_ratio: new Map(d3.zip(codon_label, spsum.map( (d) => (1000*d/codon_total).toFixed(3) ))),
 			});
-		}.bind(this));
+		})
 	}
 
 	codon_translation_select_changed(e){
-		$.get("/codon_translation?organism="+e.target.value, function(result){
-			var codon_translation= JSON.parse(result);
+		fetch('http://home.wisewolf.org/api/codon_translation?organism='+e.target.value)
+		.then( (r) => r.json() )
+		.then( (r) => {
+			var codon_translation= r;
 			var amino_seq= this.state.codon_seq.map( (codon) => codon_translation[codon.reduce( (a, b) => a+b )] );
 			this.setState({
-				codon_translation: JSON.parse(result),
+				codon_translation: codon_translation,
 				amino_seq: amino_seq[amino_seq.length-1]? amino_seq: amino_seq.slice(0,-1),
 			});
-		}.bind(this))
+
+		})
 		this.setState({
 			codon_translation_organism: e.target.value,
 		})

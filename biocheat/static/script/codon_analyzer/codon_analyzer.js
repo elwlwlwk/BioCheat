@@ -34,17 +34,23 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/sc
 		_createClass(CodonAnalyzer, [{
 			key: "componentDidMount",
 			value: function componentDidMount() {
-				$.get("/codon_translation_list", function (result) {
-					this.setState({
-						codon_translation_list: JSON.parse(result)
-					});
-				}.bind(this));
+				var _this2 = this;
 
-				$.get("/codon_translation?organism=" + this.state.codon_translation_organism, function (result) {
-					this.setState({
-						codon_translation: JSON.parse(result)
+				fetch('http://home.wisewolf.org/api/codon_translation_list').then(function (r) {
+					return r.json();
+				}).then(function (r) {
+					_this2.setState({
+						codon_translation_list: r
 					});
-				}.bind(this));
+				});
+
+				fetch('http://home.wisewolf.org/api/codon_translation?organism=' + this.state.codon_translation_organism).then(function (r) {
+					return r.json();
+				}).then(function (r) {
+					_this2.setState({
+						codon_translation: r
+					});
+				});
 			}
 		}, {
 			key: "componentWillUnmount",
@@ -54,13 +60,13 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/sc
 		}, {
 			key: "render_codon_ratio_select",
 			value: function render_codon_ratio_select() {
-				var _this2 = this;
+				var _this3 = this;
 
 				return React.createElement(
 					"div",
 					null,
 					React.createElement("input", { className: "form-control", placeholder: "Input Organism", onChange: function onChange(e) {
-							return _this2.codon_ratio_select_changed(e);
+							return _this3.codon_ratio_select_changed(e);
 						}, list: "suggest_ratio_list" }),
 					React.createElement(
 						"datalist",
@@ -74,7 +80,7 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/sc
 		}, {
 			key: "render_codon_ratio_table",
 			value: function render_codon_ratio_table() {
-				var _this3 = this;
+				var _this4 = this;
 
 				var base_set = ["U", "C", "A", "G"];
 				var base_combi = [];
@@ -155,7 +161,7 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/sc
 						"tbody",
 						null,
 						base_combi_set.map(function (combi_set) {
-							return render_base_combi(combi_set, _this3);
+							return render_base_combi(combi_set, _this4);
 						})
 					)
 				);
@@ -170,12 +176,12 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/sc
 		}, {
 			key: "render_codon_translation_select",
 			value: function render_codon_translation_select() {
-				var _this4 = this;
+				var _this5 = this;
 
 				return React.createElement(
 					"select",
 					{ className: "form-control", defaultValue: this.state.codon_translation_organism, onChange: function onChange(e) {
-							return _this4.codon_translation_select_changed(e);
+							return _this5.codon_translation_select_changed(e);
 						} },
 					this.state.codon_translation_list.map(function (org) {
 						return React.createElement(
@@ -189,7 +195,7 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/sc
 		}, {
 			key: "render_codon_translation_table",
 			value: function render_codon_translation_table() {
-				var _this5 = this;
+				var _this6 = this;
 
 				var base_set = ["U", "C", "A", "G"];
 				var base_combi = [];
@@ -270,7 +276,7 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/sc
 						"tbody",
 						null,
 						base_combi_set.map(function (combi_set) {
-							return render_base_combi(combi_set, _this5);
+							return render_base_combi(combi_set, _this6);
 						})
 					)
 				);
@@ -287,45 +293,54 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/sc
 		}, {
 			key: "codon_ratio_select_changed",
 			value: function codon_ratio_select_changed(e) {
-				if (e.target.value.length < 3) return;
-				$.get("/spsum_list?organism=" + e.target.value, function (result) {
-					var suggest_ratio_list = JSON.parse(result);
-					this.setState({
-						suggest_ratio_list: suggest_ratio_list
-					});
-				}.bind(this));
+				var _this7 = this;
 
-				$.get("/spsum?organism=" + e.target.value, function (result) {
-					if (!result) return;
+				if (e.target.value.length < 3) return;
+				fetch('http://home.wisewolf.org/api/spsum_list?organism=' + e.target.value).then(function (r) {
+					return r.json();
+				}).then(function (r) {
+					_this7.setState({
+						suggest_ratio_list: r
+					});
+				});
+
+				fetch('http://home.wisewolf.org/api/spsum?organism=' + e.target.value).then(function (r) {
+					return r.json();
+				}).then(function (r) {
+					if (!r) return;
 					var codon_label = ["CGA", "CGC", "CGG", "CGU", "AGA", "AGG", "CUA", "CUC", "CUG", "CUU", "UUA", "UUG", "UCA", "UCC", "UCG", "UCU", "AGC", "AGU", "ACA", "ACC", "ACG", "ACU", "CCA", "CCC", "CCG", "CCU", "GCA", "GCC", "GCG", "GCU", "GGA", "GGC", "GGG", "GGU", "GUA", "GUC", "GUG", "GUU", "AAA", "AAG", "AAC", "AAU", "CAA", "CAG", "CAC", "CAU", "GAA", "GAG", "GAC", "GAU", "UAC", "UAU", "UGC", "UGU", "UUC", "UUU", "AUA", "AUC", "AUU", "AUG", "UGG", "UAA", "UAG", "UGA"];
-					var spsum = JSON.parse(result)["spsum"].trim().split(" ").map(function (d) {
+					var spsum = r["spsum"].trim().split(" ").map(function (d) {
 						return parseInt(d);
 					});
 					var codon_total = spsum.reduce(function (a, b) {
 						return a + b;
 					});
-					this.setState({
+					_this7.setState({
 						codon_ratio: new Map(d3.zip(codon_label, spsum.map(function (d) {
 							return (1000 * d / codon_total).toFixed(3);
 						})))
 					});
-				}.bind(this));
+				});
 			}
 		}, {
 			key: "codon_translation_select_changed",
 			value: function codon_translation_select_changed(e) {
-				$.get("/codon_translation?organism=" + e.target.value, function (result) {
-					var codon_translation = JSON.parse(result);
-					var amino_seq = this.state.codon_seq.map(function (codon) {
+				var _this8 = this;
+
+				fetch('http://home.wisewolf.org/api/codon_translation?organism=' + e.target.value).then(function (r) {
+					return r.json();
+				}).then(function (r) {
+					var codon_translation = r;
+					var amino_seq = _this8.state.codon_seq.map(function (codon) {
 						return codon_translation[codon.reduce(function (a, b) {
 							return a + b;
 						})];
 					});
-					this.setState({
-						codon_translation: JSON.parse(result),
+					_this8.setState({
+						codon_translation: codon_translation,
 						amino_seq: amino_seq[amino_seq.length - 1] ? amino_seq : amino_seq.slice(0, -1)
 					});
-				}.bind(this));
+				});
 				this.setState({
 					codon_translation_organism: e.target.value
 				});
@@ -333,7 +348,7 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/sc
 		}, {
 			key: "codon_textarea_changed",
 			value: function codon_textarea_changed(e) {
-				var _this6 = this;
+				var _this9 = this;
 
 				var codon_input = e.target.value.trim().toUpperCase().replace(/T/g, "U").split("").filter(function (d) {
 					return ["A", "G", "U", "C"].includes(d);
@@ -344,7 +359,7 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/sc
 					codon_seq.push(codon_input_temp.splice(0, 3));
 				}
 				var amino_seq = codon_seq.map(function (codon) {
-					return _this6.state.codon_translation[codon.reduce(function (a, b) {
+					return _this9.state.codon_translation[codon.reduce(function (a, b) {
 						return a + b;
 					})];
 				});
@@ -357,7 +372,7 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/sc
 		}, {
 			key: "render",
 			value: function render() {
-				var _this7 = this;
+				var _this10 = this;
 
 				return React.createElement(
 					"div",
@@ -422,7 +437,7 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/sc
 						"div",
 						{ className: "col-sm-12" },
 						React.createElement("textarea", { className: "form-control", rows: "10", onChange: function onChange(e) {
-								return _this7.codon_textarea_changed(e);
+								return _this10.codon_textarea_changed(e);
 							} })
 					),
 					React.createElement(
