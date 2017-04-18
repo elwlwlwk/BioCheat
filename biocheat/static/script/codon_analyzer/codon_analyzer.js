@@ -36,7 +36,7 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/sc
 			value: function componentDidMount() {
 				var _this2 = this;
 
-				fetch('/api/codon_translation_list').then(function (r) {
+				fetch('http://home.wisewolf.org/api/codon_translation_list').then(function (r) {
 					return r.json();
 				}).then(function (r) {
 					_this2.setState({
@@ -44,7 +44,7 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/sc
 					});
 				});
 
-				fetch('/api/codon_translation?organism=' + this.state.codon_translation_organism).then(function (r) {
+				fetch('http://home.wisewolf.org/api/codon_translation?organism=' + this.state.codon_translation_organism).then(function (r) {
 					return r.json();
 				}).then(function (r) {
 					_this2.setState({
@@ -296,7 +296,7 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/sc
 				var _this7 = this;
 
 				if (e.target.value.length < 3) return;
-				fetch('/api/spsum_list?organism=' + e.target.value).then(function (r) {
+				fetch('http://wisewolf.org/api/spsum_list?organism=' + e.target.value).then(function (r) {
 					return r.json();
 				}).then(function (r) {
 					_this7.setState({
@@ -304,7 +304,7 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/sc
 					});
 				});
 
-				fetch('/api/spsum?organism=' + e.target.value).then(function (r) {
+				fetch('http://wisewolf.org/api/spsum?organism=' + e.target.value).then(function (r) {
 					return r.json();
 				}).then(function (r) {
 					if (!r) return;
@@ -327,7 +327,7 @@ requirejs(["static/script/codon_analyzer/codon_translation_graph.js", "static/sc
 			value: function codon_translation_select_changed(e) {
 				var _this8 = this;
 
-				fetch('/api/codon_translation?organism=' + e.target.value).then(function (r) {
+				fetch('http://home.wisewolf.org/api/codon_translation?organism=' + e.target.value).then(function (r) {
 					return r.json();
 				}).then(function (r) {
 					var codon_translation = r;
