@@ -4,6 +4,23 @@ http://biocheat.wisewolf.org
 
 It uses Flask, React.js, D3.js, Require.js and some open source javascript libraries.
 
+Some features uses database. You can download at
+biocheat_backup_20161214.sql - https://drive.google.com/file/d/0B-ELLS_9v1eGSDAyNXZGNFV0NUk/view?usp=drivesdk
+
+You can use without db but database is needed to full feature.
+
+To use db, download database dump above and set database.
+You have to create config.py at /biocheat/, same level with dao.py.
+
+config.py sould
+```
+DB_USER= <user>
+DB_PASS= <password>
+```
+
+After configuration, run main.py and rest_server.py both.
+Then set reverse proxy /api/ to 8081 port and / to 8080 port.
+
 **NOTICE: There's so many things to do alone. Every interests, contributes, opinions, requests and emails are welcom.**
 
 holo@wisewolf.org
