@@ -7,7 +7,7 @@ It uses Flask, React.js, D3.js, Require.js and some open source javascript libra
 Some features uses database. You can download at
 biocheat_backup_20161214.sql - https://drive.google.com/file/d/0B-ELLS_9v1eGSDAyNXZGNFV0NUk/view?usp=drivesdk
 
-You can use without db but database is needed to full feature.
+**Some code changes are needed to use local database.**
 
 To use db, download database dump above and set database.
 You have to create config.py at /biocheat/, same level with dao.py.
@@ -20,6 +20,8 @@ DB_PASS= <password>
 
 After configuration, run main.py and rest_server.py both.
 Then set reverse proxy /api/ to 8081 port and / to 8080 port.
+
+Search all fetch APIs in codes, modify it to use your api server's domain.
 
 **NOTICE: There's so many things to do alone. Every interests, contributes, opinions, requests and emails are welcom.**
 
