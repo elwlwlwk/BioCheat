@@ -1,5 +1,6 @@
 from flask import Flask, render_template, redirect, request
 import json
+import sys
 app = Flask(__name__)
 
 @app.route('/')
@@ -47,5 +48,9 @@ def z_curve():
 	return render_template('z_curve.html')
 
 if __name__ == '__main__':
+	if len(sys.argv)>1:
+		port= int(sys.argv[1])
+	else:
+		port=8080
 	app.debug= True
-	app.run(host='0.0.0.0', port=8080)
+	app.run(host='0.0.0.0', port=port)
